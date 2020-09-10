@@ -24,7 +24,7 @@ These data include several hundred reference fingerprints of varying quality:
 - FVC2002 (http://bias.csr.unibo.it/fvc2002)
 - FVC2004 (http://bias.csr.unibo.it/fvc2004)
 
-The FVC archives are supplied in the tif raster format. A small java program is provided to extract minutiae in ISO 19794-2:2005 format template files using SourceAFIS (https://github.com/robertvazan/sourceafis-java). Many fingerprint readers/SDKs can produce ISO format templates natively.
+The FVC archives are supplied in the tif raster format. A small python program [EXTRACT][] is provided to extract minutiae in ISO 19794-2:2005 format template files using SecuGens free SDK (https://secugen.com/products/sdk). Many fingerprint readers/SDKs can produce ISO format templates natively.
 
 ## Test readers/SDKs
 
@@ -71,3 +71,6 @@ TODO
 ## Licensing
 
 OpenAFIS is licensed under the BSD 2-Clause License. See [LICENSE][] for the full license text.
+
+[LICENSE]: https://github.com/neilharan/openafis/blob/master/LICENSE
+[EXTRACT]: https://github.com/neilharan/openafis/blob/master/data/extract.py
