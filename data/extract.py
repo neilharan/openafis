@@ -2,7 +2,7 @@
 # Extracts minutiae from supplied tif raster files (for example the FVC example data).
 #
 # Install numpy, cffi and pillow.
-# Copy sgfpamx, sgfplib & sgwsqlib (dll's or so's) from SecuGen FDx Pro SDK into current directory.
+# Copy sgfpamx, sgfplib & sgwsqlib dll's from SecuGen FDx Pro SDK into current directory (should be possible to get this to work with Linux, but not managed it yet).
 
 import argparse
 import numpy
