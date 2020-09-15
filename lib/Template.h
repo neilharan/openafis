@@ -15,8 +15,6 @@
 #define PACK(__decl__) __pragma(pack(push, 1)) __decl__ __pragma(pack(pop))
 #endif
 
-#define SWAP16(__x__) ((__x__ >> 8) | (__x__ << 8))
-
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // templated identifier might be a std::string for test purposes but a short for more constrained systems...

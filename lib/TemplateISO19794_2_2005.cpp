@@ -21,13 +21,13 @@ bool TemplateISO19794_2_2005<T>::load(const std::string &path)
         log_error("unable to open " << path);
         return false;
     }
-    static uint8_t data[MaximumLength];   
-    f.read(data, sizeof(data));
+    std::vector<uint8_t> data(MaximumLength);
+    f.read(data.data(), data.size());
     if ((f.rdstate() & std::ifstream::eofbit) == 0) {
         log_error("filesize > MaximumLength " << path);
         return false;
     }
-    return load(data, static_cast<size_t>(f.gcount()));
+    return load(data.data(), static_cast<size_t>(f.gcount()));
 }
 
 
@@ -38,77 +38,71 @@ bool TemplateISO19794_2_2005<T>::load(const std::string &path)
 // https://www.nist.gov/services-resources/software/biomdi-software-tools-supporting-standard-biometric-data-interchange
 //
 template <class T>
-bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, size_t length)
+bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
 {
-    if (length < sizeof(MagicVersion) + HeaderLength + MinutiaLength) {
-        log_error("length < minimum; " << length);
-        return false;
-    }
     if (length > MaximumLength) {
         log_error("length > MaximumLength; " << length);
         return false;
     }
-    if (memcmp(data, MagicVersion, sizeof(MagicVersion))) {
-        log_error("invalid magic; unsupported file-format");
+    // return a pointer to struct at data provided all reads from that struct would not exceed bounds
+    // also increment the source pointer to the next element...
+    const auto safeRead = [=](auto **readFrom) {
+        using T = decltype(readFrom);
+        constexpr auto sz = sizeof(**readFrom);
+        if (reinterpret_cast<const uint8_t *>(*readFrom) - data + sz > length) {
+            log_error("data invalid; attempted invalid read @" << readFrom);
+            *readFrom = nullptr;
+            return *readFrom;
+        }
+        const auto p = *readFrom;
+        *reinterpret_cast<uint8_t **>(readFrom) += sz;
+        return p;
+    };
+
+    auto p = const_cast<uint8_t *>(data);
+    if (memcmp(p, MagicVersion, sizeof(MagicVersion))) {
+        log_error("invalid magic; unsupported format");
         return false;
     }
-
-    // fields are big-endian...
-    PACK(struct _Header {
-        uint32_t totalLength;
-        uint16_t rfu1;
-        uint16_t width; // pixels
-        uint16_t height; // pixels
-        uint16_t resolutionX; // ppcm
-        uint16_t resolutionY; // ppcm
-        uint8_t fingerPrintCount;
-        uint8_t rfu2;
-    });
-
-    PACK(struct _Minutia {
-        uint16_t type_X; // 2-bits type | 14-bits x-position pixels
-        uint16_t rfu_Y; // 2-bits rfu | 14-bits y-position pixels
-        uint8_t angle;
-        uint8_t quality;
-    });
-
-    PACK(struct _FingerPrint {
-        uint8_t position;
-        uint8_t rfu;
-        uint8_t quality;
-        uint8_t minutiaCount;
-        _Minutia minutiae; // first entry
-    });
+    p += sizeof(MagicVersion);
 
     // check alignment for platform...
     assert(sizeof(_Header) % sizeof(unsigned int) == 0);
 
+    const auto *h = safeRead(reinterpret_cast<_Header**>(&p));
+    if (!h) {
+        return false;
+    }
+    assert(swap32(h->totalLength) == length);
+
     std::vector<std::vector<Minutia>> fps;
     std::vector<Minutia> minutiae;
 
-    data += sizeof(MagicVersion);
-    const _Header *h = reinterpret_cast<const _Header*>(data);
-    data += sizeof(_Header);
-
     for(auto f = 0; f < h->fingerPrintCount; ++f) {
-        const _FingerPrint *fp = reinterpret_cast<const _FingerPrint*>(data);
-        data += sizeof(_FingerPrint) + sizeof(_Minutia) * (fp->minutiaCount - 1);
-
-        auto mp = &fp->minutiae;
+        const auto *fp = safeRead(reinterpret_cast<_FingerPrint**>(&p));
+        if (!fp) {
+            return false;
+        }
         for(auto m = 0; m < fp->minutiaCount; ++m) {
-            minutiae.push_back(Minutia(SWAP16(mp->type_X) & 0x3f, SWAP16(mp->rfu_Y) & 0x3f, mp->angle));
-            mp++;
+            const auto *mp = safeRead(reinterpret_cast<_Minutia**>(&p));
+            if (!mp) {
+                return false;
+            }
+            minutiae.push_back(Minutia(swap16(mp->type_X) & 0x3f, swap16(mp->rfu_Y) & 0x3f, mp->angle));
         }
         fps.push_back(minutiae);
         minutiae.clear();
 
         // skip extension data at the end - no deref here as address may no longer be aligned...
+        const auto ex = safeRead(reinterpret_cast<uint16_t**>(&p));
+        if (!ex) {
+            return false;
+        }
         uint16_t extensionData;
-        memcpy(&extensionData, data, sizeof(extensionData));
-        data += sizeof(uint16_t);
-        data += extensionData;
+        memcpy(&extensionData, ex, sizeof(extensionData));
+        p += swap16(extensionData);
     }
-    return Template::load(std::pair<unsigned short, unsigned short>(SWAP16(h->resolutionX), SWAP16(h->resolutionY)), fps);
+    return Template::load(std::pair<unsigned short, unsigned short>(swap16(h->resolutionX), swap16(h->resolutionY)), fps);
 }
 
 

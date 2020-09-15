@@ -9,6 +9,8 @@ INCLUDEPATH += \
     ../OpenBLAS-x86/include
 
 HEADERS = \
+    ../lib/Config.h \
+    ../lib/Log.h \
     ../lib/Score.h \
     ../lib/Template.h \
     ../lib/TemplateISO19794_2_2005.h
