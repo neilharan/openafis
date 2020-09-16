@@ -49,6 +49,7 @@ private:
 
     static constexpr uint16_t swap16(const uint16_t x) { return (x << 8) | (x >> 8 ); }
     static constexpr uint32_t swap32(const uint32_t x) { const auto _x = ((x << 8) & 0xff00ff00) | ((x >> 8) & 0xff00ff); return (_x << 16) | (_x >> 16); }
+    static const size_t LargestStruct = std::max(sizeof(_Header), std::max(sizeof(_Minutia), sizeof(_FingerPrint)));
 
 public:
     static const size_t MaximumLength = sizeof(MagicVersion) + sizeof(_Header) + 256 * sizeof(_Minutia); // minutia count is stored in 8-bits so we have an implied maximum size

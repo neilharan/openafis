@@ -33,9 +33,8 @@ bool TemplateISO19794_2_2005<T>::load(const std::string &path)
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // https://www.iso.org/standard/38746.html
-// https://templates.machinezoo.com/iso-19794-2-2005
-// https://github.com/atefm/ISO_19794-2-2005-converter/blob/master/main.cpp
 // https://www.nist.gov/services-resources/software/biomdi-software-tools-supporting-standard-biometric-data-interchange
+// https://templates.machinezoo.com/iso-19794-2-2005
 //
 template <class T>
 bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
@@ -46,17 +45,31 @@ bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
     }
     // return a pointer to struct at data provided all reads from that struct would not exceed bounds
     // also increment the source pointer to the next element...
-    const auto safeRead = [=](auto **readFrom) {
-        using T = decltype(readFrom);
+    const auto safeRead = [data, length](auto **readFrom) {
+        using T = decltype(*readFrom);
         constexpr auto sz = sizeof(**readFrom);
         if (reinterpret_cast<const uint8_t *>(*readFrom) - data + sz > length) {
             log_error("data invalid; attempted invalid read @" << readFrom);
-            *readFrom = nullptr;
-            return *readFrom;
+            void *np{nullptr};
+            return reinterpret_cast<T>(np);
         }
         const auto p = *readFrom;
         *reinterpret_cast<uint8_t **>(readFrom) += sz;
-        return p;
+
+        // check alignment - platforms that support unaligned access (like x86) _could_ just return p
+        // realigning here does improve performance though & is a requirement for some platforms (like arm) where unaligned access is UB...
+        if (reinterpret_cast<uint32_t>(p) % sizeof(void *) == 0) {
+            return p;
+        }
+        static std::vector<uint8_t> buff(LargestStruct);
+        if (sz > buff.size()) {
+            log_error("struct exceeded buffer while aligning @" << readFrom);
+            *readFrom = nullptr;
+            return *readFrom;
+        }
+        memcpy(buff.data(), p, sz);
+        void *bp{buff.data()};
+        return reinterpret_cast<T>(bp);
     };
 
     auto p = const_cast<uint8_t *>(data);
@@ -65,9 +78,6 @@ bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
         return false;
     }
     p += sizeof(MagicVersion);
-
-    // check alignment for platform...
-    assert(sizeof(_Header) % sizeof(unsigned int) == 0);
 
     const auto *h = safeRead(reinterpret_cast<_Header**>(&p));
     if (!h) {

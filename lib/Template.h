@@ -34,18 +34,20 @@ public:
         unsigned char angular() const { return m_angular; }
         unsigned char orientation() const { return m_orientation; }
     
-    private:   
+    private:
         const unsigned char m_radial;
         const unsigned char m_angular;
         const unsigned char m_orientation;
     };
+
+    using Fingerprint = std::vector<std::vector<LMTS>>;
    
     Template(const T &id):
         m_data(id) {}
 
     const T &id() const { return m_data.id; }
-    const std::vector<std::vector<std::vector<LMTS>>> &lmts() const { return m_data.lmts; }
-    void clear() { m_data.lmts.clear(); }
+    const std::vector<Fingerprint> &fingerprints() const { return m_data.fps; }
+    void clear() { m_data.fps.clear(); }
     size_t size() const;
 
 protected:
@@ -75,7 +77,7 @@ private:
         Data(const T &id):
             id(id) {}
 
-        std::vector<std::vector<std::vector<LMTS>>> lmts; // [fingerprint][minutia][LMTS]
+        std::vector<Fingerprint> fps; // [fingerprint][minutia][LMTS]
         const T id;
     }) m_data;
 };
