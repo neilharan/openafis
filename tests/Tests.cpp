@@ -16,23 +16,54 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 int main(int, const char**)
 {
-#if 0
-    TemplateISO19794_2_2005<unsigned short> t1(1);
-    assert(t1.load("/dev/project/os/openafis/data/fvc2004/DB1_B/101_1_corrupt.iso"));
-    log_info("template " << t1.id() << ": size " << t1.size() << " bytes, #fingerprints " << t1.lmts().size());
+#if 1
+    TemplateISO19794_2_2005<unsigned short> t1_1(1);
+    if (!t1_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/101_1.iso")) {
+        return 0;
+    }
+    log_info("template " << t1_1.id() << ": size " << t1_1.size() << " bytes, #fingerprints " << t1_1.fingerprints().size());
 
-    /*TemplateISO19794_2_2005<unsigned short> t2(2);
-    assert(t2.load("data/njh1.iso"));
-    log_info("template " << t2.id() << ": size " << t2.size() << " bytes, #fingerprints " << t2.lmts().size());
+    TemplateISO19794_2_2005<unsigned short> t1_2(2);
+    if (!t1_2.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/101_2.iso")) {
+        return 0;
+    }
+    log_info("template " << t1_2.id() << ": size " << t1_2.size() << " bytes, #fingerprints " << t1_2.fingerprints().size());
 
-    Score<unsigned short> score;
+    TemplateISO19794_2_2005<unsigned short> t2_1(3);
+    if (!t2_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/102_1.iso")) {
+        return 0;
+    }
+    log_info("template " << t2_1.id() << ": size " << t2_1.size() << " bytes, #fingerprints " << t2_1.fingerprints().size());
+
+    assert(!t1_1.fingerprints().empty());
+    assert(!t1_2.fingerprints().empty());
+    assert(!t2_1.fingerprints().empty());
+
+//    Score<unsigned short> score;
+    {
+    Score score;
 
     const auto start = std::chrono::high_resolution_clock::now();
-    const auto s = score.compute(t1, t2);
+    unsigned int s{};
+    for(auto i = 1; i; --i) {
+        s = score.compute(t1_1.fingerprints()[0], t1_2.fingerprints()[0]);
+    }
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 
-    log_info("score " << s << " in " << ms.count() << "ms");*/
+    log_info("score [alike]" << s << " in " << ms.count() << "ms");
+    }
+
+    {
+    Score score;
+
+    const auto start = std::chrono::high_resolution_clock::now();
+    const auto s = score.compute(t1_1.fingerprints()[0], t2_1.fingerprints()[0]);
+    const auto finish = std::chrono::high_resolution_clock::now();
+    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
+
+    log_info("score [not alike]" << s << " in " << ms.count() << "ms");
+    }
 #else
 
 #if 1
@@ -63,7 +94,7 @@ int main(int, const char**)
         data.resize(static_cast<size_t>(f.gcount()));
         files.push_back(data);
     }
-    auto count = 0;
+    auto count = 0, size = 0;
     const auto start = std::chrono::high_resolution_clock::now();
     TemplateISO19794_2_2005<unsigned short> t(1);
 
@@ -71,6 +102,7 @@ int main(int, const char**)
         if (!t.load(f.data(), f.size())) {
             log_info("failed to load");
         }
+        size += t.size();
         t.clear();
         count++;
     }
@@ -99,7 +131,7 @@ int main(int, const char**)
 #endif
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    log_info("bulk load " << count << " templates in " << ms.count() << "ms");
+    log_info("bulk load " << count << " templates in " << ms.count() << "ms, consuming " << size << " bytes");
 #endif
 
     return 0;

@@ -12,7 +12,7 @@
 template <class T> class TemplateISO19794_2_2005: public Template<T>
 {
 public:
-    TemplateISO19794_2_2005(const T &id):
+    explicit TemplateISO19794_2_2005(const T &id):
         Template<T>(id) {}
         
     bool load(const std::string &path);
@@ -52,7 +52,8 @@ private:
     static const size_t LargestStruct = std::max(sizeof(_Header), std::max(sizeof(_Minutia), sizeof(_FingerPrint)));
 
 public:
-    static const size_t MaximumLength = sizeof(MagicVersion) + sizeof(_Header) + 256 * sizeof(_Minutia); // minutia count is stored in 8-bits so we have an implied maximum size
+    static const size_t MinimumLength = sizeof(MagicVersion) + sizeof(_Header);
+    static const size_t MaximumLength = MinimumLength + MaximumFingerprints * (sizeof(_FingerPrint) + MaximumMinutiae * sizeof(_Minutia));
 };
 
 #endif // TEMPLATEISO19794_2_2005_H

@@ -21,7 +21,7 @@ bool TemplateISO19794_2_2005<T>::load(const std::string &path)
         log_error("unable to open " << path);
         return false;
     }
-    std::vector<uint8_t> data(MaximumLength);
+    thread_local static std::vector<uint8_t> data(MaximumLength);
     f.read(data.data(), data.size());
     if ((f.rdstate() & std::ifstream::eofbit) == 0) {
         log_error("filesize > MaximumLength " << path);
@@ -39,10 +39,15 @@ bool TemplateISO19794_2_2005<T>::load(const std::string &path)
 template <class T>
 bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
 {
+    if (length < MinimumLength) {
+        log_error("length < MinimumLength; " << length);
+        return false;
+    }
     if (length > MaximumLength) {
         log_error("length > MaximumLength; " << length);
         return false;
     }
+
     // return a pointer to struct at data provided all reads from that struct would not exceed bounds
     // also increment the source pointer to the next element...
     const auto safeRead = [data, length](auto **readFrom) {
@@ -50,61 +55,63 @@ bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
         constexpr auto sz = sizeof(**readFrom);
         if (reinterpret_cast<const uint8_t *>(*readFrom) - data + sz > length) {
             log_error("data invalid; attempted invalid read @" << readFrom);
-            void *np{nullptr};
+            const void *np{nullptr};
             return reinterpret_cast<T>(np);
         }
         const auto p = *readFrom;
-        *reinterpret_cast<uint8_t **>(readFrom) += sz;
+        *reinterpret_cast<const uint8_t **>(readFrom) += sz;
 
         // check alignment - platforms that support unaligned access (like x86) _could_ just return p
         // realigning here does improve performance though & is a requirement for some platforms (like arm) where unaligned access is UB...
         if (reinterpret_cast<uint32_t>(p) % sizeof(void *) == 0) {
             return p;
         }
-        static std::vector<uint8_t> buff(LargestStruct);
+        thread_local static std::vector<uint8_t> buff(LargestStruct);
         if (sz > buff.size()) {
             log_error("struct exceeded buffer while aligning @" << readFrom);
             *readFrom = nullptr;
             return *readFrom;
         }
         memcpy(buff.data(), p, sz);
-        void *bp{buff.data()};
+        const void *bp{buff.data()};
         return reinterpret_cast<T>(bp);
     };
 
-    auto p = const_cast<uint8_t *>(data);
+    auto p = data;
     if (memcmp(p, MagicVersion, sizeof(MagicVersion))) {
         log_error("invalid magic; unsupported format");
         return false;
     }
     p += sizeof(MagicVersion);
 
-    const auto *h = safeRead(reinterpret_cast<_Header**>(&p));
+    const auto *h = safeRead(reinterpret_cast<const _Header**>(&p));
     if (!h) {
         return false;
     }
     assert(swap32(h->totalLength) == length);
 
     std::vector<std::vector<Minutia>> fps;
-    std::vector<Minutia> minutiae;
+    fps.reserve(h->fingerPrintCount);
 
-    for(auto f = 0; f < h->fingerPrintCount; ++f) {
-        const auto *fp = safeRead(reinterpret_cast<_FingerPrint**>(&p));
+    //NJH-TODO use this to scale values: std::pair<unsigned short, unsigned short>(swap16(h->resolutionX), swap16(h->resolutionY)), 
+
+    for(auto f = 0u; f < fps.capacity(); ++f) {
+        const auto *fp = safeRead(reinterpret_cast<const _FingerPrint**>(&p));
         if (!fp) {
             return false;
         }
-        for(auto m = 0; m < fp->minutiaCount; ++m) {
-            const auto *mp = safeRead(reinterpret_cast<_Minutia**>(&p));
+        auto& minutiae = fps.emplace_back();
+        minutiae.reserve(std::min(fp->minutiaCount, static_cast<uint8_t>(MaximumMinutiae)));
+
+        for(auto m = 0u; m < minutiae.capacity(); ++m) {
+            const auto *mp = safeRead(reinterpret_cast<const _Minutia**>(&p));
             if (!mp) {
                 return false;
             }
-            minutiae.push_back(Minutia(swap16(mp->type_X) & 0x3f, swap16(mp->rfu_Y) & 0x3f, mp->angle));
+            minutiae.emplace_back((mp->type_X & 0x3f) << 8 | (mp->type_X & 0xff00) >> 8, (mp->rfu_Y & 0x3f) << 8 | (mp->rfu_Y & 0xff00) >> 8, mp->angle);
         }
-        fps.push_back(minutiae);
-        minutiae.clear();
-
         // skip extension data at the end - no deref here as address may no longer be aligned...
-        const auto ex = safeRead(reinterpret_cast<uint16_t**>(&p));
+        const auto ex = safeRead(reinterpret_cast<const uint16_t**>(&p));
         if (!ex) {
             return false;
         }
@@ -112,7 +119,7 @@ bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
         memcpy(&extensionData, ex, sizeof(extensionData));
         p += swap16(extensionData);
     }
-    return Template::load(std::pair<unsigned short, unsigned short>(swap16(h->resolutionX), swap16(h->resolutionY)), fps);
+    return Template::load(fps);
 }
 
 
