@@ -96,7 +96,8 @@ args = parser.parse_args()
 
 input_file = args.input_file
 
-img = Image.open(input_file)
+# resize input image to suit dimensions of the sensor we specify (SG_DEV_FDU05) - note aspect ratio is ignored...
+img = Image.open(input_file).resize((300, 400), Image.LANCZOS)
 raw = numpy.array(img)
 
 lib = ffi.dlopen('sgfplib')
