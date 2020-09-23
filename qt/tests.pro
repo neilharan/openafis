@@ -15,4 +15,6 @@ contains(CONFIG, release) {
 } else {
     BUILD_TYPE = "debug"
 }
-LIBS = $$BUILD_TYPE/openafis.lib
+LIBS = \
+    $$BUILD_TYPE/openafis.lib \
+    /dev/project/os/openafis/3rdparty/OpenBLAS-x86/lib/libopenblas.lib

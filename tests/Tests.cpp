@@ -1,6 +1,7 @@
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "Log.h"
+#include "Render.h"
 #include "Score.h"
 #include "TemplateISO19794_2_2005.h"
 
@@ -19,18 +20,36 @@ int main(int, const char**)
 #if 1
     TemplateISO19794_2_2005<unsigned short> t1_1(1);
     if (!t1_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/101_1.iso")) {
+//    if (!t1_1.load("/dev/project/os/openafis/data/valid/njh-r1-1.iso")) {
+        return 0;
+    }
+    log_info("template " << t1_1.id() << ": size " << t1_1.size() << " bytes, #fingerprints " << t1_1.fingerprints().size());
+    assert(!t1_1.fingerprints().empty());
+    std::string svg;
+    assert(Render::minutiae(svg, t1_1.fingerprints()[0]));
+
+    std::ofstream f("njh.svg", std::ofstream::binary);
+    assert(f);
+    f.write(svg.data(), svg.size());
+#else
+#if 1
+    TemplateISO19794_2_2005<unsigned short> t1_1(1);
+    if (!t1_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/103_1.iso")) {
+//    if (!t1_1.load("/dev/project/os/openafis/data/valid/njh-r1-1.iso")) {
         return 0;
     }
     log_info("template " << t1_1.id() << ": size " << t1_1.size() << " bytes, #fingerprints " << t1_1.fingerprints().size());
 
     TemplateISO19794_2_2005<unsigned short> t1_2(2);
-    if (!t1_2.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/101_2.iso")) {
+    if (!t1_2.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/103_4.iso")) {
+//    if (!t1_2.load("/dev/project/os/openafis/data/valid/njh-r1-4.iso")) {
         return 0;
     }
     log_info("template " << t1_2.id() << ": size " << t1_2.size() << " bytes, #fingerprints " << t1_2.fingerprints().size());
 
     TemplateISO19794_2_2005<unsigned short> t2_1(3);
-    if (!t2_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/102_1.iso")) {
+    if (!t2_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/104_1.iso")) {
+//    if (!t2_1.load("/dev/project/os/openafis/data/valid/njh-r2-1.iso")) {
         return 0;
     }
     log_info("template " << t2_1.id() << ": size " << t2_1.size() << " bytes, #fingerprints " << t2_1.fingerprints().size());
@@ -45,9 +64,9 @@ int main(int, const char**)
 
     const auto start = std::chrono::high_resolution_clock::now();
     unsigned int s{};
-    for(auto i = 1; i; --i) {
+    //for(auto i = 0; i < 1000; ++i) {
         s = score.compute(t1_1.fingerprints()[0], t1_2.fingerprints()[0]);
-    }
+    //}
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 
@@ -132,6 +151,7 @@ int main(int, const char**)
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
     log_info("bulk load " << count << " templates in " << ms.count() << "ms, consuming " << size << " bytes");
+#endif
 #endif
 
     return 0;

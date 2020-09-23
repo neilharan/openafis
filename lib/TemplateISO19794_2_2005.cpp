@@ -78,7 +78,7 @@ bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
     };
 
     auto p = data;
-    if (memcmp(p, MagicVersion, sizeof(MagicVersion))) {
+    if (std::memcmp(p, MagicVersion, sizeof(MagicVersion))) {
         log_error("invalid magic; unsupported format");
         return false;
     }
@@ -93,8 +93,6 @@ bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
     std::vector<std::vector<Minutia>> fps;
     fps.reserve(h->fingerPrintCount);
 
-    //NJH-TODO use this to scale values: std::pair<unsigned short, unsigned short>(swap16(h->resolutionX), swap16(h->resolutionY)), 
-
     for(auto f = 0u; f < fps.capacity(); ++f) {
         const auto *fp = safeRead(reinterpret_cast<const _FingerPrint**>(&p));
         if (!fp) {
@@ -108,9 +106,13 @@ bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
             if (!mp) {
                 return false;
             }
-            minutiae.emplace_back((mp->type_X & 0x3f) << 8 | (mp->type_X & 0xff00) >> 8, (mp->rfu_Y & 0x3f) << 8 | (mp->rfu_Y & 0xff00) >> 8, mp->angle);
+            const auto adjustedAngle = [mp]() {
+                const auto a = static_cast<unsigned short>(mp->angle * (360.0f / 256.0f) + 90.0f);
+                return a > 360 ? a - 360 : a;
+            };
+            minutiae.emplace_back(Minutia::Type((mp->type_X & 0xc000) >> 14), (mp->type_X & 0x3f) << 8 | (mp->type_X & 0xff00) >> 8, (mp->rfu_Y & 0x3f) << 8 | (mp->rfu_Y & 0xff00) >> 8, adjustedAngle());
         }
-        // skip extension data at the end - no deref here as address may no longer be aligned...
+        // skip extension data at the end...
         const auto ex = safeRead(reinterpret_cast<const uint16_t**>(&p));
         if (!ex) {
             return false;
@@ -119,7 +121,7 @@ bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
         memcpy(&extensionData, ex, sizeof(extensionData));
         p += swap16(extensionData);
     }
-    return Template::load(fps);
+    return Template::load(std::make_pair(swap16(h->width), swap16(h->height)), std::make_pair(swap16(h->resolutionX), swap16(h->resolutionY)), fps);
 }
 
 
