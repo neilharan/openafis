@@ -17,38 +17,55 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 int main(int, const char**)
 {
-#if 1
+#if 0
     TemplateISO19794_2_2005<unsigned short> t1_1(1);
+    if (!t1_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/101_1.iso")) {
+        return 0;
+    }
+    assert(!t1_1.fingerprints().empty());
+    log_info("template " << t1_1.id() << ": size " << t1_1.size() << " bytes, #fingerprints " << t1_1.fingerprints().size());
+
+    TemplateISO19794_2_2005<unsigned short> t1_2(2);
+    if (!t1_2.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/101_2.iso")) {
+        return 0;
+    }
+    assert(!t1_2.fingerprints().empty());
+    log_info("template " << t1_2.id() << ": size " << t1_2.size() << " bytes, #fingerprints " << t1_2.fingerprints().size());
+
+    {
+    std::string svg;
+    assert(Render::minutiae(svg, t1_1.fingerprints()[0]));
+    std::ofstream f("njh-minutiae.svg", std::ofstream::binary);
+    assert(f);
+    f.write(svg.data(), svg.size());
+    }
+
+    {
+    std::string svg;
+    assert(Render::pairs(svg, t1_1.fingerprints()[0], t1_2.fingerprints()[0]));
+    std::ofstream f("njh-pairs.svg", std::ofstream::binary);
+    assert(f);
+    f.write(svg.data(), svg.size());
+    }
+
+#else
+#if 1
+    TemplateISO19794_2_2005 t1_1(1);
     if (!t1_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/101_1.iso")) {
 //    if (!t1_1.load("/dev/project/os/openafis/data/valid/njh-r1-1.iso")) {
         return 0;
     }
     log_info("template " << t1_1.id() << ": size " << t1_1.size() << " bytes, #fingerprints " << t1_1.fingerprints().size());
-    assert(!t1_1.fingerprints().empty());
-    std::string svg;
-    assert(Render::minutiae(svg, t1_1.fingerprints()[0]));
 
-    std::ofstream f("njh.svg", std::ofstream::binary);
-    assert(f);
-    f.write(svg.data(), svg.size());
-#else
-#if 1
-    TemplateISO19794_2_2005<unsigned short> t1_1(1);
-    if (!t1_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/103_1.iso")) {
-//    if (!t1_1.load("/dev/project/os/openafis/data/valid/njh-r1-1.iso")) {
-        return 0;
-    }
-    log_info("template " << t1_1.id() << ": size " << t1_1.size() << " bytes, #fingerprints " << t1_1.fingerprints().size());
-
-    TemplateISO19794_2_2005<unsigned short> t1_2(2);
-    if (!t1_2.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/103_4.iso")) {
+    TemplateISO19794_2_2005 t1_2(2);
+    if (!t1_2.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/101_2.iso")) {
 //    if (!t1_2.load("/dev/project/os/openafis/data/valid/njh-r1-4.iso")) {
         return 0;
     }
     log_info("template " << t1_2.id() << ": size " << t1_2.size() << " bytes, #fingerprints " << t1_2.fingerprints().size());
 
-    TemplateISO19794_2_2005<unsigned short> t2_1(3);
-    if (!t2_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/104_1.iso")) {
+    TemplateISO19794_2_2005 t2_1(3);
+    if (!t2_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/102_1.iso")) {
 //    if (!t2_1.load("/dev/project/os/openafis/data/valid/njh-r2-1.iso")) {
         return 0;
     }

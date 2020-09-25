@@ -4,20 +4,20 @@ QT -= core
 QT -= gui
 
 INCLUDEPATH += \
-    ../3rdparty/OpenBLAS-x86/include \
-    ../3rdparty/eigen-3.3.7 \
+    ../3rdparty/delaunator-cpp/include \
     ../lib
 
 HEADERS = \
-    ../lib/Config.h \
-    ../lib/Fingerprint.h \
-    ../lib/LMTS.h \
-    ../lib/Log.h \
-    ../lib/Minutia.h \
-    ../lib/Render.h \
-    ../lib/Score.h \
-    ../lib/Template.h \
-    ../lib/TemplateISO19794_2_2005.h
+    $$PWD/../lib/Config.h \
+    $$PWD/../lib/Field.h \
+    $$PWD/../lib/Fingerprint.h \
+    $$PWD/../lib/Log.h \
+    $$PWD/../lib/Minutia.h \
+    $$PWD/../lib/Render.h \
+    $$PWD/../lib/Score.h \
+    $$PWD/../lib/Template.h \
+    $$PWD/../lib/TemplateISO19794_2_2005.h \
+    $$PWD/../lib/Triplet.h
 
 SOURCES = \
     ../lib/Render.cpp \

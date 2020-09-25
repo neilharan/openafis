@@ -4,23 +4,17 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// https://doi.org/10.1371/journal.pone.0118910
+// https://doi.org/10.3390/s120303418
 //
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class T>
-unsigned int Score<T>::compute(const Template<T> &t1, const Template<T> &t2)
+unsigned int Score::compute(const Template &, const Template &)
 {
-    /*TODO for(const auto &fp : m_data.lmts) {
-        for(const auto &m : fp) {
-            for(const auto &lmts : m) {
-            }
-        }
-    }*/
     return 0;
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template class Score<unsigned short>;
-template class Score<unsigned int>;
-template class Score<std::string>;
+unsigned int Score::compute(const Fingerprint &fp1, const Fingerprint &fp2)
+{
+    return 0;
+}

@@ -4,6 +4,8 @@
 
 A high performance one-to-many (1:N) fingerprint matching library for commodity hardware, written in modern platform independent C++.
 
+Targeting contrained hardware, the library can be optimized for score time or memory usage. There are options for parallelising the scoring process. See Benchmarks below for details of the performance metrics the library is focused on.
+
 ## Supported operating systems
 
 - Windows
@@ -32,19 +34,11 @@ The FVC archives are supplied in the tif raster format. A small python program [
 
 ## Algorithm
 
-Minutia Tensor Matrix: A New Strategy for Fingerprint Matching (https://doi.org/10.1371/journal.pone.0118910).
+Improving Fingerprint Verification Using Minutiae Triplets (https://doi.org/10.3390/s120303418).
 
-## Linear algebra
+## Dependencies
 
-The algorithm, and indeed the fingerprint matching problem more generally, requires extensive use of relatively expensive matrix transformations.
-
-https://medium.com/datathings/benchmarking-blas-libraries-b57fb1c6dc7
-
-With typical matrix sizes being quite small (50-60 rows) the native C++ library Eigen is an obvious choice for this application (http://eigen.tuxfamily.org).
-
-While GPU options like CUDA potentially enable massive parallelisation, the smaller matrix sizes used here do not warrant the extra cost of transferring data to and from the GPU memory.
-
-A future study will explore whether a more complete CUDA implementation, with the majority of the algorithm implemented on the GPU rather than just BLAS-like primitives, is beneficial.
+Delaunay 2D Triangulation (https://github.com/delfrrr/delaunator-cpp) [MIT License]
 
 ## Supported minutiae template formats
 
@@ -66,7 +60,33 @@ std::cout << "score " << Score<unsigned short>().compute(t1, t2);
 
 ## Benchmarking
 
-TODO
+All benchmarks are performed on a database of 10,000 templates sourced from duplicated FVC datasets. The probe fingerprint is included only once in the candidate database. In other words, there are 9,999 non-matching templates and a single matching template.
+
+### x86-64
+
+  | METRIC | THREADS | OPTIMIZATION | PRODUCTION/RESEARCH | RESULT |
+  | ------ | ------- | ------------ | ------------------- | ------ |
+  | Load time¹ | | CPU | Production |
+  | Memory usage | | CPU | Production | |
+  | Memory usage | | Memory | Production | |
+  | Memory usage | | CPU | Research | |
+  | 1:N score time | 1 | CPU | Production | |
+  | 1:N score time | 4 | CPU | Production | |
+  | 1:N score time | | Memory | Production | |
+
+### aarch64
+
+  | METRIC | THREADS | OPTIMIZATION | PRODUCTION/RESEARCH | RESULT |
+  | ------ | ------- | ------------ | ------------------- | ------ |
+  | Load time¹ | | CPU | Production |
+  | Memory usage | | CPU | Production | |
+  | Memory usage | | Memory | Production | |
+  | Memory usage | | CPU | Research | |
+  | 1:N score time | 1 | CPU | Production | |
+  | 1:N score time | 4 | CPU | Production | |
+  | 1:N score time | | Memory | Production | |
+
+¹ 19794-2:2005 templates pre-loaded in memory. The time taken to produce indexed in-memory templates is recorded (we're not measuring disk I/O here).
 
 ## Licensing
 

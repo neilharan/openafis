@@ -8,13 +8,11 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class T>
-const unsigned char TemplateISO19794_2_2005<T>::MagicVersion[] = { 'F', 'M', 'R', 0, ' ', '2', '0', 0 };
+const unsigned char TemplateISO19794_2_2005::MagicVersion[] = { 'F', 'M', 'R', 0, ' ', '2', '0', 0 };
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class T>
-bool TemplateISO19794_2_2005<T>::load(const std::string &path)
+bool TemplateISO19794_2_2005::load(const std::string &path)
 {
     std::basic_ifstream<uint8_t> f(path, std::ifstream::in | std::ifstream::binary);
     if (!f) {
@@ -36,8 +34,7 @@ bool TemplateISO19794_2_2005<T>::load(const std::string &path)
 // https://www.nist.gov/services-resources/software/biomdi-software-tools-supporting-standard-biometric-data-interchange
 // https://templates.machinezoo.com/iso-19794-2-2005
 //
-template <class T>
-bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
+bool TemplateISO19794_2_2005::load(const uint8_t *data, const size_t length)
 {
     if (length < MinimumLength) {
         log_error("length < MinimumLength; " << length);
@@ -121,11 +118,5 @@ bool TemplateISO19794_2_2005<T>::load(const uint8_t *data, const size_t length)
         memcpy(&extensionData, ex, sizeof(extensionData));
         p += swap16(extensionData);
     }
-    return Template::load(std::make_pair(swap16(h->width), swap16(h->height)), std::make_pair(swap16(h->resolutionX), swap16(h->resolutionY)), fps);
+    return Template::load(std::make_pair(swap16(h->width), swap16(h->height)), fps);
 }
-
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template class TemplateISO19794_2_2005<unsigned short>;
-template class TemplateISO19794_2_2005<unsigned int>;
-template class TemplateISO19794_2_2005<std::string>;

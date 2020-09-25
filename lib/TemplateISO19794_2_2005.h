@@ -9,11 +9,11 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class T> class TemplateISO19794_2_2005: public Template<T>
+class TemplateISO19794_2_2005: public Template
 {
 public:
-    explicit TemplateISO19794_2_2005(const T &id):
-        Template<T>(id) {}
+    explicit TemplateISO19794_2_2005(const Field::TemplateId &id):
+        Template(id) {}
         
     bool load(const std::string &path);
     bool load(const uint8_t *data, size_t length);

@@ -3,6 +3,13 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#include <algorithm>
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// This class is used when reading template binaries and is not held in memory during scoring.
+// As the size is not sensitive the definition uses types that suit the target architecture.
+//
 class Minutia
 {
 public:
@@ -12,30 +19,22 @@ public:
         RidgeBifurcation
     };
 
-    Minutia(const Type type, const unsigned short x, const unsigned short y, const unsigned short angle)
+    Minutia(const Type type, const unsigned int x, const unsigned int y, const unsigned int angle)
         : m_type(type)
         , m_x(x)
         , m_y(y)
         , m_angle(angle) {}
 
     Type type() const { return m_type; }
-    unsigned short x() const { return m_x; } // cm
-    unsigned short y() const { return m_y; } // cm
-    unsigned short angle() const { return m_angle; } // degrees
+    unsigned int x() const { return m_x; } // cm
+    unsigned int y() const { return m_y; } // cm
+    unsigned int angle() const { return m_angle; } // degrees
     
-    // distance between two vectors: a^2 + b^2 = c^2
-    double distanceTo(const std::pair<unsigned short, unsigned short>& resolution, const Minutia& other) const
-    {
-        const double distanceX = (m_x - other.x()) * (1.0f / static_cast<float>(resolution.first));
-        const double distanceY = (m_y - other.y()) * (1.0f / static_cast<float>(resolution.second));
-        return sqrt(distanceX * distanceX + distanceY * distanceY);
-    }
-
 private:
     const Type m_type;
-    const unsigned short m_x;
-    const unsigned short m_y;
-    const unsigned short m_angle;
+    const unsigned int m_x;
+    const unsigned int m_y;
+    const unsigned int m_angle;
 };
 
 #endif // MINUTIA_H

@@ -7,10 +7,11 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class T> class Score
+class Score
 {
 public:
-    unsigned int compute(const Template<T> &t1, const Template<T> &t2);
+    unsigned int compute(const Template &t1, const Template &t2);
+    unsigned int compute(const Fingerprint &fp1, const Fingerprint &fp2);
 };
 
 #endif // SCORE_H
