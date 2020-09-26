@@ -16,7 +16,6 @@
 class Fingerprint
 {
 public:
-    using Dimensions = std::pair<unsigned int, unsigned int>;
 
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
     using Minutiae = std::vector<Minutia>;

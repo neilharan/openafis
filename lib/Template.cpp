@@ -15,7 +15,7 @@
 # define MINUTIAE , minutiae
 #endif
 
-bool Template::load(const Fingerprint::Dimensions& dimensions, const std::vector<std::vector<Minutia>>& fps)
+bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<Minutia>>& fps)
 {
     for(const auto &minutiae : fps) {
         if (minutiae.size() < MinimumMinutiae) {
@@ -38,19 +38,23 @@ bool Template::load(const Fingerprint::Dimensions& dimensions, const std::vector
         auto& t = fp.triplets();
 
 #ifdef _DEBUG
-        std::set<std::tuple<Field::Triplet, Field::Triplet, Field::Triplet>> dupes;
+        std::set<std::tuple<Field::TripletType, Field::TripletType, Field::TripletType>> dupes;
 #endif
         // walk triangles backwards building triplet vector...
         for(auto i = d.triangles.size() - 3;; i -= 3) {
             const auto& a = d.triangles[i];
             if (a) {
                 const auto& b = d.triangles[i + 1];
-                const auto& c = d.triangles[i + 1];
+                const auto& c = d.triangles[i + 2];
 #ifdef _DEBUG
-                const auto k = dupes.insert(std::make_tuple(static_cast<Field::Triplet>(a), static_cast<Field::Triplet>(b), static_cast<Field::Triplet>(c)));
+                const auto k = dupes.insert(std::make_tuple(static_cast<Field::TripletType>(a), static_cast<Field::TripletType>(b), static_cast<Field::TripletType>(c)));
                 assert(k.second);
 #endif
-                t.emplace_back(static_cast<Field::Triplet>(a), static_cast<Field::Triplet>(b), static_cast<Field::Triplet>(c));
+                t.emplace_back(Triplet::Points({
+                    std::make_pair(static_cast<Field::TripletType>(a), MinutiaPoint(dimensions, minutiae[a])),
+                    std::make_pair(static_cast<Field::TripletType>(b), MinutiaPoint(dimensions, minutiae[b])),
+                    std::make_pair(static_cast<Field::TripletType>(c), MinutiaPoint(dimensions, minutiae[c]))
+                }));
             }
             if (!i) {
                 break;

@@ -5,6 +5,9 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "Config.h"
 #include "Field.h"
+#include "MinutiaPoint.h"
+
+#include <vector>
 
 #ifdef OPENAFIS_TRIPLETS_PACK
 #define TRIPLET_PACK PACK
@@ -20,33 +23,16 @@
 class Triplet
 {
 public:
+    using Points = std::vector<std::pair<Field::TripletType, MinutiaPoint>>;
+
     Triplet() = default;
 
-    Triplet(const Field::Triplet a, const Field::Triplet b, const Field::Triplet c)
-        : m_data(a, b, c)
-        {}
-
-    Field::Triplet a() const { return m_data.a; }
-    Field::Triplet b() const { return m_data.b; }
-    Field::Triplet c() const { return m_data.c; }
+    Triplet(const Points& points);
 
 private:
-    //NJH-TODO TRIPLET_PACK(
-        
-    struct Data
-    {
-        Data() = default;
+    Points sort(Points points);
 
-        Data(const Field::Triplet a, const Field::Triplet b, const Field::Triplet c)
-            : a(a)
-            , b(b)
-            , c(c)
-            {}
-
-        Field::Triplet a{};
-        Field::Triplet b{};
-        Field::Triplet c{};
-    } m_data;
+    const Points m_points;
 };
 
 #endif // TRIPLET_H

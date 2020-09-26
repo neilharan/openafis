@@ -27,7 +27,7 @@ public:
 
     Type type() const { return m_type; }
     unsigned int x() const { return m_x; } // cm
-    unsigned int y() const { return m_y; } // cm
+    unsigned int y() const { return m_y; } // "
     unsigned int angle() const { return m_angle; } // degrees
     
 private:

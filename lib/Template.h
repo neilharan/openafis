@@ -4,6 +4,7 @@
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "Config.h"
+#include "Dimensions.h"
 #include "Field.h"
 #include "Fingerprint.h"
 #include "Minutia.h"
@@ -17,10 +18,10 @@ class Template
 public:
     using Fingerprints = std::vector<Fingerprint>;
 
-    explicit Template(const Field::TemplateId &id)
+    explicit Template(const Field::TemplateIdType &id)
         : m_data(id) {}
 
-    const Field::TemplateId &id() const { return m_data.id; }
+    const Field::TemplateIdType &id() const { return m_data.id; }
     const Fingerprints &fingerprints() const { return m_data.fps; }
     void clear() { m_data.fps.clear(); }
     size_t size() const;
@@ -30,16 +31,16 @@ protected:
     static const size_t MinimumMinutiae = 2;
     static const size_t MaximumMinutiae = 128;
 
-    bool load(const Fingerprint::Dimensions& dimensions, const std::vector<std::vector<Minutia>>& fps);
+    bool load(const Dimensions& dimensions, const std::vector<std::vector<Minutia>>& fps);
     
 private:
     PACK(struct Data
     {
-        explicit Data(const Field::TemplateId &id)
+        explicit Data(const Field::TemplateIdType &id)
             : id(id) {}
 
         Fingerprints fps;
-        const Field::TemplateId id;
+        const Field::TemplateIdType id;
     }) m_data;
 };
 

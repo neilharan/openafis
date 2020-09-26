@@ -12,7 +12,7 @@
 class TemplateISO19794_2_2005: public Template
 {
 public:
-    explicit TemplateISO19794_2_2005(const Field::TemplateId &id):
+    explicit TemplateISO19794_2_2005(const Field::TemplateIdType &id):
         Template(id) {}
         
     bool load(const std::string &path);

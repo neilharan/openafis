@@ -23,7 +23,8 @@ SOURCES = \
     ../lib/Render.cpp \
     ../lib/Score.cpp \
     ../lib/Template.cpp \
-    ../lib/TemplateISO19794_2_2005.cpp
+    ../lib/TemplateISO19794_2_2005.cpp \
+    ../lib/Triplet.cpp
 
 *-msvc*: {
     DEFINES += _HAS_EXCEPTIONS=0
