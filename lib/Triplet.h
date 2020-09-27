@@ -9,30 +9,25 @@
 
 #include <vector>
 
-#ifdef OPENAFIS_TRIPLETS_PACK
-#define TRIPLET_PACK PACK
-#else
-#define TRIPLET_PACK
-#endif
-
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// When packing is enabled a triplet can consume as little as three bytes but read accesses will be slightly slower - depending on platform architecture.
-// With packing disabled triplets will consume 3 x architectures word size regardless but performance may be improved.
-//
 class Triplet
 {
 public:
-    using Points = std::vector<std::pair<Field::TripletType, MinutiaPoint>>;
+    using Minutiae = std::vector<MinutiaPoint>;
 
     Triplet() = default;
 
-    Triplet(const Points& points);
+    Triplet(const Minutiae& minutiae);
+
+    int score(const Triplet &other) const;
+
+    const Minutiae &minutiae() const { return m_minutiae; }
 
 private:
-    Points sort(Points points);
+    static Minutiae sort(Minutiae minutiae);
 
-    const Points m_points;
+    const Minutiae m_minutiae;
 };
 
 #endif // TRIPLET_H

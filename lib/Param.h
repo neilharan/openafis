@@ -1,12 +1,21 @@
-#ifndef DIMENSIONS_H
-#define DIMENSIONS_H
+#ifndef PARAM_H
+#define PARAM_H
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include <utility>
+#include "Field.h"
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-using Dimensions = std::pair<unsigned int, unsigned int>;
+class Param
+{
+public:
+    static const float PI; // until C++20 we have to provide this
 
-#endif // DIMENSIONS_H
+    static const Field::TripletCoordType MaximumLocalDistance;
+    static const Field::TripletCoordType MaximumGlobalDistance;
+    static const float MaximumAngleDifference;
+    static const unsigned int MinimumMinutiae;
+};
+
+#endif // PARAM_H

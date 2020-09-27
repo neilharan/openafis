@@ -1,43 +1,66 @@
 
-#include "Log.h"
+#include "Param.h"
 #include "Triplet.h"
 
+#include <cassert>
 #include <string>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Triplet::Triplet(const Points& points)
-    : m_points(sort(points))
+Triplet::Triplet(const Minutiae& minutiae)
+    : m_minutiae(sort(minutiae))
 {
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Triplet::Points Triplet::sort(Points points)
+Triplet::Minutiae Triplet::sort(Minutiae minutiae)
 {
-    const auto cx = ((points[0].second.x() + points[1].second.x()) / 2.0f + points[2].second.x()) / 2.0f;
-    const auto cy = ((points[0].second.y() + points[1].second.y()) / 2.0f + points[2].second.y()) / 2.0f;
+    assert(minutiae.size() == 3);
 
-    auto a0 = std::atan2f(static_cast<float>(points[0].second.y()) - cy, static_cast<float>(points[0].second.x()) - cx);
-    auto a1 = std::atan2f(static_cast<float>(points[1].second.y()) - cy, static_cast<float>(points[1].second.x()) - cx);
-    auto a2 = std::atan2f(static_cast<float>(points[2].second.y()) - cy, static_cast<float>(points[2].second.x()) - cx);
+    const auto cx = ((minutiae[0].x() + minutiae[1].x()) / 2.0f + minutiae[2].x()) / 2.0f;
+    const auto cy = ((minutiae[0].y() + minutiae[1].y()) / 2.0f + minutiae[2].y()) / 2.0f;
+
+    auto a0 = std::atan2f(static_cast<float>(minutiae[0].y()) - cy, static_cast<float>(minutiae[0].x()) - cx);
+    auto a1 = std::atan2f(static_cast<float>(minutiae[1].y()) - cy, static_cast<float>(minutiae[1].x()) - cx);
+    auto a2 = std::atan2f(static_cast<float>(minutiae[2].y()) - cy, static_cast<float>(minutiae[2].x()) - cx);
 
     const auto swap = [](auto &x, auto &y) {
-        const auto t = x;
+        const auto copy = x;
         x = y;
-        y = t;
+        y = copy;
     };
     if (a0 > a2) {
         swap(a0, a2);
-        swap(points[0], points[2]);
+        swap(minutiae[0], minutiae[2]);
     }
     if (a0 > a1) {
         swap(a0, a1);
-        swap(points[0], points[1]);
+        swap(minutiae[0], minutiae[1]);
     }
     if (a1 > a2) {
         swap(a1, a2);
-        swap(points[1], points[2]);
+        swap(minutiae[1], minutiae[2]);
     }
-    return points;
+    minutiae[0].setDistanceFrom(minutiae[1]);
+    minutiae[1].setDistanceFrom(minutiae[2]);
+    minutiae[2].setDistanceFrom(minutiae[0]);
+
+    return minutiae;
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+int Triplet::score(const Triplet &other) const
+{
+    const auto d0 = abs(m_minutiae[0].distance() - other.minutiae()[0].distance());
+    if (d0 > Param::MaximumLocalDistance) {
+    }
+    const auto d1 = abs(m_minutiae[1].distance() - other.minutiae()[0].distance());
+    if (d1 > Param::MaximumLocalDistance) {
+    }
+    const auto d2 = abs(m_minutiae[2].distance() - other.minutiae()[0].distance());
+    if (d2 > Param::MaximumLocalDistance) {
+    }
+    return 0;
 }

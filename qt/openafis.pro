@@ -13,6 +13,8 @@ HEADERS = \
     $$PWD/../lib/Fingerprint.h \
     $$PWD/../lib/Log.h \
     $$PWD/../lib/Minutia.h \
+    $$PWD/../lib/MinutiaPoint.h \
+    $$PWD/../lib/Param.h \
     $$PWD/../lib/Render.h \
     $$PWD/../lib/Score.h \
     $$PWD/../lib/Template.h \
@@ -20,6 +22,7 @@ HEADERS = \
     $$PWD/../lib/Triplet.h
 
 SOURCES = \
+    ../lib/Param.cpp \
     ../lib/Render.cpp \
     ../lib/Score.cpp \
     ../lib/Template.cpp \
