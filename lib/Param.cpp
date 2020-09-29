@@ -1,11 +1,12 @@
 
 #include "Param.h"
+#include "FastMath.h"
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-constexpr float Param::PI = 3.14159265358979323846f;
-
 constexpr Field::TripletCoordType Param::MaximumLocalDistance = 12;
 constexpr Field::TripletCoordType Param::MaximumGlobalDistance = 12;
-constexpr float Param::MaximumAngleDifference = Param::PI / 6;
+constexpr float Param::EqualAngleDifference = 0.01f;
+constexpr float Param::MaximumAngleDifference = FastMath::PI / 6;
+constexpr float Param::MaximumDirectionDifference = FastMath::PI / 4;
 constexpr unsigned int Param::MinimumMinutiae = 4;

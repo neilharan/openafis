@@ -55,21 +55,21 @@ int main(int, const char**)
 //    if (!t1_1.load("/dev/project/os/openafis/data/valid/njh-r1-1.iso")) {
         return 0;
     }
-    log_info("template " << t1_1.id() << ": size " << t1_1.size() << " bytes, #fingerprints " << t1_1.fingerprints().size());
+    log_info("template " << t1_1.id() << ": size " << t1_1.bytes() << " bytes, #fingerprints " << t1_1.fingerprints().size());
 
     TemplateISO19794_2_2005 t1_2(2);
     if (!t1_2.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/101_2.iso")) {
 //    if (!t1_2.load("/dev/project/os/openafis/data/valid/njh-r1-4.iso")) {
         return 0;
     }
-    log_info("template " << t1_2.id() << ": size " << t1_2.size() << " bytes, #fingerprints " << t1_2.fingerprints().size());
+    log_info("template " << t1_2.id() << ": size " << t1_2.bytes() << " bytes, #fingerprints " << t1_2.fingerprints().size());
 
     TemplateISO19794_2_2005 t2_1(3);
     if (!t2_1.load("/dev/project/os/openafis/data/valid/fvc2002/DB1_B/102_1.iso")) {
 //    if (!t2_1.load("/dev/project/os/openafis/data/valid/njh-r2-1.iso")) {
         return 0;
     }
-    log_info("template " << t2_1.id() << ": size " << t2_1.size() << " bytes, #fingerprints " << t2_1.fingerprints().size());
+    log_info("template " << t2_1.id() << ": size " << t2_1.bytes() << " bytes, #fingerprints " << t2_1.fingerprints().size());
 
     assert(!t1_1.fingerprints().empty());
     assert(!t1_2.fingerprints().empty());
@@ -81,9 +81,9 @@ int main(int, const char**)
 
     const auto start = std::chrono::high_resolution_clock::now();
     unsigned int s{};
-    //for(auto i = 0; i < 1000; ++i) {
+    for(auto i = 0; i < 100; ++i) {
         s = score.compute(t1_1.fingerprints()[0], t1_2.fingerprints()[0]);
-    //}
+    }
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 

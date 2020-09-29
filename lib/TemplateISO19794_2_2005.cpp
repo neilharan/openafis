@@ -1,6 +1,6 @@
 
-#include "Log.h"
 #include "TemplateISO19794_2_2005.h"
+#include "Log.h"
 
 #include <cassert>
 #include <fstream>
@@ -12,7 +12,7 @@ const unsigned char TemplateISO19794_2_2005::MagicVersion[] = { 'F', 'M', 'R', 0
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool TemplateISO19794_2_2005::load(const std::string &path)
+bool TemplateISO19794_2_2005::load(const std::string& path)
 {
     std::basic_ifstream<uint8_t> f(path, std::ifstream::in | std::ifstream::binary);
     if (!f) {
@@ -34,7 +34,7 @@ bool TemplateISO19794_2_2005::load(const std::string &path)
 // https://www.nist.gov/services-resources/software/biomdi-software-tools-supporting-standard-biometric-data-interchange
 // https://templates.machinezoo.com/iso-19794-2-2005
 //
-bool TemplateISO19794_2_2005::load(const uint8_t *data, const size_t length)
+bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
 {
     if (length < MinimumLength) {
         log_error("length < MinimumLength; " << length);
@@ -47,20 +47,20 @@ bool TemplateISO19794_2_2005::load(const uint8_t *data, const size_t length)
 
     // return a pointer to struct at data provided all reads from that struct would not exceed bounds
     // also increment the source pointer to the next element...
-    const auto safeRead = [data, length](auto **readFrom) {
+    const auto safeRead = [data, length](auto** readFrom) {
         using T = decltype(*readFrom);
         constexpr auto sz = sizeof(**readFrom);
-        if (reinterpret_cast<const uint8_t *>(*readFrom) - data + sz > length) {
+        if (reinterpret_cast<const uint8_t*>(*readFrom) - data + sz > length) {
             log_error("data invalid; attempted invalid read @" << readFrom);
-            const void *np{nullptr};
+            const void* np { nullptr };
             return reinterpret_cast<T>(np);
         }
         const auto p = *readFrom;
-        *reinterpret_cast<const uint8_t **>(readFrom) += sz;
+        *reinterpret_cast<const uint8_t**>(readFrom) += sz;
 
         // check alignment - platforms that support unaligned access (like x86) _could_ just return p
         // realigning here does improve performance though & is a requirement for some platforms (like arm) where unaligned access is UB...
-        if (reinterpret_cast<uint32_t>(p) % sizeof(void *) == 0) {
+        if (reinterpret_cast<uint32_t>(p) % sizeof(void*) == 0) {
             return p;
         }
         thread_local static std::vector<uint8_t> buff(LargestStruct);
@@ -70,7 +70,7 @@ bool TemplateISO19794_2_2005::load(const uint8_t *data, const size_t length)
             return *readFrom;
         }
         memcpy(buff.data(), p, sz);
-        const void *bp{buff.data()};
+        const void* bp { buff.data() };
         return reinterpret_cast<T>(bp);
     };
 
@@ -81,7 +81,7 @@ bool TemplateISO19794_2_2005::load(const uint8_t *data, const size_t length)
     }
     p += sizeof(MagicVersion);
 
-    const auto *h = safeRead(reinterpret_cast<const _Header**>(&p));
+    const auto* h = safeRead(reinterpret_cast<const _Header**>(&p));
     if (!h) {
         return false;
     }
@@ -90,16 +90,16 @@ bool TemplateISO19794_2_2005::load(const uint8_t *data, const size_t length)
     std::vector<std::vector<Minutia>> fps;
     fps.reserve(h->fingerPrintCount);
 
-    for(auto f = 0u; f < fps.capacity(); ++f) {
-        const auto *fp = safeRead(reinterpret_cast<const _FingerPrint**>(&p));
+    for (auto f = 0u; f < fps.capacity(); ++f) {
+        const auto* fp = safeRead(reinterpret_cast<const _FingerPrint**>(&p));
         if (!fp) {
             return false;
         }
         auto& minutiae = fps.emplace_back();
         minutiae.reserve(std::min(fp->minutiaCount, static_cast<uint8_t>(MaximumMinutiae)));
 
-        for(auto m = 0u; m < minutiae.capacity(); ++m) {
-            const auto *mp = safeRead(reinterpret_cast<const _Minutia**>(&p));
+        for (auto m = 0u; m < minutiae.capacity(); ++m) {
+            const auto* mp = safeRead(reinterpret_cast<const _Minutia**>(&p));
             if (!mp) {
                 return false;
             }
@@ -107,7 +107,8 @@ bool TemplateISO19794_2_2005::load(const uint8_t *data, const size_t length)
                 const auto a = static_cast<unsigned short>(mp->angle * (360.0f / 256.0f) + 90.0f);
                 return a > 360 ? a - 360 : a;
             };
-            minutiae.emplace_back(Minutia::Type((mp->type_X & 0xc000) >> 14), (mp->type_X & 0x3f) << 8 | (mp->type_X & 0xff00) >> 8, (mp->rfu_Y & 0x3f) << 8 | (mp->rfu_Y & 0xff00) >> 8, adjustedAngle());
+            minutiae.emplace_back(
+                Minutia::Type((mp->type_X & 0xc000) >> 14), (mp->type_X & 0x3f) << 8 | (mp->type_X & 0xff00) >> 8, (mp->rfu_Y & 0x3f) << 8 | (mp->rfu_Y & 0xff00) >> 8, adjustedAngle());
         }
         // skip extension data at the end...
         const auto ex = safeRead(reinterpret_cast<const uint16_t**>(&p));

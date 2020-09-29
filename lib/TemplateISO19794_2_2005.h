@@ -9,14 +9,16 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-class TemplateISO19794_2_2005: public Template
+class TemplateISO19794_2_2005 : public Template
 {
 public:
-    explicit TemplateISO19794_2_2005(const Field::TemplateIdType &id):
-        Template(id) {}
-        
-    bool load(const std::string &path);
-    bool load(const uint8_t *data, size_t length);
+    explicit TemplateISO19794_2_2005(const Field::TemplateIdType& id)
+        : Template(id)
+    {
+    }
+
+    bool load(const std::string& path);
+    bool load(const uint8_t* data, size_t length);
 
 private:
     // fields are big-endian...
@@ -47,8 +49,12 @@ private:
 
     static const unsigned char MagicVersion[8];
 
-    static constexpr uint16_t swap16(const uint16_t x) { return (x << 8) | (x >> 8 ); }
-    static constexpr uint32_t swap32(const uint32_t x) { const auto _x = ((x << 8) & 0xff00ff00) | ((x >> 8) & 0xff00ff); return (_x << 16) | (_x >> 16); }
+    static constexpr uint16_t swap16(const uint16_t x) { return (x << 8) | (x >> 8); }
+    static constexpr uint32_t swap32(const uint32_t x)
+    {
+        const auto _x = ((x << 8) & 0xff00ff00) | ((x >> 8) & 0xff00ff);
+        return (_x << 16) | (_x >> 16);
+    }
     static const size_t LargestStruct = std::max(sizeof(_Header), std::max(sizeof(_Minutia), sizeof(_FingerPrint)));
 
 public:

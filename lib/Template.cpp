@@ -1,23 +1,26 @@
 
-#include "Log.h"
 #include "Template.h"
+#include "Log.h"
 
 #include "delaunator.hpp"
 
 #include <cassert>
-#include <string>
 #include <set>
+#include <string>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-# define DIMENSIONS , dimensions
-# define MINUTIAE , minutiae
+#define DIMENSIONS , dimensions
+#define MINUTIAE , minutiae
+#else
+#define DIMENSIONS
+#define MINUTIAE
 #endif
 
 bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<Minutia>>& fps)
 {
-    for(const auto &minutiae : fps) {
+    for (const auto& minutiae : fps) {
         if (minutiae.size() < MinimumMinutiae) {
             log_error("minutiea count < MinimumMinutiae");
             return false;
@@ -28,7 +31,7 @@ bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<
         }
         thread_local static std::vector<double> coords(MaximumMinutiae * 2);
         coords.clear();
-        for(const auto &m : minutiae) {
+        for (const auto& m : minutiae) {
             coords.emplace_back(m.x());
             coords.emplace_back(m.y());
         }
@@ -41,7 +44,7 @@ bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<
         std::set<std::tuple<Field::TripletIndexType, Field::TripletIndexType, Field::TripletIndexType>> dupes;
 #endif
         // walk triangles backwards building triplet vector...
-        for(auto i = d.triangles.size() - 3;; i -= 3) {
+        for (auto i = d.triangles.size() - 3;; i -= 3) {
             const auto& a = d.triangles[i];
             if (a) {
                 const auto& b = d.triangles[i + 1];
@@ -50,32 +53,27 @@ bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<
                 const auto k = dupes.insert(std::make_tuple(static_cast<Field::TripletIndexType>(a), static_cast<Field::TripletIndexType>(b), static_cast<Field::TripletIndexType>(c)));
                 assert(k.second);
 #endif
-                t.emplace_back(Triplet::Minutiae({
-                    MinutiaPoint(dimensions, minutiae[a]),
-                    MinutiaPoint(dimensions, minutiae[b]),
-                    MinutiaPoint(dimensions, minutiae[c])
-                }));
+                t.emplace_back(Triplet::Minutiae({ MinutiaPoint(dimensions, minutiae[a]), MinutiaPoint(dimensions, minutiae[b]), MinutiaPoint(dimensions, minutiae[c]) }));
             }
             if (!i) {
                 break;
             }
         }
         t.shrink_to_fit();
+
+        // Section 5 (sort required for binary search)...
+        std::sort(t.begin(), t.end());
     }
     return true;
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-size_t Template::size() const
+size_t Template::bytes() const
 {
-    size_t sz{};
-    for(const auto &fp : m_data.fps) {
-        sz += fp.triplets().capacity() * sizeof(Triplet);
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-        sz += sizeof(fp.dimensions());
-        sz += fp.minutiae().capacity() * sizeof(Minutia);
-#endif
+    size_t sz = sizeof(*this);
+    for (const auto& fp : m_data.fps) {
+        sz += fp.bytes();
     }
-    return sz + sizeof(*this);
+    return sz;
 }

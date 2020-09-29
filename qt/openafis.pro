@@ -9,6 +9,8 @@ INCLUDEPATH += \
 
 HEADERS = \
     $$PWD/../lib/Config.h \
+    $$PWD/../lib/Dimensions.h \
+    $$PWD/../lib/FastMath.h \
     $$PWD/../lib/Field.h \
     $$PWD/../lib/Fingerprint.h \
     $$PWD/../lib/Log.h \
@@ -22,6 +24,8 @@ HEADERS = \
     $$PWD/../lib/Triplet.h
 
 SOURCES = \
+    ../lib/FastMath.cpp \
+    ../lib/Fingerprint.cpp \
     ../lib/Param.cpp \
     ../lib/Render.cpp \
     ../lib/Score.cpp \

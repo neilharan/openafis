@@ -18,13 +18,15 @@ class Template
 public:
     using Fingerprints = std::vector<Fingerprint>;
 
-    explicit Template(const Field::TemplateIdType &id)
-        : m_data(id) {}
+    explicit Template(const Field::TemplateIdType& id)
+        : m_data(id)
+    {
+    }
 
-    const Field::TemplateIdType &id() const { return m_data.id; }
-    const Fingerprints &fingerprints() const { return m_data.fps; }
+    const Field::TemplateIdType& id() const { return m_data.id; }
+    const Fingerprints& fingerprints() const { return m_data.fps; }
     void clear() { m_data.fps.clear(); }
-    size_t size() const;
+    size_t bytes() const;
 
 protected:
     static const size_t MaximumFingerprints = 8;
@@ -32,16 +34,18 @@ protected:
     static const size_t MaximumMinutiae = 128;
 
     bool load(const Dimensions& dimensions, const std::vector<std::vector<Minutia>>& fps);
-    
+
 private:
-    PACK(struct Data
-    {
-        explicit Data(const Field::TemplateIdType &id)
-            : id(id) {}
+    PACK(struct Data {
+        explicit Data(const Field::TemplateIdType& id)
+            : id(id)
+        {
+        }
 
         Fingerprints fps;
         const Field::TemplateIdType id;
-    }) m_data;
+    })
+    m_data;
 };
 
 #endif // TEMPLATE_H

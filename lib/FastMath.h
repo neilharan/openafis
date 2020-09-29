@@ -1,20 +1,21 @@
-#ifndef SCORE_H
-#define SCORE_H
+#ifndef FASTMATH_H
+#define FASTMATH_H
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Template.h"
+#include "Config.h"
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-class Score
+class FastMath
 {
 public:
-    unsigned int compute(const Template& probe, const Template& candidate);
-    unsigned int compute(const Fingerprint& probe, const Fingerprint& candidate);
+    static constexpr float PI = 3.14159265358979323846f; // until C++20 we have to provide this
+    static constexpr float PI2 = PI * 2; // "
 
-private:
-    void findPairs(Triplet::Pairs& pairs, const Triplet& probeT, const Fingerprint& candidate) const;
+    static int sqrt(const int x);
+    static float atan2(const float x, const float y);
+    static float theta360ToRadians(const unsigned int theta);
 };
 
-#endif // SCORE_H
+#endif // FASTMATH_H

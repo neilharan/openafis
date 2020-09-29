@@ -16,7 +16,6 @@
 class Fingerprint
 {
 public:
-
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
     using Minutiae = std::vector<Minutia>;
 #endif
@@ -24,10 +23,10 @@ public:
 
     Fingerprint(const size_t size
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-        , const Dimensions &dimensions
-        , const Minutiae &minutiae
+        ,
+        const Dimensions& dimensions, const Minutiae& minutiae
 #endif
-    )
+        )
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
         : m_dimensions(dimensions)
         , m_minutiae(minutiae)
@@ -36,20 +35,22 @@ public:
         m_triplets.reserve(size);
     }
 
-    Triplets &triplets() { return m_triplets; };
-    const Triplets &triplets() const { return m_triplets; };
+    Triplets& triplets() { return m_triplets; };
+    const Triplets& triplets() const { return m_triplets; };
 
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-    const Dimensions &dimensions() const { return m_dimensions; };
-    const Minutiae &minutiae() const { return m_minutiae; };
+    const Dimensions& dimensions() const { return m_dimensions; };
+    const Minutiae& minutiae() const { return m_minutiae; };
 #endif
 
-private:   
+    size_t bytes() const;
+
+private:
     Triplets m_triplets;
 
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-    const Dimensions m_dimensions;
-    const Minutiae m_minutiae;
+    Dimensions m_dimensions;
+    Minutiae m_minutiae;
 #endif
 };
 

@@ -3,13 +3,13 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool Render::minutiae(std::string &svg, const Fingerprint &fp)
+bool Render::minutiae(std::string& svg, const Fingerprint& fp)
 {
 #ifdef OPENAFIS_RENDER_AVAILABLE
     svg.reserve(1000);
     svg += format(R"(<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" stroke="#121212" fill="#121212">)", fp.dimensions().first, fp.dimensions().second);
 
-    for(const auto& minutia : fp.minutiae()) {
+    for (const auto& minutia : fp.minutiae()) {
         const auto theta = toRadians(minutia.angle());
         const auto x1 = minutia.x();
         const auto y1 = minutia.y();
@@ -27,7 +27,7 @@ bool Render::minutiae(std::string &svg, const Fingerprint &fp)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool Render::pairs(std::string &svg, const Fingerprint &fp1, const Fingerprint &fp2)
+bool Render::pairs(std::string&, const Fingerprint&, const Fingerprint&)
 {
 #ifdef OPENAFIS_RENDER_AVAILABLE
     return false;
