@@ -25,8 +25,8 @@ class MinutiaPoint
 public:
     // co-ordinates (and therefore distances) are always scales for 8-bits...
     MinutiaPoint(const Dimensions& dimensions, const Minutia& minutia)
-        : m_x(static_cast<Field::TripletCoordType>(std::lround(minutia.x() * (256.0f / dimensions.first))))
-        , m_y(static_cast<Field::TripletCoordType>(std::lround(minutia.y() * (256.0f / dimensions.second))))
+        : m_x(static_cast<Field::TripletCoordType>(std::lround(static_cast<float>(minutia.x()) * (256.0f / dimensions.first))))
+        , m_y(static_cast<Field::TripletCoordType>(std::lround(static_cast<float>(minutia.y()) * (256.0f / dimensions.second))))
         , m_angle(FastMath::theta360ToRadians(minutia.angle()))
     {
     }
@@ -42,7 +42,7 @@ public:
     {
         const auto a = static_cast<int>(m_x) - other.x();
         const auto b = static_cast<int>(m_y) - other.y();
-        m_distance = static_cast<uint8_t>(FastMath::sqrt(a * a + b * b));
+        m_distance = static_cast<Field::TripletCoordType>(FastMath::isqrt(a * a + b * b));
     }
 
 private:

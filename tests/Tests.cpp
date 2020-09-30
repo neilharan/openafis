@@ -47,7 +47,6 @@ int main(int, const char**)
     assert(f);
     f.write(svg.data(), svg.size());
     }
-
 #else
 #if 1
     TemplateISO19794_2_2005 t1_1(1);
@@ -81,7 +80,7 @@ int main(int, const char**)
 
     const auto start = std::chrono::high_resolution_clock::now();
     unsigned int s{};
-    for(auto i = 0; i < 100; ++i) {
+    for(auto i = 0; i < 50000; ++i) {
         s = score.compute(t1_1.fingerprints()[0], t1_2.fingerprints()[0]);
     }
     const auto finish = std::chrono::high_resolution_clock::now();
@@ -121,7 +120,7 @@ int main(int, const char**)
             log_error("unable to open " << path);
             return false;
         }
-        std::vector<uint8_t> data(TemplateISO19794_2_2005<unsigned short>::MaximumLength);
+        std::vector<uint8_t> data(TemplateISO19794_2_2005::MaximumLength);
         f.read(data.data(), data.size());
         if ((f.rdstate() & std::ifstream::eofbit) == 0) {
             log_error("filesize > MaximumLength " << path);
@@ -132,18 +131,18 @@ int main(int, const char**)
     }
     auto count = 0, size = 0;
     const auto start = std::chrono::high_resolution_clock::now();
-    TemplateISO19794_2_2005<unsigned short> t(1);
+    TemplateISO19794_2_2005 t(1);
 
     for(const auto &f : files) {
         if (!t.load(f.data(), f.size())) {
             log_info("failed to load");
         }
-        size += t.size();
+        size += t.bytes();
         t.clear();
         count++;
     }
 #else
-    auto count = 0;
+    auto count = 0, size = 0;
     const auto start = std::chrono::high_resolution_clock::now();
 
     for(const auto& entry: std::filesystem::recursive_directory_iterator("/dev/project/os/openafis/data/valid")) {
@@ -158,10 +157,11 @@ int main(int, const char**)
         if (!strcasecmp(path.extension().string(), ".iso")) {
             continue;
         }
-        TemplateISO19794_2_2005<unsigned short> t(1);
+        TemplateISO19794_2_2005 t(1);
         if (!t.load(path.string())) {
             log_info("failed to load " << path);
         }
+        size += t.bytes();
         count++;
     }
 #endif

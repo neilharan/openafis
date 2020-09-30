@@ -1,23 +1,38 @@
 
 #include "FastMath.h"
 
-#include <algorithm>
-#include <cmath>
-
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-int FastMath::sqrt(const int x)
+// Domain: 0 < x < max(Field::TripletCoordType)^2
+// Maximum result is also a dimension (default uint8_t), so a table is viable and quite small (<64K)...
+//
+int FastMath::isqrt(const int x)
 {
-    // NJH-TODO determine range & use lookup for common cases...
+#if 1
+    static const SquareRoots Table;
+
+    return Table.get(x);
+#else
     return std::lround(std::sqrt(x));
+#endif
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-float FastMath::atan2(const float x, const float y)
+// This function is on the hot path during scoring.
+// Domain: -max(Field::TripletCoordType) < x < max(Field::TripletCoordType), y is the same so lookups possible (they weigh about ~1MB with floats).
+// Profiling reveals ~2x speedup using lookups vs CRT (with SSE2).
+// TODO: research cordic options https://www.coranac.com/documents/arctangent/ for memory constrained builds...
+//
+float FastMath::iatan2(const int x, const int y)
 {
-    // NJH-TODO research cordic options https://www.coranac.com/documents/arctangent/
-    return std::atan2f(x, y);
+#if 1
+    static const ArcTangents Table;
+
+    return Table.get(x, y);
+#else
+    return std::atan2f(static_cast<float>(x), static_cast<float>(y));
+#endif
 }
 
 

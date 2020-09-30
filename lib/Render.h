@@ -19,15 +19,13 @@ public:
 private:
     static const unsigned int LineLength = 10;
 
-    static float toRadians(const unsigned short degrees) { return degrees * 0.0174533f; }
-
     template <typename... A> static std::string format(const std::string& format, A... args)
     {
         const auto size = snprintf(nullptr, 0, format.c_str(), args...) + 1;
         if (size <= 0) {
             return "";
         }
-        std::unique_ptr<char[]> buf(new char[size]);
+        const std::unique_ptr<char[]> buf(new char[size]);
         snprintf(buf.get(), size, format.c_str(), args...);
         return std::string(buf.get(), buf.get() + size - 1);
     }

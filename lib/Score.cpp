@@ -2,9 +2,15 @@
 #include "Score.h"
 #include "Param.h"
 
+#include <algorithm>
+
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-unsigned int Score::compute(const Template&, const Template&) { return 0; }
+unsigned int Score::compute(const Template&, const Template&)
+{
+    // NJH-TODO compare entire templates...
+    return 0;
+}
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,14 +39,14 @@ unsigned int Score::compute(const Fingerprint& probe, const Fingerprint& candida
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void Score::findPairs(Triplet::Pairs& pairs, const Triplet& probeT, const Fingerprint& candidate) const
 {
-    auto& candidateT = candidate.triplets();
+    const auto& candidateT = candidate.triplets();
     auto it = std::lower_bound(candidateT.begin(), candidateT.end(), probeT.distances()[0] - Param::MaximumLocalDistance);
-    const auto end = std::upper_bound(candidateT.begin(), candidateT.end(), probeT.distances()[0] + Param::MaximumLocalDistance);
+    const auto end = std::upper_bound(it, candidateT.end(), probeT.distances()[0] + Param::MaximumLocalDistance); // NJH-TODO profile these - possibly bake custom binary search
 
     for (; it < end; ++it) {
         auto pair = it->findPair(probeT);
         if (pair.similarity() > 0) {
-            pairs.emplace_back(std::move(pair));
+            pairs.emplace_back(pair);
         }
     }
 }

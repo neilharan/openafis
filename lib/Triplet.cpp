@@ -4,14 +4,15 @@
 #include "Log.h"
 #include "Param.h"
 
+#include <algorithm>
 #include <cassert>
 #include <string>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Triplet::Triplet(const Minutiae& minutiae)
-    : m_minutiae(std::move(shiftClockwise(minutiae)))
-    , m_distances(std::move(sortDistances(m_minutiae)))
+    : m_minutiae(shiftClockwise(minutiae))
+    , m_distances(sortDistances(m_minutiae))
 {
 }
 
@@ -21,12 +22,12 @@ Triplet::Minutiae Triplet::shiftClockwise(Minutiae minutiae)
 {
     assert(minutiae.size() == 3);
 
-    const auto cx = ((minutiae[0].x() + minutiae[1].x()) / 2.0f + minutiae[2].x()) / 2.0f;
-    const auto cy = ((minutiae[0].y() + minutiae[1].y()) / 2.0f + minutiae[2].y()) / 2.0f;
+    const auto cx = ((minutiae[0].x() + minutiae[1].x()) / 2 + minutiae[2].x()) / 2;
+    const auto cy = ((minutiae[0].y() + minutiae[1].y()) / 2 + minutiae[2].y()) / 2;
 
-    auto a0 = FastMath::atan2(static_cast<float>(minutiae[0].y()) - cy, static_cast<float>(minutiae[0].x()) - cx);
-    auto a1 = FastMath::atan2(static_cast<float>(minutiae[1].y()) - cy, static_cast<float>(minutiae[1].x()) - cx);
-    auto a2 = FastMath::atan2(static_cast<float>(minutiae[2].y()) - cy, static_cast<float>(minutiae[2].x()) - cx);
+    auto a0 = FastMath::iatan2(minutiae[0].y() - cy, minutiae[0].x() - cx);
+    auto a1 = FastMath::iatan2(minutiae[1].y() - cy, minutiae[1].x() - cx);
+    auto a2 = FastMath::iatan2(minutiae[2].y() - cy, minutiae[2].x() - cx);
 
     const auto swap = [](auto& x, auto& y) {
         const auto copy = x;
@@ -151,13 +152,13 @@ Triplet::Pair Triplet::findPair(const Triplet& other) const
                     if (i == j) {
                         continue;
                     }
-                    const auto y = static_cast<float>(m_minutiae[i].y() - m_minutiae[j].y());
-                    const auto x = static_cast<float>(m_minutiae[i].x() - m_minutiae[j].x());
-                    const auto d = rotateAngle(m_minutiae[i].angle(), FastMath::atan2(y, x));
+                    const auto y = m_minutiae[i].y() - m_minutiae[j].y();
+                    const auto x = m_minutiae[i].x() - m_minutiae[j].x();
+                    const auto d = rotateAngle(m_minutiae[i].angle(), FastMath::iatan2(y, x));
 
-                    const auto oy = static_cast<float>(other.minutiae()[shift[i]].y() - other.minutiae()[shift[j]].y());
-                    const auto ox = static_cast<float>(other.minutiae()[shift[i]].x() - other.minutiae()[shift[j]].x());
-                    const auto od = rotateAngle(other.minutiae()[shift[i]].angle(), FastMath::atan2(oy, ox));
+                    const auto oy = other.minutiae()[shift[i]].y() - other.minutiae()[shift[j]].y();
+                    const auto ox = other.minutiae()[shift[i]].x() - other.minutiae()[shift[j]].x();
+                    const auto od = rotateAngle(other.minutiae()[shift[i]].angle(), FastMath::iatan2(oy, ox));
 
                     const auto ad = minimumAngle(d, od);
                     if (ad >= Param::MaximumAngleDifference) {
@@ -194,8 +195,6 @@ size_t Triplet::bytes() const
     for (const auto& m : m_minutiae) {
         sz += m.bytes();
     }
-    for (const auto& d : m_distances) {
-        sz += sizeof(d);
-    }
+    sz += m_distances.capacity() * sizeof(decltype(m_distances[0]));
     return sz;
 }

@@ -74,8 +74,8 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
         return reinterpret_cast<T>(bp);
     };
 
-    auto p = data;
-    if (std::memcmp(p, MagicVersion, sizeof(MagicVersion))) {
+    const auto* p = data;
+    if (std::memcmp(p, &MagicVersion, sizeof(MagicVersion))) {
         log_error("invalid magic; unsupported format");
         return false;
     }
@@ -104,14 +104,14 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
                 return false;
             }
             const auto adjustedAngle = [mp]() {
-                const auto a = static_cast<unsigned short>(mp->angle * (360.0f / 256.0f) + 90.0f);
+                const auto a = static_cast<unsigned short>(static_cast<float>(mp->angle) * (360.0f / 256.0f) + 90.0f);
                 return a > 360 ? a - 360 : a;
             };
             minutiae.emplace_back(
                 Minutia::Type((mp->type_X & 0xc000) >> 14), (mp->type_X & 0x3f) << 8 | (mp->type_X & 0xff00) >> 8, (mp->rfu_Y & 0x3f) << 8 | (mp->rfu_Y & 0xff00) >> 8, adjustedAngle());
         }
         // skip extension data at the end...
-        const auto ex = safeRead(reinterpret_cast<const uint16_t**>(&p));
+        const auto* ex = safeRead(reinterpret_cast<const uint16_t**>(&p));
         if (!ex) {
             return false;
         }

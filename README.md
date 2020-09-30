@@ -2,9 +2,11 @@
 
 **IN DEVELOPMENT: target completion early October 2020**.
 
-A high performance one-to-many (1:N) fingerprint matching library for commodity hardware, written in modern platform independent C++.
+A high-performance one-to-many (1:N) fingerprint matching library for commodity hardware, written in modern platform-independent C++.
 
-Targeting contrained hardware, the library can be optimized for score time or memory usage. There are options for parallelising the scoring process. See Benchmarks below for details of the performance metrics the library is focused on.
+Note: this library is focused on the matching problem. It does not extract minutiae from images.
+
+The goal is to accurately (competitive FVC-onGoing) identify one minutiae-set from a pool of 50K on modest-spec laptop equipment within one second.
 
 ## Supported operating systems
 
@@ -59,8 +61,6 @@ std::cout << "score " << Score<unsigned short>().compute(t1, t2);
 ```
 
 ## Benchmarking
-
-All benchmarks are performed on a database of 10,000 templates sourced from duplicated FVC datasets. The probe fingerprint is included only once in the candidate database. In other words, there are 9,999 non-matching templates and a single matching template.
 
 ### x86-64
 
