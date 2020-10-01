@@ -19,13 +19,14 @@ unsigned int Score::compute(const Template&, const Template&)
 unsigned int Score::compute(const Fingerprint& probe, const Fingerprint& candidate)
 {
     // Local matching 5.1.1-3...
-    thread_local static Triplet::Pairs pairs(50);
+    thread_local static Triplet::Pairs pairs;
+    pairs.reserve(50);
     pairs.clear();
 
     for (const auto& probeT : probe.triplets()) {
         findPairs(pairs, probeT, candidate);
     }
-    std::sort(pairs.begin(), pairs.end(), [](const Triplet::Pair& p1, const Triplet::Pair& p2) { return p1.similarity() > p2.similarity(); });
+    std::sort(pairs.begin(), pairs.end());
 
     // 5.1.4-5...
     // NJH-TODO
@@ -44,9 +45,6 @@ void Score::findPairs(Triplet::Pairs& pairs, const Triplet& probeT, const Finger
     const auto end = std::upper_bound(it, candidateT.end(), probeT.distances()[0] + Param::MaximumLocalDistance); // NJH-TODO profile these - possibly bake custom binary search
 
     for (; it < end; ++it) {
-        auto pair = it->findPair(probeT);
-        if (pair.similarity() > 0) {
-            pairs.emplace_back(pair);
-        }
+        it->emplacePair(pairs, probeT);
     }
 }

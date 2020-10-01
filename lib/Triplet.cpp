@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <string>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -52,7 +51,6 @@ Triplet::Minutiae Triplet::shiftClockwise(Minutiae minutiae)
     return minutiae;
 }
 
-
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Triplet::Distances Triplet::sortDistances(const Minutiae& minutiae)
 {
@@ -66,7 +64,7 @@ Triplet::Distances Triplet::sortDistances(const Minutiae& minutiae)
 // Compute similarity per 5.1.1-3
 // Note: equation return values are inverted...
 //
-Triplet::Pair Triplet::findPair(const Triplet& other) const
+void Triplet::emplacePair(Pairs& pairs, const Triplet& other) const
 {
     static const std::vector<Shift> Shifting = { { 0, 1, 2 }, { 1, 2, 0 }, { 2, 0, 1 } }; // rotate triplets when comparing
     float maxS {};
@@ -184,7 +182,9 @@ Triplet::Pair Triplet::findPair(const Triplet& other) const
             break; // short-cut
         }
     }
-    return Pair(maxS, const_cast<Triplet*>(&other), const_cast<Triplet*>(this), maxShift); // NJH-TODO fix const_casts
+    if (maxS > 0) {
+        pairs.emplace_back(maxS, const_cast<Triplet*>(&other), const_cast<Triplet*>(this), maxShift); // NJH-TODO fix const_casts
+    }
 }
 
 

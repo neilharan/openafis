@@ -3,8 +3,8 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Config.h"
 #include "Field.h"
+#include "Log.h"
 #include "MinutiaPoint.h"
 
 #include <vector>
@@ -21,8 +21,6 @@ public:
     class Pair
     {
     public:
-        Pair() = default;
-
         Pair(const float similarity, Triplet* probe, Triplet* candidate, Shift* shift)
             : m_similarity(similarity)
             , m_probe(probe)
@@ -36,6 +34,8 @@ public:
         const Triplet* candidate() const { return m_candidate; }
         const Triplet::Shift* shift() const { return m_shift; }
 
+        bool operator<(const Pair& other) const { return m_similarity > other.m_similarity; } // descending sort
+
     private:
         float m_similarity {};
         Triplet* m_probe {};
@@ -45,23 +45,25 @@ public:
 
     using Pairs = std::vector<Pair>;
 
+    explicit Triplet(const Minutiae& minutiae);
     Triplet() = default;
 
-    explicit Triplet(const Minutiae& minutiae);
-    // NJH-TODO ~Triplet() {}
-
-    // NJH-TODO Triplet(Triplet const &) = delete;
-    // NJH-TODO void operator=(Triplet const &) = delete;
-
-    Pair findPair(const Triplet& other) const;
+    void emplacePair(Pairs& pairs, const Triplet& other) const;
 
     const Minutiae& minutiae() const { return m_minutiae; }
     const Distances& distances() const { return m_distances; }
     size_t bytes() const;
 
-    bool operator<(const Triplet& other) { return m_distances[0] < other.m_distances[0]; }
+    bool operator<(const Triplet& other) const { return m_distances[0] < other.m_distances[0]; }
     friend bool operator<(const Triplet& lhs, const Field::TripletCoordType rhs) { return lhs.m_distances[0] < rhs; }
     friend bool operator<(const Field::TripletCoordType lhs, const Triplet& rhs) { return lhs < rhs.m_distances[0]; }
+    friend void swap(Triplet& lhs, Triplet& rhs) noexcept
+    {
+        thread_local static Triplet tmp; // minimize dtor (improve sort performance)
+        tmp = std::move(lhs);
+        lhs = std::move(rhs);
+        rhs = std::move(tmp);
+    }
 
 private:
     static Minutiae shiftClockwise(Minutiae minutiae);

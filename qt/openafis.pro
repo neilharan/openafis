@@ -34,6 +34,8 @@ SOURCES = \
     ../lib/Triplet.cpp
 
 *-msvc*: {
+    # /arch:AVX
     DEFINES += _HAS_EXCEPTIONS=0
-    QMAKE_CXXFLAGS += /std:c++17
+    QMAKE_CXXFLAGS += /GS- /GT /Oy /std:c++17
+    QMAKE_CXXFLAGS_EXCEPTIONS_ON -= -EHsc
 }

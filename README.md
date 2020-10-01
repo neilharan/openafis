@@ -1,12 +1,27 @@
 # OpenAFIS
 
-**IN DEVELOPMENT: target completion early October 2020**.
-
 A high-performance one-to-many (1:N) fingerprint matching library for commodity hardware, written in modern platform-independent C++.
 
-Note: this library is focused on the matching problem. It does not extract minutiae from images.
+Note: this library is focused on the matching problem. It does not currently extract minutiae from images.
 
-The goal is to accurately (competitive FVC-onGoing) identify one minutiae-set from a pool of 50K on modest-spec laptop equipment within one second.
+The goal is to accurately identify one minutiae-set from a pool of 50K on modest-spec laptop equipment within one second.
+
+## Progress
+
+**Target is to be certification ready by mid-October 2020**.
+
+  | TASK | COMPLETE | NOTES |
+  | ---- | -------- | ----- |
+  | Template loading | 100% | |
+  | Local matching | 90% | |
+  | Global matching | | |
+  | CMake support | | |
+  | Test suite | | EER, FMR100, FMR1000, ZeroFMR |
+  | Benchmarks | | |
+  | Optimizing | | float->int, vectorization (SSE/AVX), math functions |
+  | Parallelizing | | |
+  | Minutiae/pair rendering | 50% | SVG output |
+  | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction function) |
 
 ## Supported operating systems
 

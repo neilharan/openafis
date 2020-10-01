@@ -42,5 +42,5 @@ float FastMath::theta360ToRadians(const unsigned int theta)
     static constexpr float Factor = PI / 180;
 
     // NJH-TODO return int scaled for acceptable accuracy...
-    return theta * Factor;
+    return static_cast<float>(theta) * Factor;
 }
