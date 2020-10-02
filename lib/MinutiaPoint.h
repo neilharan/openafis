@@ -31,11 +31,11 @@ public:
     {
     }
 
-    Field::TripletCoordType x() const { return m_x; }
-    Field::TripletCoordType y() const { return m_y; }
-    float angle() const { return m_angle; }
-    Field::TripletCoordType distance() const { return m_distance; }
-    size_t bytes() const { return sizeof(*this); }
+    [[nodiscard]] Field::TripletCoordType x() const { return m_x; }
+    [[nodiscard]] Field::TripletCoordType y() const { return m_y; }
+    [[nodiscard]] float angle() const { return m_angle; }
+    [[nodiscard]] Field::TripletCoordType distance() const { return m_distance; }
+    [[nodiscard]] size_t bytes() const { return sizeof(*this); }
 
     // distance between two vectors: a^2 + b^2 = c^2
     void setDistanceFrom(const MinutiaPoint& other)

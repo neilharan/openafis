@@ -21,7 +21,7 @@ public:
     class Pair
     {
     public:
-        Pair(const float similarity, Triplet* probe, Triplet* candidate, Shift* shift)
+        Pair(const float similarity, const Triplet* probe, const Triplet* candidate, const Shift* shift)
             : m_similarity(similarity)
             , m_probe(probe)
             , m_candidate(candidate)
@@ -29,18 +29,18 @@ public:
         {
         }
 
-        float similarity() const { return m_similarity; }
-        const Triplet* probe() const { return m_probe; }
-        const Triplet* candidate() const { return m_candidate; }
-        const Triplet::Shift* shift() const { return m_shift; }
+        [[nodiscard]] float similarity() const { return m_similarity; }
+        [[nodiscard]] const Triplet* probe() const { return m_probe; }
+        [[nodiscard]] const Triplet* candidate() const { return m_candidate; }
+        [[nodiscard]] const Triplet::Shift* shift() const { return m_shift; }
 
         bool operator<(const Pair& other) const { return m_similarity > other.m_similarity; } // descending sort
 
     private:
         float m_similarity {};
-        Triplet* m_probe {};
-        Triplet* m_candidate {};
-        Triplet::Shift* m_shift {};
+        const Triplet* m_probe {};
+        const Triplet* m_candidate {};
+        const Triplet::Shift* m_shift {};
     };
 
     using Pairs = std::vector<Pair>;
@@ -50,9 +50,9 @@ public:
 
     void emplacePair(Pairs& pairs, const Triplet& other) const;
 
-    const Minutiae& minutiae() const { return m_minutiae; }
-    const Distances& distances() const { return m_distances; }
-    size_t bytes() const;
+    [[nodiscard]] const Minutiae& minutiae() const { return m_minutiae; }
+    [[nodiscard]] const Distances& distances() const { return m_distances; }
+    [[nodiscard]] size_t bytes() const;
 
     bool operator<(const Triplet& other) const { return m_distances[0] < other.m_distances[0]; }
     friend bool operator<(const Triplet& lhs, const Field::TripletCoordType rhs) { return lhs.m_distances[0] < rhs; }

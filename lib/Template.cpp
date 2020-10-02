@@ -21,11 +21,11 @@ bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<
 {
     for (const auto& minutiae : fps) {
         if (minutiae.size() < MinimumMinutiae) {
-            log_error("minutiea count < MinimumMinutiae");
+            logError("minutiea count < MinimumMinutiae");
             return false;
         }
         if (minutiae.size() > MaximumMinutiae) {
-            log_error("minutiea count > MaximumMinutiae");
+            logError("minutiea count > MaximumMinutiae");
             return false;
         }
         thread_local static std::vector<double> coords(MaximumMinutiae * 2);

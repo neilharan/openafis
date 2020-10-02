@@ -66,11 +66,15 @@ Triplet::Distances Triplet::sortDistances(const Minutiae& minutiae)
 //
 void Triplet::emplacePair(Pairs& pairs, const Triplet& other) const
 {
+    // Theorems 1, 2 & 3...
+    for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
+        if (abs(m_distances[i] - other.distances()[i]) >= Param::MaximumLocalDistance) {
+            return;
+        }
+    }
     static const std::vector<Shift> Shifting = { { 0, 1, 2 }, { 1, 2, 0 }, { 2, 0, 1 } }; // rotate triplets when comparing
     float maxS {};
-    Shift* maxShift {};
-
-    // NJH-TODO implement theorems 1, 2 & 3...
+    const Shift* maxShift {};
 
     for (const auto& shift : Shifting) {
         // Equation 8 (3 iterations)...
@@ -84,7 +88,7 @@ void Triplet::emplacePair(Pairs& pairs, const Triplet& other) const
                 }
                 max = std::max(max, d);
             }
-            return static_cast<float>(max) / Param::MaximumLocalDistance;
+            return max / static_cast<float>(Param::MaximumLocalDistance);
         }();
         if (lengths == 1.0f) {
             continue;
@@ -119,11 +123,10 @@ void Triplet::emplacePair(Pairs& pairs, const Triplet& other) const
 
         // Equation 10 (3 iterations)...
         const auto anglesBeta = [&]() {
-            static const std::vector<unsigned int> Sequence = { 0, 1, 2, 0 };
             auto max = 0.0f;
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                const auto j = Sequence[i + 1];
+                const auto j = Shifting[1][i];
                 const auto q = rotateAngle(m_minutiae[i].angle(), m_minutiae[j].angle());
                 const auto t = rotateAngle(other.minutiae()[shift[i]].angle(), other.minutiae()[shift[j]].angle());
                 const auto d = minimumAngle(q, t);
@@ -176,14 +179,14 @@ void Triplet::emplacePair(Pairs& pairs, const Triplet& other) const
         const auto s = 1.0f - lengths * anglesBeta * anglesAlpha;
         if (s > maxS) {
             maxS = s;
-            maxShift = const_cast<Shift*>(&shift);
+            maxShift = &shift;
         }
-        if (s == 1) {
+        if (s == 1.0f) {
             break; // short-cut
         }
     }
     if (maxS > 0) {
-        pairs.emplace_back(maxS, const_cast<Triplet*>(&other), const_cast<Triplet*>(this), maxShift); // NJH-TODO fix const_casts
+        pairs.emplace_back(maxS, &other, this, maxShift);
     }
 }
 

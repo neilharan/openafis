@@ -1,5 +1,5 @@
-#ifndef SCORE_H
-#define SCORE_H
+#ifndef MATCH_H
+#define MATCH_H
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -7,14 +7,11 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-class Score
+class Match
 {
 public:
-    unsigned int compute(const Template& probe, const Template& candidate);
-    unsigned int compute(const Fingerprint& probe, const Fingerprint& candidate);
-
-private:
-    void findPairs(Triplet::Pairs& pairs, const Triplet& probeT, const Fingerprint& candidate) const;
+    static unsigned int compute(const Template& probe, const Template& candidate);
+    static unsigned int compute(const Fingerprint& probe, const Fingerprint& candidate);
 };
 
-#endif // SCORE_H
+#endif // MATCH_H

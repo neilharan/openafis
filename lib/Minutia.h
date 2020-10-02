@@ -19,11 +19,11 @@ public:
     {
     }
 
-    Type type() const { return m_type; }
-    unsigned int x() const { return m_x; } // cm
-    unsigned int y() const { return m_y; } // "
-    unsigned int angle() const { return m_angle; } // degrees
-    size_t bytes() const { return sizeof(*this); }
+    [[nodiscard]] Type type() const { return m_type; }
+    [[nodiscard]] unsigned int x() const { return m_x; } // cm
+    [[nodiscard]] unsigned int y() const { return m_y; } // "
+    [[nodiscard]] unsigned int angle() const { return m_angle; } // degrees
+    [[nodiscard]] size_t bytes() const { return sizeof(*this); }
 
 private:
     Type m_type;

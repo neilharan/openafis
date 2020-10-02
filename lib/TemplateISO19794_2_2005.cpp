@@ -16,13 +16,13 @@ bool TemplateISO19794_2_2005::load(const std::string& path)
 {
     std::basic_ifstream<uint8_t> f(path, std::ifstream::in | std::ifstream::binary);
     if (!f) {
-        log_error("unable to open " << path);
+        logError("unable to open " << path);
         return false;
     }
     thread_local static std::vector<uint8_t> data(MaximumLength);
     f.read(data.data(), data.size());
     if ((f.rdstate() & std::ifstream::eofbit) == 0) {
-        log_error("filesize > MaximumLength " << path);
+        logError("filesize > MaximumLength " << path);
         return false;
     }
     return load(data.data(), static_cast<size_t>(f.gcount()));
@@ -37,11 +37,11 @@ bool TemplateISO19794_2_2005::load(const std::string& path)
 bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
 {
     if (length < MinimumLength) {
-        log_error("length < MinimumLength; " << length);
+        logError("length < MinimumLength; " << length);
         return false;
     }
     if (length > MaximumLength) {
-        log_error("length > MaximumLength; " << length);
+        logError("length > MaximumLength; " << length);
         return false;
     }
 
@@ -51,7 +51,7 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
         using T = decltype(*readFrom);
         constexpr auto sz = sizeof(**readFrom);
         if (reinterpret_cast<const uint8_t*>(*readFrom) - data + sz > length) {
-            log_error("data invalid; attempted invalid read @" << readFrom);
+            logError("data invalid; attempted invalid read @" << readFrom);
             const void* np { nullptr };
             return reinterpret_cast<T>(np);
         }
@@ -65,7 +65,7 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
         }
         thread_local static std::vector<uint8_t> buff(LargestStruct);
         if (sz > buff.size()) {
-            log_error("struct exceeded buffer while aligning @" << readFrom);
+            logError("struct exceeded buffer while aligning @" << readFrom);
             *readFrom = nullptr;
             return *readFrom;
         }
@@ -75,11 +75,11 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
     };
 
     const auto* p = data;
-    if (std::memcmp(p, &MagicVersion, sizeof(MagicVersion))) {
-        log_error("invalid magic; unsupported format");
+    if (std::memcmp(p, &MagicVersion, sizeof(MagicVersion)) != 0) {
+        logError("invalid magic; unsupported format");
         return false;
     }
-    p += sizeof(MagicVersion);
+    p = &p[sizeof(MagicVersion)];
 
     const auto* h = safeRead(reinterpret_cast<const _Header**>(&p));
     if (!h) {
@@ -117,7 +117,7 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
         }
         uint16_t extensionData;
         memcpy(&extensionData, ex, sizeof(extensionData));
-        p += swap16(extensionData);
+        p = &p[swap16(extensionData)];
     }
     return Template::load(std::make_pair(swap16(h->width), swap16(h->height)), fps);
 }

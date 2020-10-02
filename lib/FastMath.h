@@ -26,47 +26,56 @@ private:
     class SquareRoots {
     public:
         SquareRoots()
-        {
-            for (size_t i = 0; i < Max; ++i) {
-                m_values[i] = static_cast<Field::TripletCoordType>(std::lround(std::sqrt(i)));
-            }
-        }
+            : m_values([]() {
+                static Values v;
+                for (size_t i = 0; i < Max; ++i) {
+                    v.at(i) = static_cast<Field::TripletCoordType>(std::lround(std::sqrt(i)));
+                }
+                return &v;
+            }())
+        {}
 
-        int get(const int x) const
+        [[nodiscard]] constexpr int get(const int x) const
         {
             assert(x >= 0 && x < Max);
-            return m_values[x];
+            return (*m_values)[x];
         }
 
-        static constexpr size_t Max = std::numeric_limits<Field::TripletCoordType>::max() * std::numeric_limits<Field::TripletCoordType>::max();
+        static constexpr auto Max = std::numeric_limits<Field::TripletCoordType>::max() * std::numeric_limits<Field::TripletCoordType>::max();
 
     private:
-        std::array<Field::TripletCoordType, Max> m_values;
+        using Values = std::array<Field::TripletCoordType, Max>;
+        const Values* m_values;
     };
 
     class ArcTangents {
     public:
         ArcTangents()
-        {
-            for (auto x = Min; x < Max; ++x) {
-                for (auto y = Min; y < Max; ++y) {
-                    m_values[x - Min][y - Min] = std::atan2f(static_cast<float>(x), static_cast<float>(y));
+            : m_values([](){
+                static Values v;
+                for (auto x = Min; x < Max; ++x) {
+                    for (auto y = Min; y < Max; ++y) {
+                        v.at(x - Min).at(y - Min) = std::atan2f(static_cast<float>(x), static_cast<float>(y));
+                    }
                 }
-            }
+                return &v;
+            }())
+        {
         }
 
-        float get(const int x, const int y) const
+        [[nodiscard]] constexpr float get(const int x, const int y) const
         {
             assert(x > Min && x < Max);
             assert(y > Min && y < Max);
-            return m_values[x - Min][y - Min];
+            return (*m_values)[x - Min][y - Min];
         }
 
         static constexpr auto Min = -std::numeric_limits<Field::TripletCoordType>::max();
         static constexpr auto Max = std::numeric_limits<Field::TripletCoordType>::max();
 
     private:
-        std::array<std::array<float, Max - Min>, Max - Min> m_values;
+        using Values = std::array<std::array<float, Max - Min>, Max - Min>;
+        const Values* m_values;
     };
 };
 

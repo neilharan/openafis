@@ -34,15 +34,15 @@ public:
         m_triplets.reserve(size);
     }
 
-    Triplets& triplets() { return m_triplets; };
-    const Triplets& triplets() const { return m_triplets; };
+    [[nodiscard]] Triplets& triplets() { return m_triplets; };
+    [[nodiscard]] const Triplets& triplets() const { return m_triplets; };
 
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-    const Dimensions& dimensions() const { return m_dimensions; };
-    const Minutiae& minutiae() const { return m_minutiae; };
+    [[nodiscard]] const Dimensions& dimensions() const { return m_dimensions; };
+    [[nodiscard]] const Minutiae& minutiae() const { return m_minutiae; };
 #endif
 
-    size_t bytes() const;
+    [[nodiscard]] size_t bytes() const;
 
 private:
     Triplets m_triplets;
