@@ -5,10 +5,10 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "Field.h"
 
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <limits>
-#include <array>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,17 +23,19 @@ public:
     static float theta360ToRadians(unsigned int theta);
 
 private:
-    class SquareRoots {
+    class SquareRoots
+    {
     public:
         SquareRoots()
             : m_values([]() {
                 static Values v;
                 for (size_t i = 0; i < Max; ++i) {
-                    v.at(i) = static_cast<Field::TripletCoordType>(std::lround(std::sqrt(i)));
+                    v.at(i) = static_cast<Field::MinutiaCoordType>(std::lround(std::sqrt(i)));
                 }
                 return &v;
             }())
-        {}
+        {
+        }
 
         [[nodiscard]] constexpr int get(const int x) const
         {
@@ -41,17 +43,18 @@ private:
             return (*m_values)[x];
         }
 
-        static constexpr auto Max = std::numeric_limits<Field::TripletCoordType>::max() * std::numeric_limits<Field::TripletCoordType>::max();
+        static constexpr auto Max = std::numeric_limits<Field::MinutiaCoordType>::max() * std::numeric_limits<Field::MinutiaCoordType>::max();
 
     private:
-        using Values = std::array<Field::TripletCoordType, Max>;
+        using Values = std::array<Field::MinutiaCoordType, Max>;
         const Values* m_values;
     };
 
-    class ArcTangents {
+    class ArcTangents
+    {
     public:
         ArcTangents()
-            : m_values([](){
+            : m_values([]() {
                 static Values v;
                 for (auto x = Min; x < Max; ++x) {
                     for (auto y = Min; y < Max; ++y) {
@@ -70,8 +73,8 @@ private:
             return (*m_values)[x - Min][y - Min];
         }
 
-        static constexpr auto Min = -std::numeric_limits<Field::TripletCoordType>::max();
-        static constexpr auto Max = std::numeric_limits<Field::TripletCoordType>::max();
+        static constexpr auto Min = -std::numeric_limits<Field::MinutiaCoordType>::max();
+        static constexpr auto Max = std::numeric_limits<Field::MinutiaCoordType>::max();
 
     private:
         using Values = std::array<std::array<float, Max - Min>, Max - Min>;

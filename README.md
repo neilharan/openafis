@@ -4,7 +4,7 @@ A high-performance one-to-many (1:N) fingerprint matching library for commodity 
 
 Note: this library is focused on the matching problem. It does not currently extract minutiae from images.
 
-The goal is to accurately identify one minutiae-set from a pool of 50K on modest-spec laptop equipment within one second.
+The goal is to accurately identify one minutiae-set from 50K candidate sets within one second using modest laptop equipment.
 
 ## Progress
 
@@ -13,7 +13,7 @@ The goal is to accurately identify one minutiae-set from a pool of 50K on modest
   | TASK | COMPLETE | NOTES |
   | ---- | -------- | ----- |
   | Template loading | 100% | |
-  | Local matching | 90% | |
+  | Local matching | 100% | |
   | Global matching | | |
   | CMake support | | |
   | Test suite | | EER, FMR100, FMR1000, ZeroFMR |

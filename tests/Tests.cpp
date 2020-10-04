@@ -74,22 +74,23 @@ int main(int, const char**)
     assert(!t1_2.fingerprints().empty());
     assert(!t2_1.fingerprints().empty());
 
-//    Score<unsigned short> score;
+    Match match;
+
+    for(auto i = 0; i < 5; ++i) {
+        const auto start = std::chrono::high_resolution_clock::now();
+        unsigned int s{};
+        for(auto i = 0; i < 120000; ++i) {
+            s = match.compute(t1_1.fingerprints()[0], t1_2.fingerprints()[0]);
+        }
+        const auto finish = std::chrono::high_resolution_clock::now();
+        const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
+
+        logInfo("score [alike]" << s << " in " << ms.count() << "ms");
+    }
+
     {
     const auto start = std::chrono::high_resolution_clock::now();
-    unsigned int s{};
-    for(auto i = 0; i < 120000; ++i) {
-        s = Match::compute(t1_1.fingerprints()[0], t1_2.fingerprints()[0]);
-    }
-    const auto finish = std::chrono::high_resolution_clock::now();
-    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-
-    logInfo("score [alike]" << s << " in " << ms.count() << "ms");
-    }
-
-    {
-    const auto start = std::chrono::high_resolution_clock::now();
-    const auto s = Match::compute(t1_1.fingerprints()[0], t2_1.fingerprints()[0]);
+    const auto s = match.compute(t1_1.fingerprints()[0], t2_1.fingerprints()[0]);
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 

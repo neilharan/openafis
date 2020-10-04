@@ -25,16 +25,17 @@ class MinutiaPoint
 public:
     // co-ordinates (and therefore distances) are always scales for 8-bits...
     MinutiaPoint(const Dimensions& dimensions, const Minutia& minutia)
-        : m_x(static_cast<Field::TripletCoordType>(std::lround(static_cast<float>(minutia.x()) * (256.0f / dimensions.first))))
-        , m_y(static_cast<Field::TripletCoordType>(std::lround(static_cast<float>(minutia.y()) * (256.0f / dimensions.second))))
+        : m_x(static_cast<Field::MinutiaCoordType>(std::lround(static_cast<float>(minutia.x()) * (256.0f / dimensions.first))))
+        , m_y(static_cast<Field::MinutiaCoordType>(std::lround(static_cast<float>(minutia.y()) * (256.0f / dimensions.second))))
         , m_angle(FastMath::theta360ToRadians(minutia.angle()))
     {
     }
 
-    [[nodiscard]] Field::TripletCoordType x() const { return m_x; }
-    [[nodiscard]] Field::TripletCoordType y() const { return m_y; }
+    [[nodiscard]] Field::MinutiaCoordType x() const { return m_x; }
+    [[nodiscard]] Field::MinutiaCoordType y() const { return m_y; }
     [[nodiscard]] float angle() const { return m_angle; }
-    [[nodiscard]] Field::TripletCoordType distance() const { return m_distance; }
+    [[nodiscard]] Field::MinutiaCoordType distance() const { return m_distance; }
+    [[nodiscard]] Field::MinutiaKeyType key() const { return static_cast<Field::MinutiaKeyType>(m_x) << 8 | m_y; }
     [[nodiscard]] size_t bytes() const { return sizeof(*this); }
 
     // distance between two vectors: a^2 + b^2 = c^2
@@ -42,15 +43,15 @@ public:
     {
         const auto a = static_cast<int>(m_x) - other.x();
         const auto b = static_cast<int>(m_y) - other.y();
-        m_distance = static_cast<Field::TripletCoordType>(FastMath::isqrt(a * a + b * b));
+        m_distance = static_cast<Field::MinutiaCoordType>(FastMath::isqrt(a * a + b * b));
     }
 
 private:
-    Field::TripletCoordType m_x; // scaled for dimensions
-    Field::TripletCoordType m_y; // "
+    Field::MinutiaCoordType m_x; // scaled for dimensions
+    Field::MinutiaCoordType m_y; // "
     float m_angle; // radians
 
-    Field::TripletCoordType m_distance {}; // distance from adjacent side, also scaled
+    Field::MinutiaCoordType m_distance {}; // distance from adjacent side, also scaled
 };
 
 #endif // MINUTIAPOINT_H

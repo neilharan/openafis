@@ -51,11 +51,12 @@ Triplet::Minutiae Triplet::shiftClockwise(Minutiae minutiae)
     return minutiae;
 }
 
+
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Triplet::Distances Triplet::sortDistances(const Minutiae& minutiae)
 {
     Distances d({ minutiae[0].distance(), minutiae[1].distance(), minutiae[2].distance() });
-    std::sort(d.begin(), d.end(), [](const Field::TripletCoordType& d1, const Field::TripletCoordType& d2) { return d1 > d2; });
+    std::sort(d.begin(), d.end(), [](const Field::MinutiaCoordType& d1, const Field::MinutiaCoordType& d2) { return d1 > d2; });
     return d;
 }
 
@@ -64,11 +65,11 @@ Triplet::Distances Triplet::sortDistances(const Minutiae& minutiae)
 // Compute similarity per 5.1.1-3
 // Note: equation return values are inverted...
 //
-void Triplet::emplacePair(Pairs& pairs, const Triplet& other) const
+void Triplet::emplacePair(Pairs& pairs, Triplet::Dupes& dupes, const Triplet& probe) const
 {
     // Theorems 1, 2 & 3...
     for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
-        if (abs(m_distances[i] - other.distances()[i]) >= Param::MaximumLocalDistance) {
+        if (abs(m_distances[i] - probe.distances()[i]) >= Param::MaximumLocalDistance) {
             return;
         }
     }
@@ -82,7 +83,7 @@ void Triplet::emplacePair(Pairs& pairs, const Triplet& other) const
             auto max = 0;
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                const auto d = abs(m_minutiae[i].distance() - other.minutiae()[shift[i]].distance());
+                const auto d = abs(m_minutiae[i].distance() - probe.minutiae()[shift[i]].distance());
                 if (d > Param::MaximumLocalDistance) {
                     return 1.0f;
                 }
@@ -103,7 +104,7 @@ void Triplet::emplacePair(Pairs& pairs, const Triplet& other) const
         // Equation 7 (3 iterations)...
         const auto directions = [&]() {
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                if (minimumAngle(m_minutiae[i].angle(), other.minutiae()[shift[i]].angle()) > Param::MaximumDirectionDifference) {
+                if (minimumAngle(m_minutiae[i].angle(), probe.minutiae()[shift[i]].angle()) > Param::MaximumDirectionDifference) {
                     return false;
                 }
             }
@@ -128,7 +129,7 @@ void Triplet::emplacePair(Pairs& pairs, const Triplet& other) const
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
                 const auto j = Shifting[1][i];
                 const auto q = rotateAngle(m_minutiae[i].angle(), m_minutiae[j].angle());
-                const auto t = rotateAngle(other.minutiae()[shift[i]].angle(), other.minutiae()[shift[j]].angle());
+                const auto t = rotateAngle(probe.minutiae()[shift[i]].angle(), probe.minutiae()[shift[j]].angle());
                 const auto d = minimumAngle(q, t);
                 if (d >= Param::MaximumAngleDifference) {
                     return 1.0f;
@@ -157,9 +158,9 @@ void Triplet::emplacePair(Pairs& pairs, const Triplet& other) const
                     const auto x = m_minutiae[i].x() - m_minutiae[j].x();
                     const auto d = rotateAngle(m_minutiae[i].angle(), FastMath::iatan2(y, x));
 
-                    const auto oy = other.minutiae()[shift[i]].y() - other.minutiae()[shift[j]].y();
-                    const auto ox = other.minutiae()[shift[i]].x() - other.minutiae()[shift[j]].x();
-                    const auto od = rotateAngle(other.minutiae()[shift[i]].angle(), FastMath::iatan2(oy, ox));
+                    const auto oy = probe.minutiae()[shift[i]].y() - probe.minutiae()[shift[j]].y();
+                    const auto ox = probe.minutiae()[shift[i]].x() - probe.minutiae()[shift[j]].x();
+                    const auto od = rotateAngle(probe.minutiae()[shift[i]].angle(), FastMath::iatan2(oy, ox));
 
                     const auto ad = minimumAngle(d, od);
                     if (ad >= Param::MaximumAngleDifference) {
@@ -185,8 +186,15 @@ void Triplet::emplacePair(Pairs& pairs, const Triplet& other) const
             break; // short-cut
         }
     }
-    if (maxS > 0) {
-        pairs.emplace_back(maxS, &other, this, maxShift);
+    if (maxShift) {
+        const auto& pm = probe.minutiae();
+        for (decltype(m_minutiae.size()) i = 0; i < m_minutiae.size(); ++i) {
+            const auto kc = dupes.emplace(m_minutiae[i].key());
+            const auto kp = dupes.emplace(1 << 16 | pm[(*maxShift)[i]].key());
+            if (kc.second || kp.second) {
+                pairs.emplace_back(maxS, &probe, this);
+            }
+        }
     }
 }
 

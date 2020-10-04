@@ -17,7 +17,8 @@ using TemplateIdType = uint16_t;
 using TripletIndexType = uint8_t;
 
 // Coordinates and distances are always scaled to 8-bits so uint8_t is sufficient...
-using TripletCoordType = uint8_t;
+using MinutiaCoordType = uint8_t;
+using MinutiaKeyType = uint32_t;
 };
 
 #endif // FIELD_H
