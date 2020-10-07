@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <numeric>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -205,10 +206,7 @@ void Triplet::emplacePair(Pairs& pairs, Triplet::Dupes& dupes, const Triplet& pr
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 size_t Triplet::bytes() const
 {
-    size_t sz = sizeof(*this);
-    for (const auto& m : m_minutiae) {
-        sz += m.bytes();
-    }
-    sz += m_distances.capacity() * sizeof(decltype(m_distances[0]));
-    return sz;
+    return sizeof(*this)
+        + std::accumulate(m_minutiae.begin(), m_minutiae.end(), 0, [](int sum, const auto& m) { return sum + m.bytes(); })
+        + m_distances.capacity() * sizeof(decltype(m_distances[0]));
 }

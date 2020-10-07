@@ -3,12 +3,14 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#include "Config.h"
 #include "Dimensions.h"
 #include "FastMath.h"
 #include "Minutia.h"
 
 #include <cmath>
 
+// NJH-TODO
 #ifdef OPENAFIS_TRIPLETS_PACK
 #define TRIPLET_PACK PACK
 #else

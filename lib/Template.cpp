@@ -5,6 +5,7 @@
 #include "delaunator.hpp"
 
 #include <cassert>
+#include <numeric>
 #include <set>
 
 
@@ -70,9 +71,5 @@ bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 size_t Template::bytes() const
 {
-    size_t sz = sizeof(*this);
-    for (const auto& fp : m_data.fps) {
-        sz += fp.bytes();
-    }
-    return sz;
+    return sizeof(*this) + std::accumulate(m_data.fps.begin(), m_data.fps.end(), 0, [](int sum, const auto& fp) { return sum + fp.bytes(); });
 }

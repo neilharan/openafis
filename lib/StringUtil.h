@@ -3,6 +3,7 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#include <algorithm>
 #include <iostream>
 #include <string>
 
@@ -11,7 +12,15 @@
 class StringUtil
 {
 public:
-    static std::string center(const std::string &s, const int width = 80) { return std::string((width - s.length()) / 2, ' ') + s; }
+    static std::string lower(const std::string &s)
+    {
+        auto _s = s;
+        std::transform(_s.begin(), _s.end(), _s.begin(), [](const unsigned char c) { return std::tolower(c); });
+        return _s;
+    }
+
+    static bool contains(const std::string& s, const std::string& part) { return s.find(part) != std::string::npos; }
+    static std::string center(const std::string& s, const int width = 80) { return std::string((width - s.length()) / 2, ' ') + s; }
 
     template <typename... A> static std::string format(const std::string& format, A... args)
     {

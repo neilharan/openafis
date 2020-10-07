@@ -3,6 +3,8 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#include "Config.h"
+
 #include <cstdint>
 
 
@@ -10,7 +12,7 @@
 namespace Field
 {
 // Any identifier you like - maybe a std::string for research, or uint16_t for constrained targets...
-using TemplateIdType = uint16_t;
+using TemplateIdType = uint32_t;
 
 // Triplets are generated when loading templates and held in memory. Each template has tens of triplets so this type effects memory usage significantly.
 // Generally uint8_t is sufficient but some sensors may generate a lot of minutiae, resulting in more triplets & possibly exceeding 8-bits...
