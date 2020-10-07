@@ -14,9 +14,9 @@ The goal is to accurately identify one minutiae-set from 50K candidate sets with
   | ---- | -------- | ----- |
   | Template loading | 100% | |
   | Local matching | 100% | |
-  | Global matching | | |
+  | Global matching | 80% | |
   | CMake support | | |
-  | Test suite | | EER, FMR100, FMR1000, ZeroFMR |
+  | Test suite | 10% | EER, FMR100, FMR1000, ZeroFMR |
   | Benchmarks | | |
   | Optimizing | | float->int, vectorization (SSE/AVX), math functions |
   | Parallelizing | | |

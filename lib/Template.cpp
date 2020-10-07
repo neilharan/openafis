@@ -36,7 +36,7 @@ bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<
         }
         delaunator::Delaunator d(coords);
         assert(d.triangles.size() % 3 == 0);
-        auto& fp = m_data.fps.emplace_back(d.triangles.size() / 3 DIMENSIONS MINUTIAE);
+        auto& fp = m_data.fps.emplace_back(minutiae.size(), d.triangles.size() / 3 DIMENSIONS MINUTIAE);
         auto& t = fp.triplets();
 
 #ifdef _DEBUG

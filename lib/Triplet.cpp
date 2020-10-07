@@ -189,10 +189,13 @@ void Triplet::emplacePair(Pairs& pairs, Triplet::Dupes& dupes, const Triplet& pr
     if (maxShift) {
         const auto& pm = probe.minutiae();
         for (decltype(m_minutiae.size()) i = 0; i < m_minutiae.size(); ++i) {
-            const auto kc = dupes.emplace(m_minutiae[i].key());
-            const auto kp = dupes.emplace(1 << 16 | pm[(*maxShift)[i]].key());
+            const auto& mc = m_minutiae[i];
+            const auto& mp = pm[(*maxShift)[i]];
+
+            const auto kc = dupes.emplace(mc.key());
+            const auto kp = dupes.emplace(1 << 16 | mp.key());
             if (kc.second || kp.second) {
-                pairs.emplace_back(maxS, &probe, this);
+                pairs.emplace_back(maxS, &mp, &mc);
             }
         }
     }

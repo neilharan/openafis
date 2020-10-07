@@ -1,5 +1,7 @@
 
 #include "Match.h"
+#include "FastMath.h"
+#include "Log.h"
 #include "Param.h"
 
 #include <algorithm>
@@ -38,6 +40,40 @@ unsigned int Match::compute(const Fingerprint& probe, const Fingerprint& candida
     std::sort(m_pairs.begin(), m_pairs.end());
 
     // Global matching 5.2...
-    // NJH-TODO
-    return 0;
+    auto maxMatched = 0;
+
+    for (const auto& p1 : m_pairs) {
+        const auto theta = p1.candidate()->angle() - p1.probe()->angle();
+        const auto cosTheta = std::cos(theta); // NJH-TODO use tables, domain can be determined
+        const auto sinTheta = std::sin(theta);
+
+        auto matched = 0;
+        auto min = m_pairs.size();
+
+        for (const auto& p2 : m_pairs) {
+            if (p1.probe() == p2.probe() || p1.candidate() == p2.candidate()) {
+                continue;
+            }
+            // 5.2.2...
+            const auto x = p1.candidate()->x() + std::lround(cosTheta * static_cast<float>(p2.probe()->x() - p1.probe()->x()) - sinTheta * static_cast<float>(p2.probe()->y() - p1.probe()->y()));
+            const auto y = p1.candidate()->y() + std::lround(sinTheta * static_cast<float>(p2.probe()->x() - p1.probe()->x()) + cosTheta * static_cast<float>(p2.probe()->y() - p1.probe()->y()));
+            // NJH-TODO compare angles too
+
+            const auto distance = [&]() {
+                const auto a = x - p2.candidate()->x();
+                const auto b = y - p2.candidate()->y();
+                const auto c = a * a + b * b;
+                return c > std::numeric_limits<Field::MinutiaCoordType>::max() ? Param::MaximumGlobalDistance : static_cast<Field::MinutiaCoordType>(FastMath::isqrt(c));
+            };
+
+            if (distance() < Param::MaximumGlobalDistance) {
+                matched++;
+            }
+            if (matched + --min < Param::MinimumMinutiae) {
+                break;
+            }
+        }
+        maxMatched = std::max(maxMatched, matched);
+    }
+    return std::lround(static_cast<float>(maxMatched * maxMatched) / static_cast<float>(probe.minutiaeCount() * candidate.minutiaeCount()) * 100.0f);
 }

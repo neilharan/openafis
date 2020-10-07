@@ -4,8 +4,7 @@
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "Field.h"
-#include "Log.h"
-#include "MinutiaPoint.h"
+#include "Pair.h"
 
 #include <unordered_set>
 #include <vector>
@@ -23,32 +22,9 @@ public:
 
     using Minutiae = std::vector<MinutiaPoint>;
     using Distances = std::vector<Field::MinutiaCoordType>;
+    using Pairs = std::vector<Pair>;
     using Dupes = std::unordered_set<Field::MinutiaKeyType, Hash>;
     using Shift = std::vector<unsigned int>;
-
-    class Pair
-    {
-    public:
-        Pair(const float similarity, const Triplet* probe, const Triplet* candidate)
-            : m_similarity(similarity)
-            , m_probe(probe)
-            , m_candidate(candidate)
-        {
-        }
-
-        [[nodiscard]] float similarity() const { return m_similarity; }
-        [[nodiscard]] const Triplet* probe() const { return m_probe; }
-        [[nodiscard]] const Triplet* candidate() const { return m_candidate; }
-
-        bool operator<(const Pair& other) const { return m_similarity > other.m_similarity; } // descending sort
-
-    private:
-        float m_similarity {};
-        const Triplet* m_probe {};
-        const Triplet* m_candidate {};
-    };
-
-    using Pairs = std::vector<Pair>;
 
     explicit Triplet(const Minutiae& minutiae);
     Triplet() = default;

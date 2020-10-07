@@ -20,31 +20,34 @@ public:
 #endif
     using Triplets = std::vector<Triplet>;
 
-    Fingerprint(const size_t size
+    Fingerprint(const size_t minutiaeCount, const size_t tripletsCount
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
         ,
         const Dimensions& dimensions, const Minutiae& minutiae
 #endif
         )
+        : m_minutiaeCount(minutiaeCount)
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-        : m_dimensions(dimensions)
+        , m_dimensions(dimensions)
         , m_minutiae(minutiae)
 #endif
     {
-        m_triplets.reserve(size);
+        m_triplets.reserve(tripletsCount);
     }
 
-    [[nodiscard]] Triplets& triplets() { return m_triplets; };
-    [[nodiscard]] const Triplets& triplets() const { return m_triplets; };
+    [[nodiscard]] size_t minutiaeCount() const { return m_minutiaeCount; }
+    [[nodiscard]] Triplets& triplets() { return m_triplets; }
+    [[nodiscard]] const Triplets& triplets() const { return m_triplets; }
 
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-    [[nodiscard]] const Dimensions& dimensions() const { return m_dimensions; };
-    [[nodiscard]] const Minutiae& minutiae() const { return m_minutiae; };
+    [[nodiscard]] const Dimensions& dimensions() const { return m_dimensions; }
+    [[nodiscard]] const Minutiae& minutiae() const { return m_minutiae; }
 #endif
 
     [[nodiscard]] size_t bytes() const;
 
 private:
+    size_t m_minutiaeCount;
     Triplets m_triplets;
 
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
