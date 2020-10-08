@@ -13,6 +13,7 @@
 #include <iostream>
 #include <map>
 #include <regex>
+#include <sstream>
 #include <vector>
 
 
@@ -139,7 +140,7 @@ static void testMatchSingle(const std::string &path)
 static void testMatchMany(const std::string &path)
 {
     logTest(std::string(LineWidth, '='));
-    logTest(StringUtil::center("1:N SIMPLE MATCH EFFICACY TEST", LineWidth));
+    logTest(StringUtil::center("N:N SIMPLE MATCH EFFICACY TEST", LineWidth));
     logTest(std::string(LineWidth, '='));
 
     // We're not concerned with loading efficiency (a lot of disk I/O and irrelevant tasks like regex)...
@@ -165,7 +166,7 @@ static void testMatchMany(const std::string &path)
                 return uint32_t{};
             }
             const auto s = StringUtil::lower(p.string());
-            uint32_t id{};
+            Field::TemplateIdType id{};
 
             // Yes, there are better ways to do this...
             if (StringUtil::contains(s, "fvc2002")) {
@@ -206,7 +207,7 @@ static void testMatchMany(const std::string &path)
             return;
         }
     }
-    std::vector<unsigned int> scores(templates.size() * (templates.size() - 1));
+    std::vector<unsigned int> scores(templates.size() * templates.size());
 
     logTest("Matching " << scores.capacity() << " permutations...");
 
@@ -216,9 +217,6 @@ static void testMatchMany(const std::string &path)
     const auto start = std::chrono::high_resolution_clock::now();
     for (const auto &t1 : templates) {
         for (const auto &t2 : templates) {
-            if (t1.id() == t2.id()) {
-                continue;
-            }
             scores[i++] = match.compute(t1.fingerprints()[0], t2.fingerprints()[0]);
             if ((i % 50000) == 0) {
                 logTest("Matched " << i);
@@ -227,19 +225,38 @@ static void testMatchMany(const std::string &path)
     }
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
+    logTest("Completed " << " in " << ms.count() << "ms");
 
     logTest("Reporting...");
 
+    const auto now = []() {
+        std::time_t t = std::time(nullptr);
+        std::tm tm = *std::localtime(&t);
+        std::stringstream ss;
+        ss << std::put_time(&tm, "%Y-%m-%d-%H-%M-%S");
+        return ss.str();
+    };
+
+    const auto fn = StringUtil::format(R"(%s.csv)", now().c_str());
+    std::ofstream f(fn, std::ofstream::binary);
+    assert(f);
+
     i = 0;
     for (const auto &t1 : templates) {
-        for (const auto &t2 : templates) {
-            if (t1.id() == t2.id()) {
-                continue;
-            }
-            logTest(t1.id() << " " << t2.id() << " similarity of " << scores[i++]);
-        }
+        f << "," << t1.id();
     }
-    logTest("Completed " << " in " << ms.count() << "ms");
+    f << std::endl;
+    for (const auto &t1 : templates) {
+        f << t1.id();
+
+        for (const auto &t2 : templates) {
+            std::ignore = t2;
+            f << "," << scores[i++];
+        }
+        f << std::endl;
+    }
+    logTest("Written " << fn);
+
     logTest(std::string(LineWidth, '=') << std::endl << std::endl);
 }
 
@@ -293,10 +310,9 @@ int main(int, const char**)
 {
     const std::string path = "/dev/project/os/openafis/data/valid"; // NJH-TODO from command line
 
-//    testBulkLoad(path);
-//    testMatchSingle(path);
+    testBulkLoad(path);
+    testMatchSingle(path);
     testMatchMany(path);
-//    testRender(path);
-
+    testRender(path);
     return 0;
 }
