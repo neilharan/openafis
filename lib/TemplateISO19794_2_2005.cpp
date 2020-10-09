@@ -2,7 +2,6 @@
 #include "TemplateISO19794_2_2005.h"
 #include "Log.h"
 
-#include <cassert>
 #include <fstream>
 #include <iostream>
 
@@ -85,8 +84,10 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
     if (!h) {
         return false;
     }
-    assert(swap32(h->totalLength) == length);
-
+    if (swap32(h->totalLength) != length) {
+        logError("totalLength != length");
+        return false;
+    }
     std::vector<std::vector<Minutia>> fps;
     fps.reserve(h->fingerPrintCount);
 

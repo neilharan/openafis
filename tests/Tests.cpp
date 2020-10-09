@@ -4,6 +4,7 @@
 #include "Match.h"
 #include "Render.h"
 #include "StringUtil.h"
+#include "TemplateCSV.h"
 #include "TemplateISO19794_2_2005.h"
 
 #include <cassert>
@@ -88,16 +89,30 @@ static void testMatchSingle(const std::string &path)
 
     logTest("Loading...");
 
+#if 0
+    TemplateCSV t1_1(101);
+    if (!t1_1.load("101_1.csv")) {
+        return;
+    }
+#else
     TemplateISO19794_2_2005 t1_1(101);
     if (!t1_1.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_1.iso)", path.c_str()))) {
         return;
     }
+#endif
     logTest("Template " << t1_1.id() << ": size " << t1_1.bytes() << " bytes, #fingerprints " << t1_1.fingerprints().size());
 
+#if 0
+    TemplateCSV t1_2(107);
+    if (!t1_2.load("101_7.csv")) {
+        return;
+    }
+#else
     TemplateISO19794_2_2005 t1_2(102);
     if (!t1_2.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_2.iso)", path.c_str()))) {
         return;
     }
+#endif
     logTest("Template " << t1_2.id() << ": size " << t1_2.bytes() << " bytes, #fingerprints " << t1_2.fingerprints().size());
 
     TemplateISO19794_2_2005 t2_1(201);
@@ -110,16 +125,17 @@ static void testMatchSingle(const std::string &path)
         return;
     }
 
-    const auto test = [](const TemplateISO19794_2_2005& a, const TemplateISO19794_2_2005& b) {
+    const auto test = [](const Template& a, const Template& b) {
+        static const int Passes = 5;
         static const int Iterations = 50000;
-        Match match;
+        Match<unsigned int> match;
 
-        for (auto i = 0; i < 5; ++i) {
+        for (auto i = 0; i < Passes; ++i) {
             unsigned int s {};
 
             const auto start = std::chrono::high_resolution_clock::now();
             for (auto i = 0; i < Iterations; ++i) {
-                s = match.compute(a.fingerprints()[0], b.fingerprints()[0]);
+                match.compute(s, a.fingerprints()[0], b.fingerprints()[0]);
             }
             const auto finish = std::chrono::high_resolution_clock::now();
             const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
@@ -211,13 +227,13 @@ static void testMatchMany(const std::string &path)
 
     logTest("Matching " << scores.capacity() << " permutations...");
 
-    Match match;
+    Match<unsigned int> match;
     size_t i{};
 
     const auto start = std::chrono::high_resolution_clock::now();
     for (const auto &t1 : templates) {
         for (const auto &t2 : templates) {
-            scores[i++] = match.compute(t1.fingerprints()[0], t2.fingerprints()[0]);
+            match.compute(scores[i++], t1.fingerprints()[0], t2.fingerprints()[0]);
             if ((i % 50000) == 0) {
                 logTest("Matched " << i);
             }
@@ -237,17 +253,24 @@ static void testMatchMany(const std::string &path)
         return ss.str();
     };
 
-    const auto fn = StringUtil::format(R"(%s.csv)", now().c_str());
+    const auto fn = StringUtil::format(R"(%s.csv)", "results" /*NJH-TEMP now().c_str()*/);
     std::ofstream f(fn, std::ofstream::binary);
-    assert(f);
+    if (!f) {
+        logTest("Unable to write " << fn);
+        return;
+    }
+
+    const auto expandId = [](const Field::TemplateIdType id) {
+        return StringUtil::format(R"(FVC%d-DB%d_B-%d_%d)", id >> 20, (id >> 16) & 0xf, (id >> 8) & 0xff, id & 0xff);
+    };
 
     i = 0;
     for (const auto &t1 : templates) {
-        f << "," << t1.id();
+        f << "," << expandId(t1.id());
     }
     f << std::endl;
     for (const auto &t1 : templates) {
-        f << t1.id();
+        f << expandId(t1.id());
 
         for (const auto &t2 : templates) {
             std::ignore = t2;
@@ -270,37 +293,56 @@ static void testRender(const std::string &path)
 
     logTest("Loading...");
 
+#if 1
+    TemplateCSV t1_1(101);
+    if (!t1_1.load("101_1.csv")) {
+        return;
+    }
+#else
     TemplateISO19794_2_2005 t1_1(101);
     if (!t1_1.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_1.iso)", path.c_str()))) {
         return;
     }
+#endif
     logTest("Template " << t1_1.id() << ": size " << t1_1.bytes() << " bytes, #fingerprints " << t1_1.fingerprints().size());
 
-    TemplateISO19794_2_2005 t1_2(102);
+#if 1
+    TemplateCSV t1_2(107);
+    if (!t1_2.load("101_7.csv")) {
+        return;
+    }
+#else
+    TemplateISO19794_2_2005 t1_2(107);
     if (!t1_2.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_2.iso)", path.c_str()))) {
         return;
     }
-    logTest("Template " << t1_2.id() << ": size " << t1_2.bytes() << " bytes, #fingerprints " << t1_2.fingerprints().size());
+#endif
 
     if (t1_1.fingerprints().empty() || t1_2.fingerprints().empty()) {
         return;
     }
 
-    const auto test = [](const TemplateISO19794_2_2005& a) {
-        std::string svg;
-        if (!Render::minutiae(svg, a.fingerprints()[0])) {
+    const auto test = [](const Template& a, const Template& b) {
+        const auto write = [](const Template& t, const std::string &svg) {
+            const auto fn = StringUtil::format(R"(%s.svg)", std::to_string(t.id()).c_str());
+            std::ofstream f(fn, std::ofstream::binary);
+            if (!f) {
+                logTest("Unable to write " << fn);
+                return;
+            }
+            f.write(svg.data(), svg.size());
+            logTest("Written " << fn);
+        };
+        std::string svg1, svg2;
+        if (!Render::all(svg1, svg2, a.fingerprints()[0], b.fingerprints()[0])) {
             return;
         }
-        const auto fn = StringUtil::format(R"(%s.svg)", std::to_string(a.id()).c_str());
-        std::ofstream f(fn, std::ofstream::binary);
-        assert(f);
-        f.write(svg.data(), svg.size());
-        logTest("Written " << fn);
+        write(a, svg1);
+        write(b, svg2);
     };
 
     logTest("Rendering...");
-    test(t1_1);
-    test(t1_2);
+    test(t1_1, t1_2);
     logTest(std::string(LineWidth, '=') << std::endl << std::endl);
 }
 
@@ -308,11 +350,12 @@ static void testRender(const std::string &path)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 int main(int, const char**)
 {
-    const std::string path = "/dev/project/os/openafis/data/valid"; // NJH-TODO from command line
+    //const std::string path = "/dev/project/os/openafis/data/valid"; // NJH-TODO from command line
+    const std::string path = "/dev/project/os/openafis/data/psy"; // NJH-TODO from command line
 
-    testBulkLoad(path);
-    testMatchSingle(path);
+//    testBulkLoad(path);
+//    testMatchSingle(path);
     testMatchMany(path);
-    testRender(path);
+//    testRender(path);
     return 0;
 }

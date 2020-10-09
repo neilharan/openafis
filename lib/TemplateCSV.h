@@ -1,29 +1,24 @@
-#ifndef MATCH_H
-#define MATCH_H
+#ifndef TEMPLATECSV_H
+#define TEMPLATECSV_H
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "Config.h"
 #include "Template.h"
 
+#include <string>
+
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <typename T>
-class Match
+class TemplateCSV : public Template
 {
 public:
-    Match()
+    explicit TemplateCSV(const Field::TemplateIdType& id)
+        : Template(id)
     {
-        m_pairs.reserve(64);
-        m_dupes.reserve(64);
     }
 
-    void compute(const Template& probe, const Template& candidate) const;
-    void compute(T& result, const Fingerprint& probe, const Fingerprint& candidate) const;
-
-private:
-    mutable Pair::Pairs m_pairs;
-    mutable Triplet::Dupes m_dupes;
+    bool load(const std::string& path);
 };
 
-#endif // MATCH_H
+#endif // TEMPLATECSV_H

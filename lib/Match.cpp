@@ -5,20 +5,22 @@
 #include "Param.h"
 
 #include <algorithm>
+#include <set>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-unsigned int Match::compute(const Template&, const Template&) const
+template <typename T>
+void Match<T>::compute(const Template&, const Template&) const
 {
     // NJH-TODO compare entire templates...
-    return 0;
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // https://doi.org/10.3390/s120303418
 //
-unsigned int Match::compute(const Fingerprint& probe, const Fingerprint& candidate) const
+template <typename T>
+void Match<T>::compute(T& result, const Fingerprint& probe, const Fingerprint& candidate) const
 {
     m_pairs.clear();
     m_dupes.clear();
@@ -35,7 +37,7 @@ unsigned int Match::compute(const Fingerprint& probe, const Fingerprint& candida
         }
     }
     if (m_pairs.size() < Param::MinimumMinutiae) {
-        return 0;
+        return;
     }
     std::sort(m_pairs.begin(), m_pairs.end());
 
@@ -63,10 +65,17 @@ unsigned int Match::compute(const Fingerprint& probe, const Fingerprint& candida
                 const auto a = x - p2.candidate()->x();
                 const auto b = y - p2.candidate()->y();
                 const auto c = a * a + b * b;
-                return c > std::numeric_limits<Field::MinutiaCoordType>::max() ? Param::MaximumGlobalDistance : static_cast<Field::MinutiaCoordType>(FastMath::isqrt(c));
+                return c > std::numeric_limits<Field::MinutiaCoordType>::max() ? Param::MaximumGlobalDistance + 1 : static_cast<Field::MinutiaCoordType>(FastMath::isqrt(c));
             };
 
-            if (distance() < Param::MaximumGlobalDistance) {
+            if (distance() <= Param::MaximumGlobalDistance) {
+                if constexpr(std::is_same<T, MinutiaPoint::RenderPair>::value) {
+                    if (matched == 0) {
+                        result.first.push_back(p2.probe());
+                        result.second.push_back(p2.candidate());
+                        break;
+                    }
+                }
                 matched++;
             }
             if (matched + --min < Param::MinimumMinutiae) {
@@ -75,5 +84,12 @@ unsigned int Match::compute(const Fingerprint& probe, const Fingerprint& candida
         }
         maxMatched = std::max(maxMatched, matched);
     }
-    return std::lround(static_cast<float>(maxMatched * maxMatched) / static_cast<float>(probe.minutiaeCount() * candidate.minutiaeCount()) * 100.0f);
+    if constexpr(std::is_same<T, unsigned int>::value) {
+        result = std::lround(static_cast<float>(maxMatched * maxMatched) / static_cast<float>(probe.minutiaeCount() * candidate.minutiaeCount()) * 100.0f);
+    }
 }
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+template class Match<unsigned int>;
+template class Match<MinutiaPoint::RenderPair>;

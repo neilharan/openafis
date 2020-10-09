@@ -53,7 +53,7 @@ bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<
                 const auto k = dupes.insert(std::make_tuple(static_cast<Field::TripletIndexType>(a), static_cast<Field::TripletIndexType>(b), static_cast<Field::TripletIndexType>(c)));
                 assert(k.second);
 #endif
-                t.emplace_back(Triplet::Minutiae({ MinutiaPoint(dimensions, minutiae[a]), MinutiaPoint(dimensions, minutiae[b]), MinutiaPoint(dimensions, minutiae[c]) }));
+                t.emplace_back(MinutiaPoint::Minutiae({ MinutiaPoint(dimensions, minutiae[a]), MinutiaPoint(dimensions, minutiae[b]), MinutiaPoint(dimensions, minutiae[c]) }));
             }
             if (!i) {
                 break;

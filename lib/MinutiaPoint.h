@@ -9,6 +9,7 @@
 #include "Minutia.h"
 
 #include <cmath>
+#include <vector>
 
 // NJH-TODO
 #ifdef OPENAFIS_TRIPLETS_PACK
@@ -25,11 +26,14 @@
 class MinutiaPoint
 {
 public:
+    using Minutiae = std::vector<MinutiaPoint>;
+    using RenderPair = std::pair<std::vector<const MinutiaPoint*>, std::vector<const MinutiaPoint*>>;
+
     // co-ordinates (and therefore distances) are always scales for 8-bits...
     MinutiaPoint(const Dimensions& dimensions, const Minutia& minutia)
         : m_x(static_cast<Field::MinutiaCoordType>(std::lround(static_cast<float>(minutia.x()) * (256.0f / dimensions.first))))
         , m_y(static_cast<Field::MinutiaCoordType>(std::lround(static_cast<float>(minutia.y()) * (256.0f / dimensions.second))))
-        , m_angle(FastMath::theta360ToRadians(minutia.angle()))
+        , m_angle(FastMath::degreesToRadians(minutia.angle()))
     {
     }
 

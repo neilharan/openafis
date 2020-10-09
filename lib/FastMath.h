@@ -21,7 +21,8 @@ public:
 
     static int isqrt(int x);
     static float iatan2(int x, int y);
-    static float theta360ToRadians(unsigned int theta);
+    static float degreesToRadians(unsigned int theta);
+    static unsigned int radiansToDegrees(float theta);
 
 private:
     class SquareRoots

@@ -10,7 +10,7 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Triplet::Triplet(const Minutiae& minutiae)
+Triplet::Triplet(const MinutiaPoint::Minutiae& minutiae)
     : m_minutiae(shiftClockwise(minutiae))
     , m_distances(sortDistances(m_minutiae))
 {
@@ -18,7 +18,7 @@ Triplet::Triplet(const Minutiae& minutiae)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Triplet::Minutiae Triplet::shiftClockwise(Minutiae minutiae)
+MinutiaPoint::Minutiae Triplet::shiftClockwise(MinutiaPoint::Minutiae minutiae)
 {
     assert(minutiae.size() == 3);
 
@@ -54,7 +54,7 @@ Triplet::Minutiae Triplet::shiftClockwise(Minutiae minutiae)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Triplet::Distances Triplet::sortDistances(const Minutiae& minutiae)
+Triplet::Distances Triplet::sortDistances(const MinutiaPoint::Minutiae& minutiae)
 {
     Distances d({ minutiae[0].distance(), minutiae[1].distance(), minutiae[2].distance() });
     std::sort(d.begin(), d.end(), [](const Field::MinutiaCoordType& d1, const Field::MinutiaCoordType& d2) { return d1 > d2; });
@@ -66,7 +66,7 @@ Triplet::Distances Triplet::sortDistances(const Minutiae& minutiae)
 // Compute similarity per 5.1.1-3
 // Note: equation return values are inverted...
 //
-void Triplet::emplacePair(Pairs& pairs, Triplet::Dupes& dupes, const Triplet& probe) const
+void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Triplet& probe) const
 {
     // Theorems 1, 2 & 3...
     for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
@@ -74,6 +74,7 @@ void Triplet::emplacePair(Pairs& pairs, Triplet::Dupes& dupes, const Triplet& pr
             return;
         }
     }
+    using Shift = std::vector<unsigned int>;
     static const std::vector<Shift> Shifting = { { 0, 1, 2 }, { 1, 2, 0 }, { 2, 0, 1 } }; // rotate triplets when comparing
     float maxS {};
     const Shift* maxShift {};
@@ -209,4 +210,19 @@ size_t Triplet::bytes() const
     return sizeof(*this)
         + std::accumulate(m_minutiae.begin(), m_minutiae.end(), 0, [](int sum, const auto& m) { return sum + m.bytes(); })
         + m_distances.capacity() * sizeof(decltype(m_distances[0]));
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool Triplet::operator<(const Triplet& other) const
+{
+    for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
+        if (m_distances[i] < other.m_distances[i]) {
+            return true;
+        }
+        if (other.m_distances[i] < m_distances[i]) {
+            return false;
+        }
+    }
+    return false;
 }

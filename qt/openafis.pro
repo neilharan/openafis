@@ -21,6 +21,7 @@ HEADERS = \
     $$PWD/../lib/Param.h \
     $$PWD/../lib/Render.h \
     $$PWD/../lib/Template.h \
+    $$PWD/../lib/TemplateCSV.h \
     $$PWD/../lib/TemplateISO19794_2_2005.h \
     $$PWD/../lib/Triplet.h \
     $$PWD/../lib/StringUtil.h
@@ -32,6 +33,7 @@ SOURCES = \
     ../lib/Param.cpp \
     ../lib/Render.cpp \
     ../lib/Template.cpp \
+    ../lib/TemplateCSV.cpp \
     ../lib/TemplateISO19794_2_2005.cpp \
     ../lib/Triplet.cpp
 

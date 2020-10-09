@@ -37,10 +37,19 @@ float FastMath::iatan2(const int x, const int y)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-float FastMath::theta360ToRadians(const unsigned int theta)
+float FastMath::degreesToRadians(const unsigned int theta)
 {
     static constexpr float Factor = PI / 180;
 
     // NJH-TODO return int scaled for acceptable accuracy...
     return static_cast<float>(theta) * Factor;
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+unsigned int FastMath::radiansToDegrees(const float theta)
+{
+    static constexpr float Factor = PI / 180;
+
+    return static_cast<unsigned int>(std::lround(theta / Factor));
 }

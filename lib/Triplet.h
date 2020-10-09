@@ -15,28 +15,25 @@
 class Triplet
 {
 public:
-    class Hash
+    class DupesHash
     {
     public:
         size_t operator()(const Field::MinutiaKeyType k) const { return k; } // replace std::unordered_set hash
     };
 
-    using Minutiae = std::vector<MinutiaPoint>;
     using Distances = std::vector<Field::MinutiaCoordType>;
-    using Pairs = std::vector<Pair>;
-    using Dupes = std::unordered_set<Field::MinutiaKeyType, Hash>;
-    using Shift = std::vector<unsigned int>;
+    using Dupes = std::unordered_set<Field::MinutiaKeyType, DupesHash>;
 
-    explicit Triplet(const Minutiae& minutiae);
+    explicit Triplet(const MinutiaPoint::Minutiae& minutiae);
     Triplet() = default;
 
-    void emplacePair(Pairs& pairs, Triplet::Dupes& dupes, const Triplet& probe) const;
+    void emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Triplet& probe) const;
 
-    [[nodiscard]] const Minutiae& minutiae() const { return m_minutiae; }
+    [[nodiscard]] const MinutiaPoint::Minutiae& minutiae() const { return m_minutiae; }
     [[nodiscard]] const Distances& distances() const { return m_distances; }
     [[nodiscard]] size_t bytes() const;
 
-    bool operator<(const Triplet& other) const { return m_distances[0] < other.m_distances[0]; }
+    bool operator<(const Triplet& other) const;
     friend bool operator<(const Triplet& lhs, const Field::MinutiaCoordType rhs) { return lhs.m_distances[0] < rhs; }
     friend bool operator<(const Field::MinutiaCoordType lhs, const Triplet& rhs) { return lhs < rhs.m_distances[0]; }
     friend void swap(Triplet& lhs, Triplet& rhs) noexcept
@@ -48,10 +45,10 @@ public:
     }
 
 private:
-    static Minutiae shiftClockwise(Minutiae minutiae);
-    static Distances sortDistances(const Minutiae& minutiae);
+    static MinutiaPoint::Minutiae shiftClockwise(MinutiaPoint::Minutiae minutiae);
+    static Distances sortDistances(const MinutiaPoint::Minutiae& minutiae);
 
-    Minutiae m_minutiae;
+    MinutiaPoint::Minutiae m_minutiae;
     Distances m_distances {}; // max, mid, min side lengths respectively (sorted minutiae distances)
 };
 

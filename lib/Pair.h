@@ -11,6 +11,8 @@
 class Pair
 {
 public:
+    using Pairs = std::vector<Pair>;
+
     Pair(const float similarity, const MinutiaPoint* probe, const MinutiaPoint* candidate)
         : m_similarity(similarity)
         , m_probe(probe)
