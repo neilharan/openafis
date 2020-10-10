@@ -39,9 +39,8 @@ float FastMath::iatan2(const int x, const int y)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 float FastMath::degreesToRadians(const unsigned int theta)
 {
-    static constexpr float Factor = PI / 180;
+    static constexpr float Factor = PI / 180.0f;
 
-    // NJH-TODO return int scaled for acceptable accuracy...
     return static_cast<float>(theta) * Factor;
 }
 
@@ -49,7 +48,40 @@ float FastMath::degreesToRadians(const unsigned int theta)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 unsigned int FastMath::radiansToDegrees(const float theta)
 {
-    static constexpr float Factor = PI / 180;
+    static constexpr float Factor = PI / 180.0f;
 
     return static_cast<unsigned int>(std::lround(theta / Factor));
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Equation 1...
+//
+float FastMath::minimumAngle(const float a, const float b)
+{
+    const auto d = abs(a - b);
+    return std::min(d, FastMath::PI2 - d);
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Equation 2...
+//
+float FastMath::rotateAngle(const float a, const float b)
+{
+    if (b > a) {
+        return b - a;
+    }
+    return b - a + FastMath::PI2;
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+int FastMath::round(const float v)
+{
+#if 0
+    return static_cast<int>(v);
+#else
+    return std::lround(v);
+#endif
 }

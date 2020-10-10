@@ -12,7 +12,7 @@
 class StringUtil
 {
 public:
-    static std::string lower(const std::string &s)
+    static std::string lower(const std::string& s)
     {
         auto _s = s;
         std::transform(_s.begin(), _s.end(), _s.begin(), [](const unsigned char c) { return std::tolower(c); });

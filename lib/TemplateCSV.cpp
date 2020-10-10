@@ -24,7 +24,7 @@ bool TemplateCSV::load(const std::string& path)
     auto& minutiae = fps.emplace_back();
 
     std::string line;
-    unsigned int width{}, height{};
+    unsigned int width {}, height {};
 
     if (std::getline(f, line)) {
         std::stringstream ss(line);
@@ -39,8 +39,8 @@ bool TemplateCSV::load(const std::string& path)
         logError("invalid width or height " << path);
         return false;
     }
-    unsigned int type{}, x{}, y{};
-    float angle{};
+    unsigned int type {}, x {}, y {};
+    float angle {};
 
     while (std::getline(f, line)) {
         std::stringstream ss(line);

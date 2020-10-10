@@ -7,7 +7,7 @@
 #include "Field.h"
 #include "Pair.h"
 
-#include <unordered_set>
+#include <array>
 #include <vector>
 
 
@@ -22,7 +22,7 @@ public:
     };
 
     using Distances = std::vector<Field::MinutiaCoordType>;
-    using Dupes = std::unordered_set<Field::MinutiaKeyType, DupesHash>;
+    using Dupes = std::pair<std::array<bool, Field::MinutiaCoordMatrixSize>, std::array<bool, Field::MinutiaCoordMatrixSize>>;
 
     explicit Triplet(const MinutiaPoint::Minutiae& minutiae);
     Triplet() = default;

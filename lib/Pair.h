@@ -6,12 +6,15 @@
 #include "Config.h"
 #include "MinutiaPoint.h"
 
+#include <unordered_set>
+
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class Pair
 {
 public:
     using Pairs = std::vector<Pair>;
+    using Set = std::unordered_set<const Pair*>;
 
     Pair(const float similarity, const MinutiaPoint* probe, const MinutiaPoint* candidate)
         : m_similarity(similarity)

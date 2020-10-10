@@ -22,6 +22,8 @@ private:
 
     static void addMinutiae(std::string& svg, const Fingerprint& fp);
     static void addPairs(std::string& svg1, std::string& svg2, const Fingerprint& fp1, const Fingerprint& fp2);
+    static void open(std::string& svg, const Dimensions& dimensions);
+    static void close(std::string& svg);
 };
 
 #endif // RENDER_H

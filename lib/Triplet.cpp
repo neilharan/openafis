@@ -70,7 +70,7 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Tripl
 {
     // Theorems 1, 2 & 3...
     for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
-        if (abs(m_distances[i] - probe.distances()[i]) >= Param::MaximumLocalDistance) {
+        if (std::abs(m_distances[i] - probe.distances()[i]) >= Param::MaximumLocalDistance) {
             return;
         }
     }
@@ -85,7 +85,7 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Tripl
             auto max = 0;
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                const auto d = abs(m_minutiae[i].distance() - probe.minutiae()[shift[i]].distance());
+                const auto d = std::abs(m_minutiae[i].distance() - probe.minutiae()[shift[i]].distance());
                 if (d > Param::MaximumLocalDistance) {
                     return 1.0f;
                 }
@@ -97,16 +97,10 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Tripl
             continue;
         }
 
-        // Equation 1...
-        const auto minimumAngle = [](const float a, const float b) {
-            const auto d = abs(a - b);
-            return std::min(d, FastMath::PI2 - d);
-        };
-
         // Equation 7 (3 iterations)...
         const auto directions = [&]() {
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                if (minimumAngle(m_minutiae[i].angle(), probe.minutiae()[shift[i]].angle()) > Param::MaximumDirectionDifference) {
+                if (FastMath::minimumAngle(m_minutiae[i].angle(), probe.minutiae()[shift[i]].angle()) > Param::MaximumDirectionDifference) {
                     return false;
                 }
             }
@@ -116,27 +110,19 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Tripl
             continue;
         }
 
-        // Equation 2...
-        const auto rotateAngle = [](const float a, const float b) {
-            if (b > a) {
-                return b - a;
-            }
-            return b - a + FastMath::PI2;
-        };
-
         // Equation 10 (3 iterations)...
         const auto anglesBeta = [&]() {
-            auto max = 0.0f;
+            float max {};
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
                 const auto j = Shifting[1][i];
-                const auto q = rotateAngle(m_minutiae[i].angle(), m_minutiae[j].angle());
-                const auto t = rotateAngle(probe.minutiae()[shift[i]].angle(), probe.minutiae()[shift[j]].angle());
-                const auto d = minimumAngle(q, t);
+                const auto c = FastMath::rotateAngle(m_minutiae[i].angle(), m_minutiae[j].angle());
+                const auto p = FastMath::rotateAngle(probe.minutiae()[shift[i]].angle(), probe.minutiae()[shift[j]].angle());
+                const auto d = FastMath::minimumAngle(c, p);
                 if (d >= Param::MaximumAngleDifference) {
                     return 1.0f;
                 }
-                if (abs(d) <= Param::EqualAngleDifference) {
+                if (std::abs(d) <= Param::EqualAngleDifference) {
                     return 0.0f; // short-cut
                 }
                 max = std::max(max, d);
@@ -149,7 +135,7 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Tripl
 
         // Equation 9 (6 iterations)...
         const auto anglesAlpha = [&]() {
-            auto max = 0.0f;
+            float max {};
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
                 for (decltype(shift.size()) j = 0; j < shift.size(); ++j) {
@@ -158,17 +144,17 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Tripl
                     }
                     const auto y = m_minutiae[i].y() - m_minutiae[j].y();
                     const auto x = m_minutiae[i].x() - m_minutiae[j].x();
-                    const auto d = rotateAngle(m_minutiae[i].angle(), FastMath::iatan2(y, x));
+                    const auto d = FastMath::rotateAngle(m_minutiae[i].angle(), FastMath::iatan2(y, x));
 
                     const auto oy = probe.minutiae()[shift[i]].y() - probe.minutiae()[shift[j]].y();
                     const auto ox = probe.minutiae()[shift[i]].x() - probe.minutiae()[shift[j]].x();
-                    const auto od = rotateAngle(probe.minutiae()[shift[i]].angle(), FastMath::iatan2(oy, ox));
+                    const auto od = FastMath::rotateAngle(probe.minutiae()[shift[i]].angle(), FastMath::iatan2(oy, ox));
 
-                    const auto ad = minimumAngle(d, od);
+                    const auto ad = FastMath::minimumAngle(d, od);
                     if (ad >= Param::MaximumAngleDifference) {
                         return 1.0f;
                     }
-                    if (abs(ad) <= Param::EqualAngleDifference) {
+                    if (std::abs(ad) <= Param::EqualAngleDifference) {
                         return 0.0f; // short-cut
                     }
                     max = std::max(max, ad);
@@ -191,12 +177,17 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Tripl
     if (maxShift) {
         const auto& pm = probe.minutiae();
         for (decltype(m_minutiae.size()) i = 0; i < m_minutiae.size(); ++i) {
-            const auto& mc = m_minutiae[i];
-            const auto& mp = pm[(*maxShift)[i]];
+            const auto& mc = m_minutiae[(*maxShift)[i]];
+            const auto& mp = pm[i];
 
-            const auto kc = dupes.emplace(mc.key());
-            const auto kp = dupes.emplace(1 << 16 | mp.key());
-            if (kc.second || kp.second) {
+            bool z {};
+            if (!dupes.first[mc.key()]) {
+                z = dupes.first[mc.key()] = true;
+            }
+            if (!dupes.second[mp.key()]) {
+                z &= (dupes.second[mp.key()] = true);
+            }
+            if (z) {
                 pairs.emplace_back(maxS, &mp, &mc);
             }
         }
@@ -207,9 +198,7 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Tripl
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 size_t Triplet::bytes() const
 {
-    return sizeof(*this)
-        + std::accumulate(m_minutiae.begin(), m_minutiae.end(), 0, [](int sum, const auto& m) { return sum + m.bytes(); })
-        + m_distances.capacity() * sizeof(decltype(m_distances[0]));
+    return sizeof(*this) + std::accumulate(m_minutiae.begin(), m_minutiae.end(), 0, [](int sum, const auto& m) { return sum + m.bytes(); }) + m_distances.capacity() * sizeof(decltype(m_distances[0]));
 }
 
 

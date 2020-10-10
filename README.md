@@ -14,13 +14,13 @@ The goal is to accurately identify one minutiae-set from 50K candidate sets with
   | ---- | -------- | ----- |
   | Template loading | 100% | |
   | Local matching | 100% | |
-  | Global matching | 80% | |
+  | Global matching | 100% | |
   | CMake support | | |
-  | Test suite | 10% | EER, FMR100, FMR1000, ZeroFMR |
+  | Test suite | 20% | EER, FMR100, FMR1000, ZeroFMR |
   | Benchmarks | | |
   | Optimizing | | float->int, vectorization (SSE/AVX), math functions |
   | Parallelizing | | |
-  | Minutiae/pair rendering | 50% | SVG output |
+  | Minutiae/pair rendering | 100% | SVG output |
   | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction function) |
 
 ## Supported operating systems
@@ -64,15 +64,16 @@ Delaunay 2D Triangulation (https://github.com/delfrrr/delaunator-cpp) [MIT Licen
 ## Example
 
 ```C++
-TemplateISO19794_2_2005<unsigned short> t1(1);
-assert(t1.load("./data/njh0.iso"));
+TemplateISO19794_2_2005 t1(101);
+assert(t1.load("./fvc2002/DB1_B/101_1.iso"));
 std::cout << "template " << t1.id() << ": size " << t1.size() << " bytes, #fingerprints " << t1.lmts().size() << std::endl;
 
-TemplateISO19794_2_2005<unsigned short> t2(2);
-assert(t2.load("./data/njh1.iso"));
+TemplateISO19794_2_2005 t2(102);
+assert(t2.load("./fvc2002/DB1_B/101_2.iso"));
 std::cout << "template " << t2.id() << ": size " << t2.size() << " bytes, #fingerprints " << t2.lmts().size()) << std::endl;
 
-std::cout << "score " << Score<unsigned short>().compute(t1, t2);
+static Match<unsigned int> match;
+std::cout << "similarity = " << match.compute(s, t1, t2);
 ```
 
 ## Benchmarking
@@ -85,9 +86,9 @@ std::cout << "score " << Score<unsigned short>().compute(t1, t2);
   | Memory usage | | CPU | Production | |
   | Memory usage | | Memory | Production | |
   | Memory usage | | CPU | Research | |
-  | 1:N score time | 1 | CPU | Production | |
-  | 1:N score time | 4 | CPU | Production | |
-  | 1:N score time | | Memory | Production | |
+  | 1:N match time | 1 | CPU | Production | |
+  | 1:N match time | 4 | CPU | Production | |
+  | 1:N match time | | Memory | Production | |
 
 ### aarch64
 
@@ -97,9 +98,9 @@ std::cout << "score " << Score<unsigned short>().compute(t1, t2);
   | Memory usage | | CPU | Production | |
   | Memory usage | | Memory | Production | |
   | Memory usage | | CPU | Research | |
-  | 1:N score time | 1 | CPU | Production | |
-  | 1:N score time | 4 | CPU | Production | |
-  | 1:N score time | | Memory | Production | |
+  | 1:N match time | 1 | CPU | Production | |
+  | 1:N match time | 4 | CPU | Production | |
+  | 1:N match time | | Memory | Production | |
 
 ¹ 19794-2:2005 templates pre-loaded in memory. The time taken to produce indexed in-memory templates is recorded (we're not measuring disk I/O here).
 

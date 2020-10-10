@@ -6,6 +6,7 @@
 #include "Config.h"
 
 #include <cstdint>
+#include <limits>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -20,6 +21,9 @@ using TripletIndexType = uint8_t;
 
 // Coordinates and distances are always scaled to 8-bits so uint8_t is sufficient...
 using MinutiaCoordType = uint8_t;
+constexpr size_t MinutiaCoordMax = std::numeric_limits<Field::MinutiaCoordType>::max();
+constexpr size_t MinutiaCoordMatrixSize = (MinutiaCoordMax + 1) * (MinutiaCoordMax + 1);
+
 using MinutiaKeyType = uint32_t;
 };
 

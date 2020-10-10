@@ -9,7 +9,6 @@
 #include <array>
 #include <cassert>
 #include <cmath>
-#include <limits>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,6 +22,9 @@ public:
     static float iatan2(int x, int y);
     static float degreesToRadians(unsigned int theta);
     static unsigned int radiansToDegrees(float theta);
+    static float minimumAngle(float a, float b);
+    static float rotateAngle(float a, float b);
+    static int round(float v);
 
 private:
     class SquareRoots
@@ -45,7 +47,7 @@ private:
             return (*m_values)[x];
         }
 
-        static constexpr auto Max = std::numeric_limits<Field::MinutiaCoordType>::max() * std::numeric_limits<Field::MinutiaCoordType>::max();
+        static constexpr auto Max = static_cast<int>(Field::MinutiaCoordMatrixSize);
 
     private:
         using Values = std::array<Field::MinutiaCoordType, Max>;
@@ -75,8 +77,8 @@ private:
             return (*m_values)[x - Min][y - Min];
         }
 
-        static constexpr auto Min = -std::numeric_limits<Field::MinutiaCoordType>::max();
-        static constexpr auto Max = std::numeric_limits<Field::MinutiaCoordType>::max();
+        static constexpr auto Min = -static_cast<int>(Field::MinutiaCoordMax);
+        static constexpr auto Max = static_cast<int>(Field::MinutiaCoordMax);
 
     private:
         using Values = std::array<std::array<float, Max - Min>, Max - Min>;

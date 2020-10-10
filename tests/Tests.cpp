@@ -25,7 +25,7 @@ constexpr auto LineWidth = 100;
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Loading/enrolling efficiency is relevant too...
 //
-static void testBulkLoad(const std::string &path)
+static void testBulkLoad(const std::string& path)
 {
     logTest(std::string(LineWidth, '='));
     logTest(StringUtil::center("BULK LOAD TEMPLATE TEST", LineWidth));
@@ -81,7 +81,7 @@ static void testBulkLoad(const std::string &path)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Crude matching efficiency & efficacy test...
 //
-static void testMatchSingle(const std::string &path)
+static void testMatchSingle(const std::string& path)
 {
     logTest(std::string(LineWidth, '='));
     logTest(StringUtil::center("1:1 SIMPLE 50K ITERATION MATCH TEST", LineWidth));
@@ -89,7 +89,7 @@ static void testMatchSingle(const std::string &path)
 
     logTest("Loading...");
 
-#if 0
+#if 1
     TemplateCSV t1_1(101);
     if (!t1_1.load("101_1.csv")) {
         return;
@@ -102,7 +102,7 @@ static void testMatchSingle(const std::string &path)
 #endif
     logTest("Template " << t1_1.id() << ": size " << t1_1.bytes() << " bytes, #fingerprints " << t1_1.fingerprints().size());
 
-#if 0
+#if 1
     TemplateCSV t1_2(107);
     if (!t1_2.load("101_7.csv")) {
         return;
@@ -128,7 +128,7 @@ static void testMatchSingle(const std::string &path)
     const auto test = [](const Template& a, const Template& b) {
         static const int Passes = 5;
         static const int Iterations = 50000;
-        Match<unsigned int> match;
+        static Match<unsigned int> match;
 
         for (auto i = 0; i < Passes; ++i) {
             unsigned int s {};
@@ -153,7 +153,7 @@ static void testMatchSingle(const std::string &path)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-static void testMatchMany(const std::string &path)
+static void testMatchMany(const std::string& path)
 {
     logTest(std::string(LineWidth, '='));
     logTest(StringUtil::center("N:N SIMPLE MATCH EFFICACY TEST", LineWidth));
@@ -179,10 +179,10 @@ static void testMatchMany(const std::string &path)
             const std::vector<std::string> parts(std::sregex_token_iterator(stem.begin(), stem.end(), re, -1), {});
             if (parts.size() != 2) {
                 logError("unknown FVC dataset [file] " << p);
-                return uint32_t{};
+                return uint32_t {};
             }
             const auto s = StringUtil::lower(p.string());
-            Field::TemplateIdType id{};
+            Field::TemplateIdType id {};
 
             // Yes, there are better ways to do this...
             if (StringUtil::contains(s, "fvc2002")) {
@@ -193,7 +193,7 @@ static void testMatchMany(const std::string &path)
                 id |= 2006 << 20;
             } else {
                 logError("unknown FVC dataset [year] " << p);
-                return uint32_t{};
+                return uint32_t {};
             }
 
             if (StringUtil::contains(s, "db1_b")) {
@@ -206,14 +206,14 @@ static void testMatchMany(const std::string &path)
                 id |= 4 << 16;
             } else {
                 logError("unknown FVC dataset [set] " << p);
-                return uint32_t{};
+                return uint32_t {};
             }
             id |= std::stoul(parts[0]) << 8; // eg. 101
             id |= std::stoul(parts[1]);
             return id;
         };
-        
-        auto &t = templates.emplace_back(id());
+
+        auto& t = templates.emplace_back(id());
         if (!t.load(p.string())) {
             logError("failed to load " << p);
             return;
@@ -227,12 +227,12 @@ static void testMatchMany(const std::string &path)
 
     logTest("Matching " << scores.capacity() << " permutations...");
 
-    Match<unsigned int> match;
-    size_t i{};
+    static Match<unsigned int> match;
+    size_t i {};
 
     const auto start = std::chrono::high_resolution_clock::now();
-    for (const auto &t1 : templates) {
-        for (const auto &t2 : templates) {
+    for (const auto& t1 : templates) {
+        for (const auto& t2 : templates) {
             match.compute(scores[i++], t1.fingerprints()[0], t2.fingerprints()[0]);
             if ((i % 50000) == 0) {
                 logTest("Matched " << i);
@@ -241,7 +241,8 @@ static void testMatchMany(const std::string &path)
     }
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    logTest("Completed " << " in " << ms.count() << "ms");
+    logTest("Completed "
+        << " in " << ms.count() << "ms");
 
     logTest("Reporting...");
 
@@ -260,32 +261,29 @@ static void testMatchMany(const std::string &path)
         return;
     }
 
-    const auto expandId = [](const Field::TemplateIdType id) {
-        return StringUtil::format(R"(FVC%d-DB%d_B-%d_%d)", id >> 20, (id >> 16) & 0xf, (id >> 8) & 0xff, id & 0xff);
-    };
+    const auto expandId = [](const Field::TemplateIdType id) { return StringUtil::format(R"(FVC%d-DB%d_B-%d_%d)", id >> 20, (id >> 16) & 0xf, (id >> 8) & 0xff, id & 0xff); };
 
     i = 0;
-    for (const auto &t1 : templates) {
+    for (const auto& t1 : templates) {
         f << "," << expandId(t1.id());
     }
     f << std::endl;
-    for (const auto &t1 : templates) {
+    for (const auto& t1 : templates) {
         f << expandId(t1.id());
 
-        for (const auto &t2 : templates) {
+        for (const auto& t2 : templates) {
             std::ignore = t2;
             f << "," << scores[i++];
         }
         f << std::endl;
     }
     logTest("Written " << fn);
-
     logTest(std::string(LineWidth, '=') << std::endl << std::endl);
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-static void testRender(const std::string &path)
+static void testRender(const std::string& path)
 {
     logTest(std::string(LineWidth, '='));
     logTest(StringUtil::center("MINUTIAE PAIRING RENDER TEST", LineWidth));
@@ -323,7 +321,7 @@ static void testRender(const std::string &path)
     }
 
     const auto test = [](const Template& a, const Template& b) {
-        const auto write = [](const Template& t, const std::string &svg) {
+        const auto write = [](const Template& t, const std::string& svg) {
             const auto fn = StringUtil::format(R"(%s.svg)", std::to_string(t.id()).c_str());
             std::ofstream f(fn, std::ofstream::binary);
             if (!f) {
@@ -350,12 +348,11 @@ static void testRender(const std::string &path)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 int main(int, const char**)
 {
-    //const std::string path = "/dev/project/os/openafis/data/valid"; // NJH-TODO from command line
-    const std::string path = "/dev/project/os/openafis/data/psy"; // NJH-TODO from command line
+    const std::string path = "/dev/project/os/openafis/data/valid"; // NJH-TODO from command line
 
-//    testBulkLoad(path);
-//    testMatchSingle(path);
+    testBulkLoad(path);
+    testMatchSingle(path);
     testMatchMany(path);
-//    testRender(path);
+    testRender(path);
     return 0;
 }

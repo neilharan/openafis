@@ -24,13 +24,13 @@ public:
     Fingerprint(const size_t minutiaeCount, const size_t tripletsCount
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
         ,
-        const Dimensions& dimensions, const Minutiae& minutiae
+        Dimensions dimensions, Minutiae minutiae
 #endif
         )
         : m_minutiaeCount(minutiaeCount)
 #ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-        , m_dimensions(dimensions)
-        , m_minutiae(minutiae)
+        , m_dimensions(std::move(dimensions))
+        , m_minutiae(std::move(minutiae))
 #endif
     {
         m_triplets.reserve(tripletsCount);
