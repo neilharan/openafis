@@ -60,6 +60,7 @@ Delaunay 2D Triangulation (https://github.com/delfrrr/delaunator-cpp) [MIT Licen
 ## Supported minutiae template formats
 
 - ISO/IEC 19794-2:2005 (https://www.iso.org/standard/38746.html)
+- CSV. For research and interchange purposes
 
 ## Results
 
