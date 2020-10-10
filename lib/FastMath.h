@@ -47,7 +47,7 @@ private:
             return (*m_values)[x];
         }
 
-        static constexpr auto Max = static_cast<int>(Field::MinutiaCoordMatrixSize);
+        static constexpr auto Max = static_cast<int>(Field::MinutiaCoordMatrixSize) * 2;
 
     private:
         using Values = std::array<Field::MinutiaCoordType, Max>;

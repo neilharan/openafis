@@ -21,10 +21,11 @@ template <typename T> void Match<T>::compute(const Template&, const Template&) c
 template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe, const Fingerprint& candidate) const
 {
     m_pairs.clear();
-    m_dupes.first.fill(false);
-    m_dupes.second.fill(false);
+    m_dupes.first.fill(0);
+    m_dupes.second.fill(0);
 
     const auto& candidateT = candidate.triplets();
+    unsigned int oust{};
 
     // Local matching 5.1.1-5...
     for (const auto& probeT : probe.triplets()) {
@@ -32,13 +33,16 @@ template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe
         const auto end = std::upper_bound(it, candidateT.end(), probeT.distances()[0] + Param::MaximumLocalDistance); // NJH-TODO profile these - possibly bake custom binary search
 
         for (; it < end; ++it) {
-            it->emplacePair(m_pairs, m_dupes, probeT);
+            probeT.emplacePair(m_pairs, m_dupes, oust, *it);
         }
     }
     if (m_pairs.size() < Param::MinimumMinutiae) {
         return;
     }
     std::sort(m_pairs.begin(), m_pairs.end());
+    for(; oust; --oust) {
+        m_pairs.pop_back();
+    }
 
     // Global matching 5.2...
     auto maxMatched = 0;
@@ -65,13 +69,14 @@ template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe
                     = p1.candidate()->x() + FastMath::round(cosTheta * static_cast<float>(p2.probe()->x() - p1.probe()->x()) - sinTheta * static_cast<float>(p2.probe()->y() - p1.probe()->y()));
                 const auto y
                     = p1.candidate()->y() + FastMath::round(sinTheta * static_cast<float>(p2.probe()->x() - p1.probe()->x()) + cosTheta * static_cast<float>(p2.probe()->y() - p1.probe()->y()));
+
                 const auto a = x - p2.candidate()->x();
                 const auto b = y - p2.candidate()->y();
                 const auto c = a * a + b * b;
-                if (c > std::numeric_limits<Field::MinutiaCoordType>::max()) {
+                if (c > Param::MaximumGlobalDistance * Param::MaximumGlobalDistance) {
                     return false;
                 }
-                return static_cast<Field::MinutiaCoordType>(FastMath::isqrt(c)) <= Param::MaximumGlobalDistance;
+                return FastMath::isqrt(c) <= Param::MaximumGlobalDistance;
             }();
             if (!length) {
                 continue;

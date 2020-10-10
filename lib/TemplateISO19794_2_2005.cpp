@@ -105,7 +105,7 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
                 return false;
             }
             const auto adjustedAngle = [mp]() {
-                const auto a = static_cast<unsigned short>(static_cast<float>(mp->angle) * (360.0f / 256.0f) + 90.0f);
+                const auto a = static_cast<unsigned short>(360.0f - static_cast<float>(mp->angle) * (360.0f / 256.0f));
                 return a > 360 ? a - 360 : a;
             };
             minutiae.emplace_back(

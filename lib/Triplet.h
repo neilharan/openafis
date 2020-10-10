@@ -22,12 +22,12 @@ public:
     };
 
     using Distances = std::vector<Field::MinutiaCoordType>;
-    using Dupes = std::pair<std::array<bool, Field::MinutiaCoordMatrixSize>, std::array<bool, Field::MinutiaCoordMatrixSize>>;
+    using Dupes = std::pair<std::array<float, Field::MinutiaCoordMatrixSize>, std::array<float, Field::MinutiaCoordMatrixSize>>;
 
     explicit Triplet(const MinutiaPoint::Minutiae& minutiae);
     Triplet() = default;
 
-    void emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Triplet& probe) const;
+    void emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, unsigned int& oust, const Triplet& probe) const;
 
     [[nodiscard]] const MinutiaPoint::Minutiae& minutiae() const { return m_minutiae; }
     [[nodiscard]] const Distances& distances() const { return m_distances; }
@@ -48,7 +48,7 @@ private:
     static MinutiaPoint::Minutiae shiftClockwise(MinutiaPoint::Minutiae minutiae);
     static Distances sortDistances(const MinutiaPoint::Minutiae& minutiae);
 
-    MinutiaPoint::Minutiae m_minutiae;
+    MinutiaPoint::Minutiae m_minutiae; // three points making up the triplet
     Distances m_distances {}; // max, mid, min side lengths respectively (sorted minutiae distances)
 };
 

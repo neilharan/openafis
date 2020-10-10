@@ -66,7 +66,7 @@ Triplet::Distances Triplet::sortDistances(const MinutiaPoint::Minutiae& minutiae
 // Compute similarity per 5.1.1-3
 // Note: equation return values are inverted...
 //
-void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Triplet& probe) const
+void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, unsigned int& oust, const Triplet& probe) const
 {
     // Theorems 1, 2 & 3...
     for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
@@ -169,23 +169,34 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, const Tripl
         if (s > maxS) {
             maxS = s;
             maxShift = &shift;
-        }
-        if (s == 1.0f) {
-            break; // short-cut
+
+            if (s == 1.0f) {
+                break; // short-cut
+            }
         }
     }
     if (maxShift) {
         const auto& pm = probe.minutiae();
         for (decltype(m_minutiae.size()) i = 0; i < m_minutiae.size(); ++i) {
-            const auto& mc = m_minutiae[(*maxShift)[i]];
-            const auto& mp = pm[i];
+            const auto& mc = m_minutiae[i];
+            const auto& mp = pm[(*maxShift)[i]];
 
             bool z {};
-            if (!dupes.first[mc.key()]) {
-                z = dupes.first[mc.key()] = true;
+            const auto dsc = dupes.first[mc.key()];
+            if (dsc < maxS) {
+                dupes.first[mc.key()] = maxS;
+                if (dsc) {
+                    oust++;
+                }
+                z = true;
             }
-            if (!dupes.second[mp.key()]) {
-                z &= (dupes.second[mp.key()] = true);
+            const auto dsp = dupes.second[mp.key()];
+            if (dsp < maxS) {
+                dupes.second[mp.key()] = maxS;
+                if (dsp && !z) {
+                    oust++;
+                }
+                z |= true;
             }
             if (z) {
                 pairs.emplace_back(maxS, &mp, &mc);
