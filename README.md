@@ -61,6 +61,21 @@ Delaunay 2D Triangulation (https://github.com/delfrrr/delaunator-cpp) [MIT Licen
 
 - ISO/IEC 19794-2:2005 (https://www.iso.org/standard/38746.html)
 
+## Results
+
+#### Minutiae and matched pair rendering
+
+[![](examples/fvc2002_db1_b_101_1.png)]()
+[![](examples/fvc2002_db1_b_101_7.png)]()
+
+FVC2002 DB1_B 101_1 and 101_7 respectively. The implementation can reliably match displaced and rotated minutiae.
+
+These images were produced by the included Render class. The output of that class is two SVG's identifying (a) all minutiae, (b) paired minutiae (in blue), and (c) similarity scores of pairs. The SVG's were then overlayed on top of the original FVC tif's.
+
+#### Efficacy
+
+TODO
+
 ## Example
 
 ```C++
@@ -78,7 +93,9 @@ std::cout << "similarity = " << match.compute(s, t1, t2);
 
 ## Benchmarking
 
-### x86-64
+TODO
+
+#### x86-64
 
   | METRIC | THREADS | OPTIMIZATION | PRODUCTION/RESEARCH | RESULT |
   | ------ | ------- | ------------ | ------------------- | ------ |
@@ -90,7 +107,7 @@ std::cout << "similarity = " << match.compute(s, t1, t2);
   | 1:N match time | 4 | CPU | Production | |
   | 1:N match time | | Memory | Production | |
 
-### aarch64
+#### aarch64
 
   | METRIC | THREADS | OPTIMIZATION | PRODUCTION/RESEARCH | RESULT |
   | ------ | ------- | ------------ | ------------------- | ------ |
