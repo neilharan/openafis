@@ -1,4 +1,4 @@
-# OpenAFIS
+[![](logo/logo.png)]()
 
 A high-performance one-to-many (1:N) fingerprint matching library for commodity hardware, written in modern platform-independent C++.
 
@@ -16,7 +16,7 @@ The goal is to accurately identify one minutiae-set from 50K candidate sets with
   | Local matching | 100% | |
   | Global matching | 100% | |
   | CMake support | | |
-  | Test suite | 20% | EER, FMR100, FMR1000, ZeroFMR |
+  | Test suite | 30% | EER, FMR100, FMR1000, ZeroFMR |
   | Benchmarks | | |
   | Optimizing | | float->int, vectorization (SSE/AVX), math functions |
   | Parallelizing | | |
@@ -66,14 +66,16 @@ Delaunay 2D Triangulation (https://github.com/delfrrr/delaunator-cpp) [MIT Licen
 
 #### Minutiae and matched pair rendering
 
-[![](examples/fvc2002_db1_b_101_1.png)]()
-[![](examples/fvc2002_db1_b_101_7.png)]()
+[![](results/fvc2002_db1_b_101_1.png)]()
+[![](results/fvc2002_db1_b_101_7.png)]()
 
 FVC2002 DB1_B 101_1 and 101_7 respectively. The implementation can reliably match displaced and rotated minutiae.
 
 These images were produced by the included Render class. The output of that class is two SVG's identifying (a) all minutiae, (b) paired minutiae (in blue), and (c) similarity scores of pairs. The SVG's were then overlayed on top of the original FVC tif's.
 
 #### Efficacy
+
+Preliminary M:M [RESULTS] matching all FVC 2002/2004 impressions against each other.
 
 TODO
 
@@ -120,7 +122,7 @@ TODO
   | 1:N match time | 4 | CPU | Production | |
   | 1:N match time | | Memory | Production | |
 
-¹ 19794-2:2005 templates pre-loaded in memory. The time taken to produce indexed in-memory templates is recorded (we're not measuring disk I/O here).
+¹ 19794-2:2005 templates pre-loaded in memory. The time taken to produce indexed in-memory structures is recorded (we're not measuring disk I/O here).
 
 ## Licensing
 
@@ -128,3 +130,4 @@ OpenAFIS is licensed under the BSD 2-Clause License. See [LICENSE][] for the ful
 
 [LICENSE]: https://github.com/neilharan/openafis/blob/master/LICENSE
 [EXTRACT]: https://github.com/neilharan/openafis/blob/master/data/extract.py
+[RESULTS]: https://github.com/neilharan/openafis/blob/master/results/results.csv

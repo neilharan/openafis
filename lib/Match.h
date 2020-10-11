@@ -14,14 +14,19 @@
 template <typename T> class Match
 {
 public:
-    Match() { m_pairs.reserve(64); }
+    Match()
+    {
+        m_tripletPairs.reserve(100);
+        m_pairs.reserve(100);
+    }
 
     void compute(const Template& probe, const Template& candidate) const;
     void compute(T& result, const Fingerprint& probe, const Fingerprint& candidate) const;
 
 private:
-    mutable Pair::Pairs m_pairs;
+    mutable Triplet::Pair::Pairs m_tripletPairs;
     mutable Triplet::Dupes m_dupes;
+    mutable MinutiaPoint::Pair::Pairs m_pairs;
 };
 
 #endif // MATCH_H

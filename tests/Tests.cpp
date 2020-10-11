@@ -89,30 +89,16 @@ static void testMatchSingle(const std::string& path)
 
     logTest("Loading...");
 
-#if 1
-    TemplateCSV t1_1(107);
-    if (!t1_1.load("101_7.csv")) {
-        return;
-    }
-#else
     TemplateISO19794_2_2005 t1_1(101);
-    if (!t1_1.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_5.iso)", path.c_str()))) {
+    if (!t1_1.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_1.iso)", path.c_str()))) {
         return;
     }
-#endif
     logTest("Template " << t1_1.id() << ": size " << t1_1.bytes() << " bytes, #fingerprints " << t1_1.fingerprints().size());
 
-#if 1
-    TemplateCSV t1_2(108);
-    if (!t1_2.load("101_8.csv")) {
-        return;
-    }
-#else
     TemplateISO19794_2_2005 t1_2(102);
-    if (!t1_2.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_6.iso)", path.c_str()))) {
+    if (!t1_2.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_2.iso)", path.c_str()))) {
         return;
     }
-#endif
     logTest("Template " << t1_2.id() << ": size " << t1_2.bytes() << " bytes, #fingerprints " << t1_2.fingerprints().size());
 
     TemplateISO19794_2_2005 t2_1(201);
@@ -126,8 +112,8 @@ static void testMatchSingle(const std::string& path)
     }
 
     const auto test = [](const Template& a, const Template& b) {
-        static const int Passes = 1;//5;
-        static const int Iterations = 1;//50000;
+        static const int Passes = 5;
+        static const int Iterations = 50000;
         static Match<unsigned int> match;
 
         for (auto i = 0; i < Passes; ++i) {
@@ -241,8 +227,7 @@ static void testMatchMany(const std::string& path)
     }
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    logTest("Completed "
-        << " in " << ms.count() << "ms");
+    logTest("Completed " << " in " << ms.count() << "ms");
 
     logTest("Reporting...");
 
@@ -291,31 +276,16 @@ static void testRender(const std::string& path)
 
     logTest("Loading...");
 
-#if 0
-    TemplateCSV t1_1(101);
-    if (!t1_1.load("101_1.csv")) {
-        return;
-    }
-#else
     TemplateISO19794_2_2005 t1_1(101);
     if (!t1_1.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_1.iso)", path.c_str()))) {
         return;
     }
-#endif
     logTest("Template " << t1_1.id() << ": size " << t1_1.bytes() << " bytes, #fingerprints " << t1_1.fingerprints().size());
 
-#if 0
-    TemplateCSV t1_2(107);
-    if (!t1_2.load("101_7.csv")) {
-        return;
-    }
-#else
     TemplateISO19794_2_2005 t1_2(107);
     if (!t1_2.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_7.iso)", path.c_str()))) {
         return;
     }
-#endif
-
     if (t1_1.fingerprints().empty() || t1_2.fingerprints().empty()) {
         return;
     }
@@ -349,11 +319,10 @@ static void testRender(const std::string& path)
 int main(int, const char**)
 {
     const std::string path = "/dev/project/os/openafis/data/valid"; // NJH-TODO from command line
-//    const std::string path = "/dev/project/os/openafis/data/psy";
 
-//    testBulkLoad(path);
-//    testMatchSingle(path);
-//    testMatchMany(path);
+    testBulkLoad(path);
+    testMatchSingle(path);
+    testMatchMany(path);
     testRender(path);
     return 0;
 }

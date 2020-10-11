@@ -5,7 +5,7 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "Config.h"
 #include "Field.h"
-#include "Pair.h"
+#include "MinutiaPoint.h"
 
 #include <array>
 #include <vector>
@@ -15,6 +15,32 @@
 class Triplet
 {
 public:
+    class Pair
+    {
+    public:
+        using Pairs = std::vector<Pair>;
+
+        Pair() = default;
+
+        Pair(const float similarity, const Triplet* probe, const Triplet* candidate)
+            : m_similarity(similarity)
+            , m_probe(probe)
+            , m_candidate(candidate)
+        {
+        }
+
+        [[nodiscard]] float similarity() const { return m_similarity; }
+        [[nodiscard]] const Triplet* probe() const { return m_probe; }
+        [[nodiscard]] const Triplet* candidate() const { return m_candidate; }
+
+        bool operator<(const Pair& other) const { return m_similarity > other.m_similarity; } // descending sort
+
+    private:
+        float m_similarity {};
+        const Triplet* m_probe {};
+        const Triplet* m_candidate {};
+    };
+
     class DupesHash
     {
     public:
@@ -22,12 +48,12 @@ public:
     };
 
     using Distances = std::vector<Field::MinutiaCoordType>;
-    using Dupes = std::pair<std::array<float, Field::MinutiaCoordMatrixSize>, std::array<float, Field::MinutiaCoordMatrixSize>>;
+    using Dupes = std::pair<std::array<bool, Field::MinutiaCoordMatrixSize>, std::array<bool, Field::MinutiaCoordMatrixSize>>;
 
     explicit Triplet(const MinutiaPoint::Minutiae& minutiae);
     Triplet() = default;
 
-    void emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, unsigned int& oust, const Triplet& probe) const;
+    void emplacePair(Pair::Pairs& pairs, const Triplet& probe) const;
 
     [[nodiscard]] const MinutiaPoint::Minutiae& minutiae() const { return m_minutiae; }
     [[nodiscard]] const Distances& distances() const { return m_distances; }

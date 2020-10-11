@@ -8,6 +8,7 @@
 #include "FastMath.h"
 #include "Minutia.h"
 
+#include <unordered_set>
 #include <vector>
 
 // NJH-TODO
@@ -25,6 +26,39 @@
 class MinutiaPoint
 {
 public:
+    class Pair
+    {
+    public:
+        using Pairs = std::vector<Pair>;
+        using Set = std::unordered_set<const Pair*>;
+
+        Pair(const MinutiaPoint* probe, const MinutiaPoint* candidate
+#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
+            , const float similarity
+#endif
+        )
+            : m_probe(probe)
+            , m_candidate(candidate)
+#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
+            , m_similarity(similarity)
+#endif
+        {
+        }
+
+        [[nodiscard]] const MinutiaPoint* probe() const { return m_probe; }
+        [[nodiscard]] const MinutiaPoint* candidate() const { return m_candidate; }
+#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
+        [[nodiscard]] float similarity() const { return m_similarity; }
+#endif
+
+    private:
+        const MinutiaPoint* m_probe {};
+        const MinutiaPoint* m_candidate {};
+#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
+        float m_similarity {};
+#endif
+    };
+
     using Minutiae = std::vector<MinutiaPoint>;
 
     // co-ordinates (and therefore distances) are always scales for 8-bits...

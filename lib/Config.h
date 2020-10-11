@@ -3,8 +3,8 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#define OPENAFIS_FINGERPRINT_RENDERABLE
-#define OPENAFIS_TRIPLET_RENDERABLE
+// #define OPENAFIS_FINGERPRINT_RENDERABLE
+// #define OPENAFIS_TRIPLET_RENDERABLE
 
 #if defined(OPENAFIS_FINGERPRINT_RENDERABLE) && defined(OPENAFIS_TRIPLET_RENDERABLE)
 #define OPENAFIS_RENDER_AVAILABLE

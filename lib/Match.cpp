@@ -5,7 +5,6 @@
 #include "Param.h"
 
 #include <algorithm>
-#include <set>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -18,30 +17,53 @@ template <typename T> void Match<T>::compute(const Template&, const Template&) c
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // https://doi.org/10.3390/s120303418
 //
+#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
+#define SIMILARITY , p.similarity()
+#else
+#define SIMILARITY
+#endif
+
 template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe, const Fingerprint& candidate) const
 {
+    m_tripletPairs.clear();
+    m_dupes.first.fill(false);
+    m_dupes.second.fill(false);
     m_pairs.clear();
-    m_dupes.first.fill(0);
-    m_dupes.second.fill(0);
 
     const auto& candidateT = candidate.triplets();
-    unsigned int oust{};
 
-    // Local matching 5.1.1-5...
+    // Local matching 5.1.1-2...
     for (const auto& probeT : probe.triplets()) {
         auto it = std::lower_bound(candidateT.begin(), candidateT.end(), probeT.distances()[0] - Param::MaximumLocalDistance);
         const auto end = std::upper_bound(it, candidateT.end(), probeT.distances()[0] + Param::MaximumLocalDistance); // NJH-TODO profile these - possibly bake custom binary search
 
         for (; it < end; ++it) {
-            probeT.emplacePair(m_pairs, m_dupes, oust, *it);
+            probeT.emplacePair(m_tripletPairs, *it);
         }
     }
-    if (m_pairs.size() < Param::MinimumMinutiae) {
+    if (m_tripletPairs.size() < Param::MinimumMinutiae) {
         return;
     }
-    std::sort(m_pairs.begin(), m_pairs.end());
-    for(; oust; --oust) {
-        m_pairs.pop_back();
+
+    // Local matching 5.1.3-5...
+    std::sort(m_tripletPairs.begin(), m_tripletPairs.end());
+
+    for (const auto &p : m_tripletPairs) {
+        for (decltype(p.probe()->minutiae().size()) i = 0; i < p.probe()->minutiae().size(); ++i) {
+            bool z{};
+            auto& dp = m_dupes.first[p.probe()->minutiae()[i].key()];
+            if (!dp) {
+                dp = true;
+                z = true;
+            }
+            auto& dc = m_dupes.second[p.candidate()->minutiae()[i].key()];
+            if (!dc) {
+                dc = true;
+            } else if (!z) {
+                continue;
+            }
+            m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i] SIMILARITY);
+        }
     }
 
     // Global matching 5.2...
@@ -56,11 +78,8 @@ template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe
         auto min = m_pairs.size() - 1;
 
         for (const auto& p2 : m_pairs) {
-            if (p1.probe() == p2.probe() || p1.candidate() == p2.candidate()) {
+            if (&p1 == &p2) {
                 continue;
-            }
-            if (matched + --min < Param::MinimumMinutiae) {
-                break;
             }
 
             // 5.2.2...
@@ -73,10 +92,7 @@ template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe
                 const auto a = x - p2.candidate()->x();
                 const auto b = y - p2.candidate()->y();
                 const auto c = a * a + b * b;
-                if (c > Param::MaximumGlobalDistance * Param::MaximumGlobalDistance) {
-                    return false;
-                }
-                return FastMath::isqrt(c) <= Param::MaximumGlobalDistance;
+                return c <= Param::MaximumGlobalDistance * Param::MaximumGlobalDistance;
             }();
             if (!length) {
                 continue;
@@ -104,9 +120,12 @@ template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe
                 continue;
             }
             matched++;
+            if (matched + --min < Param::MinimumMinutiae) {
+                break;
+            }
 
             // When this class is specialized for rendering only - no overhead when computing similarities...
-            if constexpr (std::is_same<T, Pair::Set>::value) {
+            if constexpr (std::is_same<T, MinutiaPoint::Pair::Set>::value) {
                 result.insert(&p2);
             }
         }
@@ -120,4 +139,4 @@ template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 template class Match<unsigned int>;
-template class Match<Pair::Set>;
+template class Match<MinutiaPoint::Pair::Set>;

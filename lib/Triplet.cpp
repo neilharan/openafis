@@ -66,7 +66,7 @@ Triplet::Distances Triplet::sortDistances(const MinutiaPoint::Minutiae& minutiae
 // Compute similarity per 5.1.1-3
 // Note: equation return values are inverted...
 //
-void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, unsigned int& oust, const Triplet& probe) const
+void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
 {
     // Theorems 1, 2 & 3...
     for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
@@ -122,9 +122,6 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, unsigned in
                 if (d >= Param::MaximumAngleDifference) {
                     return 1.0f;
                 }
-                if (std::abs(d) <= Param::EqualAngleDifference) {
-                    return 0.0f; // short-cut
-                }
                 max = std::max(max, d);
             }
             return max / Param::MaximumAngleDifference;
@@ -154,9 +151,6 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, unsigned in
                     if (ad >= Param::MaximumAngleDifference) {
                         return 1.0f;
                     }
-                    if (std::abs(ad) <= Param::EqualAngleDifference) {
-                        return 0.0f; // short-cut
-                    }
                     max = std::max(max, ad);
                 }
             }
@@ -176,32 +170,7 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, unsigned in
         }
     }
     if (maxShift) {
-        const auto& pm = probe.minutiae();
-        for (decltype(m_minutiae.size()) i = 0; i < m_minutiae.size(); ++i) {
-            const auto& mc = m_minutiae[i];
-            const auto& mp = pm[(*maxShift)[i]];
-
-            bool z {};
-            const auto dsc = dupes.first[mc.key()];
-            if (dsc < maxS) {
-                dupes.first[mc.key()] = maxS;
-                if (dsc) {
-                    oust++;
-                }
-                z = true;
-            }
-            const auto dsp = dupes.second[mp.key()];
-            if (dsp < maxS) {
-                dupes.second[mp.key()] = maxS;
-                if (dsp && !z) {
-                    oust++;
-                }
-                z |= true;
-            }
-            if (z) {
-                pairs.emplace_back(maxS, &mp, &mc);
-            }
-        }
+        pairs.emplace_back(maxS, &probe, this);
     }
 }
 
@@ -209,7 +178,9 @@ void Triplet::emplacePair(Pair::Pairs& pairs, Triplet::Dupes& dupes, unsigned in
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 size_t Triplet::bytes() const
 {
-    return sizeof(*this) + std::accumulate(m_minutiae.begin(), m_minutiae.end(), 0, [](int sum, const auto& m) { return sum + m.bytes(); }) + m_distances.capacity() * sizeof(decltype(m_distances[0]));
+    return sizeof(*this) + 
+        std::accumulate(m_minutiae.begin(), m_minutiae.end(), 0, [](int sum, const auto& m) { return sum + m.bytes(); }) + 
+        m_distances.capacity() * sizeof(decltype(m_distances[0]));
 }
 
 

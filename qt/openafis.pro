@@ -17,7 +17,6 @@ HEADERS = \
     $$PWD/../lib/Match.h \
     $$PWD/../lib/Minutia.h \
     $$PWD/../lib/MinutiaPoint.h \
-    $$PWD/../lib/Pair.h \
     $$PWD/../lib/Param.h \
     $$PWD/../lib/Render.h \
     $$PWD/../lib/Template.h \

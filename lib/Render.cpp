@@ -101,8 +101,8 @@ void Render::addPairs(std::string& svg1, std::string& svg2, const Fingerprint& f
     const auto scaleX = static_cast<float>(fp1.dimensions().first) / 256.0f;
     const auto scaleY = static_cast<float>(fp1.dimensions().second) / 256.0f;
 
-    Pair::Set pairs;
-    const Match<Pair::Set> match;
+    MinutiaPoint::Pair::Set pairs;
+    const Match<decltype(pairs)> match;
     match.compute(pairs, fp1, fp2);
 
     for (const auto *p : pairs) {
