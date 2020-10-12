@@ -3,25 +3,29 @@
 #include "Log.h"
 
 #include <fstream>
-#include <iostream>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-const unsigned char TemplateISO19794_2_2005::MagicVersion[] = { 'F', 'M', 'R', 0, ' ', '2', '0', 0 };
+namespace OpenAFIS
+{
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool TemplateISO19794_2_2005::load(const std::string& path)
+template <class F> const unsigned char TemplateISO19794_2_2005<F>::MagicVersion[] = { 'F', 'M', 'R', 0, ' ', '2', '0', 0 };
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+template <class F> bool TemplateISO19794_2_2005<F>::load(const std::string& path)
 {
     std::basic_ifstream<uint8_t> f(path, std::ifstream::in | std::ifstream::binary);
     if (!f) {
-        logError("unable to open " << path);
+        Log::error("unable to open ", path);
         return false;
     }
     thread_local static std::vector<uint8_t> data(MaximumLength);
     f.read(data.data(), data.size());
     if ((f.rdstate() & std::ifstream::eofbit) == 0) {
-        logError("filesize > MaximumLength " << path);
+        Log::error("filesize > MaximumLength ", path);
         return false;
     }
     return load(data.data(), static_cast<size_t>(f.gcount()));
@@ -33,14 +37,14 @@ bool TemplateISO19794_2_2005::load(const std::string& path)
 // https://www.nist.gov/services-resources/software/biomdi-software-tools-supporting-standard-biometric-data-interchange
 // https://templates.machinezoo.com/iso-19794-2-2005
 //
-bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
+template <class F> bool TemplateISO19794_2_2005<F>::load(const uint8_t* data, const size_t length)
 {
     if (length < MinimumLength) {
-        logError("length < MinimumLength; " << length);
+        Log::error("length < MinimumLength; ", length);
         return false;
     }
     if (length > MaximumLength) {
-        logError("length > MaximumLength; " << length);
+        Log::error("length > MaximumLength; ", length);
         return false;
     }
 
@@ -50,7 +54,7 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
         using T = decltype(*readFrom);
         constexpr auto sz = sizeof(**readFrom);
         if (reinterpret_cast<const uint8_t*>(*readFrom) - data + sz > length) {
-            logError("data invalid; attempted invalid read @" << readFrom);
+            Log::error("data invalid; attempted invalid read @", readFrom);
             const void* np { nullptr };
             return reinterpret_cast<T>(np);
         }
@@ -64,7 +68,7 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
         }
         thread_local static std::vector<uint8_t> buff(LargestStruct);
         if (sz > buff.size()) {
-            logError("struct exceeded buffer while aligning @" << readFrom);
+            Log::error("struct exceeded buffer while aligning @", readFrom);
             *readFrom = nullptr;
             return *readFrom;
         }
@@ -75,7 +79,7 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
 
     const auto* p = data;
     if (std::memcmp(p, &MagicVersion, sizeof(MagicVersion)) != 0) {
-        logError("invalid magic; unsupported format");
+        Log::error("invalid magic; unsupported format");
         return false;
     }
     p = &p[sizeof(MagicVersion)];
@@ -85,7 +89,7 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
         return false;
     }
     if (swap32(h->totalLength) != length) {
-        logError("totalLength != length");
+        Log::error("totalLength != length");
         return false;
     }
     std::vector<std::vector<Minutia>> fps;
@@ -97,7 +101,7 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
             return false;
         }
         auto& minutiae = fps.emplace_back();
-        minutiae.reserve(std::min(fp->minutiaCount, static_cast<uint8_t>(MaximumMinutiae)));
+        minutiae.reserve(std::min(fp->minutiaCount, static_cast<uint8_t>(Template<F>::MaximumMinutiae)));
 
         for (auto m = 0u; m < minutiae.capacity(); ++m) {
             const auto* mp = safeRead(reinterpret_cast<const _Minutia**>(&p));
@@ -120,5 +124,11 @@ bool TemplateISO19794_2_2005::load(const uint8_t* data, const size_t length)
         memcpy(&extensionData, ex, sizeof(extensionData));
         p = &p[swap16(extensionData)];
     }
-    return Template::load(std::make_pair(swap16(h->width), swap16(h->height)), fps);
+    return Template<F>::load(std::make_pair(swap16(h->width), swap16(h->height)), fps);
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+template class TemplateISO19794_2_2005<Fingerprint>;
+template class TemplateISO19794_2_2005<FingerprintRenderable>;
 }

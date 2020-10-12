@@ -6,47 +6,35 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool Render::minutiae(std::string& svg, const Fingerprint& fp)
+namespace OpenAFIS
 {
-#ifdef OPENAFIS_RENDER_AVAILABLE
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool Render::minutiae(std::string& svg, const FingerprintRenderable& fp)
+{
     open(svg, fp.dimensions());
     addMinutiae(svg, fp);
     close(svg);
     return true;
-#else
-    logError("rendering not possible, OPENAFIS_RENDER_AVAILABLE is not defined");
-
-    svg = "Please #define OPENAFIS_RENDER_AVAILABLE to enable this feature";
-    std::ignore = fp;
-    return false;
-#endif
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool Render::pairs(std::string& svg1, std::string& svg2, const Fingerprint& fp1, const Fingerprint& fp2)
+bool Render::pairs(std::string& svg1, std::string& svg2, const FingerprintRenderable& fp1, const FingerprintRenderable& fp2)
 {
-#ifdef OPENAFIS_RENDER_AVAILABLE
     open(svg1, fp1.dimensions());
     open(svg2, fp2.dimensions());
     addPairs(svg1, svg2, fp1, fp2);
     close(svg1);
     close(svg2);
     return true;
-#else
-    std::ignore = svg1;
-    std::ignore = svg2;
-    std::ignore = fp1;
-    std::ignore = fp2;
-    return false;
-#endif
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool Render::all(std::string& svg1, std::string& svg2, const Fingerprint& fp1, const Fingerprint& fp2)
+bool Render::all(std::string& svg1, std::string& svg2, const FingerprintRenderable& fp1, const FingerprintRenderable& fp2)
 {
-#ifdef OPENAFIS_RENDER_AVAILABLE
     open(svg1, fp1.dimensions());
     open(svg2, fp2.dimensions());
     addMinutiae(svg1, fp1);
@@ -55,20 +43,12 @@ bool Render::all(std::string& svg1, std::string& svg2, const Fingerprint& fp1, c
     close(svg1);
     close(svg2);
     return true;
-#else
-    std::ignore = svg1;
-    std::ignore = svg2;
-    std::ignore = fp1;
-    std::ignore = fp2;
-    return false;
-#endif
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Render::addMinutiae(std::string& svg, const Fingerprint& fp)
+void Render::addMinutiae(std::string& svg, const FingerprintRenderable& fp)
 {
-#ifdef OPENAFIS_RENDER_AVAILABLE
     for (const auto& minutia : fp.minutiae()) {
         const auto r = FastMath::degreesToRadians(minutia.angle());
         const auto x1 = minutia.x();
@@ -83,29 +63,24 @@ void Render::addMinutiae(std::string& svg, const Fingerprint& fp)
             svg += StringUtil::format(R"(<circle cx="%d" cy="%d" r="4"/>)", x1, y1);
         }
     }
-#else
-    std::ignore = svg;
-    std::ignore = fp;
-#endif
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Render::addPairs(std::string& svg1, std::string& svg2, const Fingerprint& fp1, const Fingerprint& fp2)
+void Render::addPairs(std::string& svg1, std::string& svg2, const FingerprintRenderable& fp1, const FingerprintRenderable& fp2)
 {
-#ifdef OPENAFIS_RENDER_AVAILABLE
     if (fp1.dimensions() != fp2.dimensions()) {
-        logError("mismatched dimensions not supported");
+        Log::error("mismatched dimensions not supported");
         return;
     }
     const auto scaleX = static_cast<float>(fp1.dimensions().first) / 256.0f;
     const auto scaleY = static_cast<float>(fp1.dimensions().second) / 256.0f;
 
-    MinutiaPoint::Pair::Set pairs;
-    const Match<decltype(pairs)> match;
+    MinutiaPoint::PairRenderable::Set pairs;
+    const MatchRenderable match;
     match.compute(pairs, fp1, fp2);
 
-    for (const auto *p : pairs) {
+    for (const auto* p : pairs) {
         const auto x1 = std::lround(static_cast<float>(p->candidate()->x()) * scaleX);
         const auto y1 = std::lround(static_cast<float>(p->candidate()->y()) * scaleY);
         svg1 += StringUtil::format(R"(<circle cx="%d" cy="%d" r="8" stroke="#0000ff" stroke-width="2" fill="none"/>)", x1, y1);
@@ -116,12 +91,6 @@ void Render::addPairs(std::string& svg1, std::string& svg2, const Fingerprint& f
         svg2 += StringUtil::format(R"(<circle cx="%d" cy="%d" r="8" stroke="#0000ff" stroke-width="2" fill="none"/>)", x2, y2);
         svg2 += StringUtil::format(R"(<text x="%d" y="%d" stroke="#0000ff" class="small">%.2f</text>)", x2 + 9, y2 + 2, p->similarity());
     }
-#else
-    std::ignore = svg1;
-    std::ignore = svg2;
-    std::ignore = fp1;
-    std::ignore = fp2;
-#endif
 }
 
 
@@ -140,3 +109,4 @@ void Render::open(std::string& svg, const Dimensions& dimensions)
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void Render::close(std::string& svg) { svg += "</svg>"; }
+}

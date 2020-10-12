@@ -1,4 +1,5 @@
 TARGET = tests
+OBJECTS_DIR = tests
 
 QT -= core
 QT -= gui
@@ -15,5 +16,4 @@ contains(CONFIG, release) {
 } else {
     BUILD_TYPE = "debug"
 }
-LIBS = \
-    $$BUILD_TYPE/openafis.lib
+LIBS = $$BUILD_TYPE/openafis.lib

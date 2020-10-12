@@ -19,6 +19,11 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace OpenAFIS
+{
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 constexpr auto LineWidth = 100;
 
 
@@ -27,11 +32,11 @@ constexpr auto LineWidth = 100;
 //
 static void testBulkLoad(const std::string& path)
 {
-    logTest(std::string(LineWidth, '='));
-    logTest(StringUtil::center("BULK LOAD TEMPLATE TEST", LineWidth));
-    logTest(std::string(LineWidth, '='));
+    Log::test(std::string(LineWidth, '='));
+    Log::test(StringUtil::center("BULK LOAD TEMPLATE TEST", LineWidth));
+    Log::test(std::string(LineWidth, '='));
 
-    logTest("Loading into memory...");
+    Log::test("Loading into memory...");
 
     std::vector<std::vector<uint8_t>> files;
     files.reserve(1000);
@@ -45,19 +50,19 @@ static void testBulkLoad(const std::string& path)
         }
         std::basic_ifstream<uint8_t> f(p, std::ifstream::in | std::ifstream::binary);
         if (!f) {
-            logError("unable to open " << p);
+            Log::error("unable to open ", p);
             return;
         }
-        std::vector<uint8_t> data(TemplateISO19794_2_2005::MaximumLength);
+        std::vector<uint8_t> data(TemplateISO19794_2_2005<Fingerprint>::MaximumLength);
         f.read(data.data(), data.size());
         if ((f.rdstate() & std::ifstream::eofbit) == 0) {
-            logError("filesize > MaximumLength " << p);
+            Log::error("filesize > MaximumLength ", p);
             return;
         }
         data.resize(static_cast<size_t>(f.gcount()));
         files.emplace_back(data);
     }
-    logTest("Parsing...");
+    Log::test("Parsing...");
 
     auto count = 0, size = 0;
     const auto start = std::chrono::high_resolution_clock::now();
@@ -65,7 +70,7 @@ static void testBulkLoad(const std::string& path)
 
     for (const auto& f : files) {
         if (!t.load(f.data(), f.size())) {
-            logTest("failed to load");
+            Log::test("failed to load");
         }
         size += t.bytes();
         t.clear();
@@ -73,8 +78,8 @@ static void testBulkLoad(const std::string& path)
     }
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    logTest("Loaded " << count << " templates in " << ms.count() << "ms, consuming " << size << " bytes");
-    logTest(std::string(LineWidth, '=') << std::endl << std::endl);
+    Log::test("Loaded ", count, " templates in ", ms.count(), "ms, consuming ", size, " bytes");
+    Log::test(std::string(LineWidth, '='), Log::LF, Log::LF);
 }
 
 
@@ -83,38 +88,38 @@ static void testBulkLoad(const std::string& path)
 //
 static void testMatchSingle(const std::string& path)
 {
-    logTest(std::string(LineWidth, '='));
-    logTest(StringUtil::center("1:1 SIMPLE 50K ITERATION MATCH TEST", LineWidth));
-    logTest(std::string(LineWidth, '='));
+    Log::test(std::string(LineWidth, '='));
+    Log::test(StringUtil::center("1:1 SIMPLE 50K ITERATION MATCH TEST", LineWidth));
+    Log::test(std::string(LineWidth, '='));
 
-    logTest("Loading...");
+    Log::test("Loading...");
 
     TemplateISO19794_2_2005 t1_1(101);
     if (!t1_1.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_1.iso)", path.c_str()))) {
         return;
     }
-    logTest("Template " << t1_1.id() << ": size " << t1_1.bytes() << " bytes, #fingerprints " << t1_1.fingerprints().size());
+    Log::test("Template ", t1_1.id(), ": size ", t1_1.bytes(), " bytes, #fingerprints ", t1_1.fingerprints().size());
 
     TemplateISO19794_2_2005 t1_2(102);
     if (!t1_2.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_2.iso)", path.c_str()))) {
         return;
     }
-    logTest("Template " << t1_2.id() << ": size " << t1_2.bytes() << " bytes, #fingerprints " << t1_2.fingerprints().size());
+    Log::test("Template ", t1_2.id(), ": size ", t1_2.bytes(), " bytes, #fingerprints ", t1_2.fingerprints().size());
 
     TemplateISO19794_2_2005 t2_1(201);
     if (!t2_1.load(StringUtil::format(R"(%s/fvc2002/DB1_B/102_1.iso)", path.c_str()))) {
         return;
     }
-    logTest("Template " << t2_1.id() << ": size " << t2_1.bytes() << " bytes, #fingerprints " << t2_1.fingerprints().size());
+    Log::test("Template ", t2_1.id(), ": size ", t2_1.bytes(), " bytes, #fingerprints ", t2_1.fingerprints().size());
 
     if (t1_1.fingerprints().empty() || t1_2.fingerprints().empty() || t2_1.fingerprints().empty()) {
         return;
     }
 
-    const auto test = [](const Template& a, const Template& b) {
+    const auto test = [](const auto& a, const auto& b) {
         static const int Passes = 5;
         static const int Iterations = 50000;
-        static Match<unsigned int> match;
+        static MatchSimilarity match;
 
         for (auto i = 0; i < Passes; ++i) {
             unsigned int s {};
@@ -126,30 +131,30 @@ static void testMatchSingle(const std::string& path)
             const auto finish = std::chrono::high_resolution_clock::now();
             const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 
-            logTest("Pass " << i + 1 << ", similarity of " << a.id() << " and " << b.id() << " == " << s << "% [" << Iterations << " iterations computed in " << ms.count() << "ms]");
+            Log::test("Pass ", i + 1, ", similarity of ", a.id(), " and ", b.id(), " == ", s, "% [", Iterations, " iterations computed in ", ms.count(), "ms]");
         }
     };
 
-    logTest("Matching...");
+    Log::test("Matching...");
     test(t1_1, t1_2); // matching
-    logTest("");
+    Log::test("");
     test(t1_1, t2_1); // not matching
-    logTest(std::string(LineWidth, '=') << std::endl << std::endl);
+    Log::test(std::string(LineWidth, '='), Log::LF, Log::LF);
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 static void testMatchMany(const std::string& path)
 {
-    logTest(std::string(LineWidth, '='));
-    logTest(StringUtil::center("N:N SIMPLE MATCH EFFICACY TEST", LineWidth));
-    logTest(std::string(LineWidth, '='));
+    Log::test(std::string(LineWidth, '='));
+    Log::test(StringUtil::center("N:N SIMPLE MATCH EFFICACY TEST", LineWidth));
+    Log::test(std::string(LineWidth, '='));
 
     // We're not concerned with loading efficiency (a lot of disk I/O and irrelevant tasks like regex)...
-    logTest("Loading...");
+    Log::test("Loading...");
 
     std::regex re("\\_+"); // split underscore
-    std::vector<TemplateISO19794_2_2005> templates;
+    std::vector<TemplateISO19794_2_2005<Fingerprint>> templates;
     templates.reserve(1000);
     for (const auto& entry : std::filesystem::recursive_directory_iterator(path.c_str())) {
         if (!entry.is_regular_file()) {
@@ -164,7 +169,7 @@ static void testMatchMany(const std::string& path)
             const auto stem = p.stem().string();
             const std::vector<std::string> parts(std::sregex_token_iterator(stem.begin(), stem.end(), re, -1), {});
             if (parts.size() != 2) {
-                logError("unknown FVC dataset [file] " << p);
+                Log::error("unknown FVC dataset [file] ", p);
                 return uint32_t {};
             }
             const auto s = StringUtil::lower(p.string());
@@ -172,48 +177,48 @@ static void testMatchMany(const std::string& path)
 
             // Yes, there are better ways to do this...
             if (StringUtil::contains(s, "fvc2002")) {
-                id |= 2002 << 20;
+                id |= 2002, 20;
             } else if (StringUtil::contains(s, "fvc2004")) {
-                id |= 2004 << 20;
+                id |= 2004, 20;
             } else if (StringUtil::contains(s, "fvc2006")) {
-                id |= 2006 << 20;
+                id |= 2006, 20;
             } else {
-                logError("unknown FVC dataset [year] " << p);
+                Log::error("unknown FVC dataset [year] ", p);
                 return uint32_t {};
             }
 
             if (StringUtil::contains(s, "db1_b")) {
-                id |= 1 << 16;
+                id |= 1, 16;
             } else if (StringUtil::contains(s, "db2_b")) {
-                id |= 2 << 16;
+                id |= 2, 16;
             } else if (StringUtil::contains(s, "db3_b")) {
-                id |= 3 << 16;
+                id |= 3, 16;
             } else if (StringUtil::contains(s, "db4_b")) {
-                id |= 4 << 16;
+                id |= 4, 16;
             } else {
-                logError("unknown FVC dataset [set] " << p);
+                Log::error("unknown FVC dataset [set] ", p);
                 return uint32_t {};
             }
-            id |= std::stoul(parts[0]) << 8; // eg. 101
+            id |= std::stoul(parts[0]), 8; // eg. 101
             id |= std::stoul(parts[1]);
             return id;
         };
 
         auto& t = templates.emplace_back(id());
         if (!t.load(p.string())) {
-            logError("failed to load " << p);
+            Log::error("failed to load ", p);
             return;
         }
         if (t.fingerprints().empty()) {
-            logError("template is empty " << p);
+            Log::error("template is empty ", p);
             return;
         }
     }
     std::vector<unsigned int> scores(templates.size() * templates.size());
 
-    logTest("Matching " << scores.capacity() << " permutations...");
+    Log::test("Matching ", scores.capacity(), " permutations...");
 
-    static Match<unsigned int> match;
+    static MatchSimilarity match;
     size_t i {};
 
     const auto start = std::chrono::high_resolution_clock::now();
@@ -221,15 +226,15 @@ static void testMatchMany(const std::string& path)
         for (const auto& t2 : templates) {
             match.compute(scores[i++], t1.fingerprints()[0], t2.fingerprints()[0]);
             if ((i % 50000) == 0) {
-                logTest("Matched " << i);
+                Log::test("Matched ", i);
             }
         }
     }
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    logTest("Completed " << " in " << ms.count() << "ms");
+    Log::test("Completed ", " in ", ms.count(), "ms");
 
-    logTest("Reporting...");
+    Log::test("Reporting...");
 
     const auto now = []() {
         std::time_t t = std::time(nullptr);
@@ -239,10 +244,10 @@ static void testMatchMany(const std::string& path)
         return ss.str();
     };
 
-    const auto fn = StringUtil::format(R"(%s.csv)", "results" /*NJH-TEMP now().c_str()*/);
+    const auto fn = StringUtil::format(R"(%s.csv)", now().c_str());
     std::ofstream f(fn, std::ofstream::binary);
     if (!f) {
-        logTest("Unable to write " << fn);
+        Log::test("Unable to write ", fn);
         return;
     }
 
@@ -262,27 +267,27 @@ static void testMatchMany(const std::string& path)
         }
         f << std::endl;
     }
-    logTest("Written " << fn);
-    logTest(std::string(LineWidth, '=') << std::endl << std::endl);
+    Log::test("Written ", fn);
+    Log::test(std::string(LineWidth, '='), Log::LF, Log::LF);
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 static void testRender(const std::string& path)
 {
-    logTest(std::string(LineWidth, '='));
-    logTest(StringUtil::center("MINUTIAE PAIRING RENDER TEST", LineWidth));
-    logTest(std::string(LineWidth, '='));
+    Log::test(std::string(LineWidth, '='));
+    Log::test(StringUtil::center("MINUTIAE PAIRING RENDER TEST", LineWidth));
+    Log::test(std::string(LineWidth, '='));
 
-    logTest("Loading...");
+    Log::test("Loading...");
 
-    TemplateISO19794_2_2005 t1_1(101);
+    TemplateISO19794_2_2005<FingerprintRenderable> t1_1(101);
     if (!t1_1.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_1.iso)", path.c_str()))) {
         return;
     }
-    logTest("Template " << t1_1.id() << ": size " << t1_1.bytes() << " bytes, #fingerprints " << t1_1.fingerprints().size());
+    Log::test("Template ", t1_1.id(), ": size ", t1_1.bytes(), " bytes, #fingerprints ", t1_1.fingerprints().size());
 
-    TemplateISO19794_2_2005 t1_2(107);
+    TemplateISO19794_2_2005<FingerprintRenderable> t1_2(107);
     if (!t1_2.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_7.iso)", path.c_str()))) {
         return;
     }
@@ -290,16 +295,16 @@ static void testRender(const std::string& path)
         return;
     }
 
-    const auto test = [](const Template& a, const Template& b) {
-        const auto write = [](const Template& t, const std::string& svg) {
+    const auto test = [](const auto& a, const auto& b) {
+        const auto write = [](const auto& t, const std::string& svg) {
             const auto fn = StringUtil::format(R"(%s.svg)", std::to_string(t.id()).c_str());
             std::ofstream f(fn, std::ofstream::binary);
             if (!f) {
-                logTest("Unable to write " << fn);
+                Log::test("Unable to write ", fn);
                 return;
             }
             f.write(svg.data(), svg.size());
-            logTest("Written " << fn);
+            Log::test("Written ", fn);
         };
         std::string svg1, svg2;
         if (!Render::all(svg1, svg2, a.fingerprints()[0], b.fingerprints()[0])) {
@@ -309,9 +314,10 @@ static void testRender(const std::string& path)
         write(b, svg2);
     };
 
-    logTest("Rendering...");
+    Log::test("Rendering...");
     test(t1_1, t1_2);
-    logTest(std::string(LineWidth, '=') << std::endl << std::endl);
+    Log::test(std::string(LineWidth, '='), Log::LF, Log::LF);
+}
 }
 
 
@@ -320,9 +326,9 @@ int main(int, const char**)
 {
     const std::string path = "/dev/project/os/openafis/data/valid"; // NJH-TODO from command line
 
-    testBulkLoad(path);
-    testMatchSingle(path);
-    testMatchMany(path);
-    testRender(path);
+    OpenAFIS::testBulkLoad(path);
+    OpenAFIS::testMatchSingle(path);
+    OpenAFIS::testMatchMany(path);
+    OpenAFIS::testRender(path);
     return 0;
 }

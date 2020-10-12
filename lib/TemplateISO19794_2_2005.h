@@ -3,14 +3,26 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Config.h"
 #include "Template.h"
 
 #include <string>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-class TemplateISO19794_2_2005 : public Template
+#ifdef __GNUC__
+#define PACK(__decl__) __decl__ __attribute__((__packed__))
+#endif
+
+#ifdef _MSC_VER
+#define PACK(__decl__) __pragma(pack(push, 1)) __decl__ __pragma(pack(pop))
+#endif
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace OpenAFIS
+{
+
+template <class FingerprintType = Fingerprint> class TemplateISO19794_2_2005 : public Template<FingerprintType>
 {
 public:
     explicit TemplateISO19794_2_2005(const Field::TemplateIdType& id)
@@ -56,11 +68,13 @@ private:
         const auto _x = ((x << 8) & 0xff00ff00) | ((x >> 8) & 0xff00ff);
         return (_x << 16) | (_x >> 16);
     }
-    static const size_t LargestStruct = std::max(sizeof(_Header), std::max(sizeof(_Minutia), sizeof(_FingerPrint)));
+
+    static constexpr size_t LargestStruct = std::max(sizeof(_Header), std::max(sizeof(_Minutia), sizeof(_FingerPrint)));
 
 public:
-    static const size_t MinimumLength = sizeof(MagicVersion) + sizeof(_Header);
-    static const size_t MaximumLength = MinimumLength + MaximumFingerprints * (sizeof(_FingerPrint) + MaximumMinutiae * sizeof(_Minutia));
+    static constexpr size_t MinimumLength = sizeof(MagicVersion) + sizeof(_Header);
+    static constexpr size_t MaximumLength = MinimumLength + Template<FingerprintType>::MaximumFingerprints * (sizeof(_FingerPrint) + Template<FingerprintType>::MaximumMinutiae * sizeof(_Minutia));
 };
+}
 
 #endif // TEMPLATEISO19794_2_2005_H

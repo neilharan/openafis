@@ -3,14 +3,16 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Config.h"
 #include "Template.h"
 
 #include <string>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-class TemplateCSV : public Template
+namespace OpenAFIS
+{
+
+template <class FingerprintType> class TemplateCSV : public Template<FingerprintType>
 {
 public:
     explicit TemplateCSV(const Field::TemplateIdType& id)
@@ -20,5 +22,6 @@ public:
 
     bool load(const std::string& path);
 };
+}
 
 #endif // TEMPLATECSV_H

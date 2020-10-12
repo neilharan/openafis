@@ -3,14 +3,33 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Config.h"
-
 #include <iostream>
+#include <string_view>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#define logTest(x) std::cout << x << std::endl
-#define logInfo(x) std::cout << __FUNCTION__ << ": " << x << std::endl
-#define logError(x) std::cerr << __FUNCTION__ << ": " << x << std::endl
+namespace OpenAFIS
+{
+
+class Log
+{
+public:
+    static constexpr std::string_view LF = "\n";
+
+    template <typename... A> static void test(A&&... args) { (std::cout << ... << std::forward<A>(args)) << std::endl; }
+
+    template <typename... A> static void info(A&&... args)
+    {
+        std::cout << __FUNCTION__ << ": ";
+        (std::cout << ... << std::forward<A>(args)) << std::endl;
+    }
+
+    template <typename... A> static void error(A&&... args)
+    {
+        std::cerr << __FUNCTION__ << ": ";
+        (std::cerr << ... << std::forward<A>(args)) << std::endl;
+    }
+};
+}
 
 #endif // LOG_H

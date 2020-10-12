@@ -3,35 +3,23 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Config.h"
 #include "Triplet.h"
 
 #include <vector>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Only triplets are required for the production use-case of this library (efficient 1:N matching).
-// In order to further reduce the memory required to store thousands of templates, fields required only for research or development purposes can be removed.
-//
+namespace OpenAFIS
+{
+
 class Fingerprint
 {
 public:
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
     using Minutiae = std::vector<Minutia>;
-#endif
     using Triplets = std::vector<Triplet>;
 
-    Fingerprint(const size_t minutiaeCount, const size_t tripletsCount
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-        ,
-        Dimensions dimensions, Minutiae minutiae
-#endif
-        )
+    Fingerprint(const size_t minutiaeCount, const size_t tripletsCount)
         : m_minutiaeCount(minutiaeCount)
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-        , m_dimensions(std::move(dimensions))
-        , m_minutiae(std::move(minutiae))
-#endif
     {
         m_triplets.reserve(tripletsCount);
     }
@@ -39,22 +27,32 @@ public:
     [[nodiscard]] size_t minutiaeCount() const { return m_minutiaeCount; }
     [[nodiscard]] Triplets& triplets() { return m_triplets; }
     [[nodiscard]] const Triplets& triplets() const { return m_triplets; }
-
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-    [[nodiscard]] const Dimensions& dimensions() const { return m_dimensions; }
-    [[nodiscard]] const Minutiae& minutiae() const { return m_minutiae; }
-#endif
-
     [[nodiscard]] size_t bytes() const;
 
 private:
     size_t m_minutiaeCount;
     Triplets m_triplets;
+};
 
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+class FingerprintRenderable : public Fingerprint
+{
+public:
+    FingerprintRenderable(const size_t minutiaeCount, const size_t tripletsCount, Dimensions dimensions, Minutiae minutiae)
+        : Fingerprint(minutiaeCount, tripletsCount)
+        , m_dimensions(std::move(dimensions))
+        , m_minutiae(std::move(minutiae))
+    {
+    }
+
+    [[nodiscard]] const Dimensions& dimensions() const { return m_dimensions; }
+    [[nodiscard]] const Minutiae& minutiae() const { return m_minutiae; }
+
+private:
     Dimensions m_dimensions;
     Minutiae m_minutiae;
-#endif
 };
+}
 
 #endif // FINGERPRINT_H

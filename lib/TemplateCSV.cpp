@@ -3,8 +3,12 @@
 #include "Log.h"
 
 #include <fstream>
-#include <iostream>
 #include <sstream>
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace OpenAFIS
+{
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -12,11 +16,11 @@
 //     First line is width,height
 //     Followed by minutiae in the form type,x,y,angle (radians)
 //
-bool TemplateCSV::load(const std::string& path)
+template <class F> bool TemplateCSV<F>::load(const std::string& path)
 {
     std::ifstream f(path, std::ifstream::in);
     if (!f) {
-        logError("unable to open " << path);
+        Log::error("unable to open ", path);
         return false;
     }
     std::vector<std::vector<Minutia>> fps;
@@ -36,7 +40,7 @@ bool TemplateCSV::load(const std::string& path)
         ss >> height;
     }
     if (!width || !height) {
-        logError("invalid width or height " << path);
+        Log::error("invalid width or height ", path);
         return false;
     }
     unsigned int type {}, x {}, y {};
@@ -60,10 +64,11 @@ bool TemplateCSV::load(const std::string& path)
         ss >> angle;
 
         if (!type) {
-            logError("invalid minutia type " << path);
+            Log::error("invalid minutia type ", path);
             return false;
         }
         minutiae.emplace_back(Minutia::Type(type), x, y, FastMath::radiansToDegrees(angle));
     }
-    return Template::load(std::make_pair(width, height), fps);
+    return Template<F>::load(std::make_pair(width, height), fps);
+}
 }

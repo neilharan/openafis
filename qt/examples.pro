@@ -1,4 +1,5 @@
 TARGET = examples
+OBJECTS_DIR = examples
 
 QT -= core
 QT -= gui

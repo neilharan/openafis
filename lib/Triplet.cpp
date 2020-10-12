@@ -1,12 +1,16 @@
 
 #include "Triplet.h"
 #include "FastMath.h"
-#include "Log.h"
 #include "Param.h"
 
 #include <algorithm>
 #include <cassert>
 #include <numeric>
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace OpenAFIS
+{
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -178,9 +182,7 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 size_t Triplet::bytes() const
 {
-    return sizeof(*this) + 
-        std::accumulate(m_minutiae.begin(), m_minutiae.end(), 0, [](int sum, const auto& m) { return sum + m.bytes(); }) + 
-        m_distances.capacity() * sizeof(decltype(m_distances[0]));
+    return sizeof(*this) + std::accumulate(m_minutiae.begin(), m_minutiae.end(), 0, [](int sum, const auto& m) { return sum + m.bytes(); }) + m_distances.capacity() * sizeof(decltype(m_distances[0]));
 }
 
 
@@ -196,4 +198,5 @@ bool Triplet::operator<(const Triplet& other) const
         }
     }
     return false;
+}
 }

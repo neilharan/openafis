@@ -6,27 +6,23 @@
 
 #include <cassert>
 #include <numeric>
-#include <set>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-#define DIMENSIONS , dimensions
-#define MINUTIAE , minutiae
-#else
-#define DIMENSIONS
-#define MINUTIAE
-#endif
+namespace OpenAFIS
+{
 
-bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<Minutia>>& fps)
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+template <class F> bool Template<F>::load(const Dimensions& dimensions, const std::vector<Fingerprint::Minutiae>& fps)
 {
     for (const auto& minutiae : fps) {
         if (minutiae.size() < MinimumMinutiae) {
-            logError("minutiea count < MinimumMinutiae");
+            Log::error("minutiea count < MinimumMinutiae");
             return false;
         }
         if (minutiae.size() > MaximumMinutiae) {
-            logError("minutiea count > MaximumMinutiae");
+            Log::error("minutiea count > MaximumMinutiae");
             return false;
         }
         thread_local static std::vector<double> coords(MaximumMinutiae * 2);
@@ -37,22 +33,22 @@ bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<
         }
         delaunator::Delaunator d(coords);
         assert(d.triangles.size() % 3 == 0);
-        auto& fp = m_data.fps.emplace_back(minutiae.size(), d.triangles.size() / 3 DIMENSIONS MINUTIAE);
-        auto& t = fp.triplets();
 
-#ifdef _DEBUG
-        std::set<std::tuple<Field::TripletIndexType, Field::TripletIndexType, Field::TripletIndexType>> dupes;
-#endif
+        F* fp {};
+        if constexpr (std::is_same_v<F, Fingerprint>) {
+            fp = &m_data.fps.emplace_back(minutiae.size(), d.triangles.size() / 3);
+        }
+        if constexpr (std::is_same_v<F, FingerprintRenderable>) {
+            fp = &m_data.fps.emplace_back(minutiae.size(), d.triangles.size() / 3, dimensions, minutiae);
+        }
+        auto& t = fp->triplets();
+
         // walk triangles backwards building triplet vector...
         for (auto i = d.triangles.size() - 3;; i -= 3) {
             const auto& a = d.triangles[i];
             if (a) {
                 const auto& b = d.triangles[i + 1];
                 const auto& c = d.triangles[i + 2];
-#ifdef _DEBUG
-                const auto k = dupes.insert(std::make_tuple(static_cast<Field::TripletIndexType>(a), static_cast<Field::TripletIndexType>(b), static_cast<Field::TripletIndexType>(c)));
-                assert(k.second);
-#endif
                 t.emplace_back(MinutiaPoint::Minutiae({ MinutiaPoint(dimensions, minutiae[a]), MinutiaPoint(dimensions, minutiae[b]), MinutiaPoint(dimensions, minutiae[c]) }));
             }
             if (!i) {
@@ -69,7 +65,13 @@ bool Template::load(const Dimensions& dimensions, const std::vector<std::vector<
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-size_t Template::bytes() const
+template <class F> size_t Template<F>::bytes() const
 {
     return sizeof(*this) + std::accumulate(m_data.fps.begin(), m_data.fps.end(), 0, [](int sum, const auto& fp) { return sum + fp.bytes(); });
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+template class Template<Fingerprint>;
+template class Template<FingerprintRenderable>;
 }

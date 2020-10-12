@@ -3,7 +3,6 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Config.h"
 #include "Field.h"
 #include "MinutiaPoint.h"
 
@@ -12,6 +11,9 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace OpenAFIS
+{
+
 class Triplet
 {
 public:
@@ -77,5 +79,6 @@ private:
     MinutiaPoint::Minutiae m_minutiae; // three points making up the triplet
     Distances m_distances {}; // max, mid, min side lengths respectively (sorted minutiae distances)
 };
+}
 
 #endif // TRIPLET_H

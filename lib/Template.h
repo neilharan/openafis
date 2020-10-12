@@ -3,20 +3,20 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Config.h"
-#include "Dimensions.h"
 #include "Field.h"
 #include "Fingerprint.h"
-#include "Minutia.h"
 
 #include <vector>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-class Template
+namespace OpenAFIS
+{
+
+template <class FingerprintType> class Template
 {
 public:
-    using Fingerprints = std::vector<Fingerprint>;
+    using Fingerprints = std::vector<FingerprintType>;
 
     explicit Template(const Field::TemplateIdType& id)
         : m_data(id)
@@ -29,14 +29,14 @@ public:
     [[nodiscard]] size_t bytes() const;
 
 protected:
-    static const size_t MaximumFingerprints = 8;
-    static const size_t MinimumMinutiae = 2;
-    static const size_t MaximumMinutiae = 128;
+    static constexpr size_t MaximumFingerprints = 8;
+    static constexpr size_t MinimumMinutiae = 2;
+    static constexpr size_t MaximumMinutiae = 128;
 
-    bool load(const Dimensions& dimensions, const std::vector<std::vector<Minutia>>& fps);
+    bool load(const Dimensions& dimensions, const std::vector<Fingerprint::Minutiae>& fps);
 
 private:
-    PACK(struct Data {
+    struct Data {
         explicit Data(const Field::TemplateIdType& id)
             : id(id)
         {
@@ -44,8 +44,8 @@ private:
 
         Fingerprints fps;
         const Field::TemplateIdType id;
-    })
-    m_data;
+    } m_data;
 };
+}
 
 #endif // TEMPLATE_H

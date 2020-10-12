@@ -1,29 +1,20 @@
 
 #include "Match.h"
 #include "FastMath.h"
-#include "Log.h"
 #include "Param.h"
 
 #include <algorithm>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <typename T> void Match<T>::compute(const Template&, const Template&) const
+namespace OpenAFIS
 {
-    // NJH-TODO compare entire templates...
-}
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // https://doi.org/10.3390/s120303418
 //
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-#define SIMILARITY , p.similarity()
-#else
-#define SIMILARITY
-#endif
-
-template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe, const Fingerprint& candidate) const
+template <class R, class F, class P> void Match<R, F, P>::compute(R& result, const F& probe, const F& candidate) const
 {
     m_tripletPairs.clear();
     m_dupes.first.fill(false);
@@ -48,9 +39,9 @@ template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe
     // Local matching 5.1.3-5...
     std::sort(m_tripletPairs.begin(), m_tripletPairs.end());
 
-    for (const auto &p : m_tripletPairs) {
+    for (const auto& p : m_tripletPairs) {
         for (decltype(p.probe()->minutiae().size()) i = 0; i < p.probe()->minutiae().size(); ++i) {
-            bool z{};
+            bool z {};
             auto& dp = m_dupes.first[p.probe()->minutiae()[i].key()];
             if (!dp) {
                 dp = true;
@@ -62,7 +53,11 @@ template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe
             } else if (!z) {
                 continue;
             }
-            m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i] SIMILARITY);
+            if constexpr (std::is_same_v<R, MinutiaPoint::PairRenderable::Set>) {
+                m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i], p.similarity());
+            } else {
+                m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i]);
+            }
         }
     }
 
@@ -83,7 +78,7 @@ template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe
             }
 
             // 5.2.2...
-            const auto length = [&]() {
+            const auto lengths = [&]() {
                 const auto x
                     = p1.candidate()->x() + FastMath::round(cosTheta * static_cast<float>(p2.probe()->x() - p1.probe()->x()) - sinTheta * static_cast<float>(p2.probe()->y() - p1.probe()->y()));
                 const auto y
@@ -94,7 +89,7 @@ template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe
                 const auto c = a * a + b * b;
                 return c <= Param::MaximumGlobalDistance * Param::MaximumGlobalDistance;
             }();
-            if (!length) {
+            if (!lengths) {
                 continue;
             }
 
@@ -125,18 +120,19 @@ template <typename T> void Match<T>::compute(T& result, const Fingerprint& probe
             }
 
             // When this class is specialized for rendering only - no overhead when computing similarities...
-            if constexpr (std::is_same<T, MinutiaPoint::Pair::Set>::value) {
+            if constexpr (std::is_same_v<R, MinutiaPoint::PairRenderable::Set>) {
                 result.insert(&p2);
             }
         }
         maxMatched = std::max(maxMatched, matched);
     }
-    if constexpr (std::is_same<T, unsigned int>::value) {
+    if constexpr (std::is_same_v<R, unsigned int>) {
         result = FastMath::round(static_cast<float>(maxMatched * maxMatched) / static_cast<float>(probe.minutiaeCount() * candidate.minutiaeCount()) * 100.0f);
     }
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template class Match<unsigned int>;
-template class Match<MinutiaPoint::Pair::Set>;
+template class Match<unsigned int, Fingerprint, MinutiaPoint::Pair>;
+template class Match<MinutiaPoint::PairRenderable::Set, FingerprintRenderable, MinutiaPoint::PairRenderable>;
+}

@@ -1,4 +1,5 @@
 TARGET = openafis
+OBJECTS_DIR = openafis
 
 QT -= core
 QT -= gui
@@ -8,7 +9,6 @@ INCLUDEPATH += \
     ../lib
 
 HEADERS = \
-    $$PWD/../lib/Config.h \
     $$PWD/../lib/Dimensions.h \
     $$PWD/../lib/FastMath.h \
     $$PWD/../lib/Field.h \

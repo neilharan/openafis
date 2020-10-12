@@ -3,7 +3,6 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Config.h"
 #include "Template.h"
 
 
@@ -11,7 +10,10 @@
 // Instantiate on the heap.
 // This class reserves a wide array to improve duplicate checking efficiency...
 //
-template <typename T> class Match
+namespace OpenAFIS
+{
+
+template <class ResultType, class FingerprintType, class PairType> class Match
 {
 public:
     Match()
@@ -20,13 +22,16 @@ public:
         m_pairs.reserve(100);
     }
 
-    void compute(const Template& probe, const Template& candidate) const;
-    void compute(T& result, const Fingerprint& probe, const Fingerprint& candidate) const;
+    void compute(ResultType& result, const FingerprintType& probe, const FingerprintType& candidate) const;
 
 private:
     mutable Triplet::Pair::Pairs m_tripletPairs;
     mutable Triplet::Dupes m_dupes;
-    mutable MinutiaPoint::Pair::Pairs m_pairs;
+    mutable std::vector<PairType> m_pairs;
 };
+
+using MatchSimilarity = Match<unsigned int, Fingerprint, MinutiaPoint::Pair>;
+using MatchRenderable = Match<MinutiaPoint::PairRenderable::Set, FingerprintRenderable, MinutiaPoint::PairRenderable>;
+}
 
 #endif // MATCH_H

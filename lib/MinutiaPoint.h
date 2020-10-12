@@ -3,7 +3,6 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Config.h"
 #include "Dimensions.h"
 #include "FastMath.h"
 #include "Minutia.h"
@@ -11,52 +10,49 @@
 #include <unordered_set>
 #include <vector>
 
-// NJH-TODO
-#ifdef OPENAFIS_TRIPLETS_PACK
-#define TRIPLET_PACK PACK
-#else
-#define TRIPLET_PACK
-#endif
-
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // When packing is enabled a triplet can consume as little as three bytes but read accesses will be slightly slower - depending on platform architecture.
 // With packing disabled triplets will consume 3 x architectures word size regardless but scoring performance may be improved.
 //
+namespace OpenAFIS
+{
+
 class MinutiaPoint
 {
 public:
     class Pair
     {
     public:
-        using Pairs = std::vector<Pair>;
-        using Set = std::unordered_set<const Pair*>;
-
-        Pair(const MinutiaPoint* probe, const MinutiaPoint* candidate
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-            , const float similarity
-#endif
-        )
+        Pair(const MinutiaPoint* probe, const MinutiaPoint* candidate)
             : m_probe(probe)
             , m_candidate(candidate)
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-            , m_similarity(similarity)
-#endif
         {
         }
 
         [[nodiscard]] const MinutiaPoint* probe() const { return m_probe; }
         [[nodiscard]] const MinutiaPoint* candidate() const { return m_candidate; }
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
-        [[nodiscard]] float similarity() const { return m_similarity; }
-#endif
 
     private:
         const MinutiaPoint* m_probe {};
         const MinutiaPoint* m_candidate {};
-#ifdef OPENAFIS_FINGERPRINT_RENDERABLE
+    };
+
+    class PairRenderable : public Pair
+    {
+    public:
+        using Set = std::unordered_set<const PairRenderable*>;
+
+        PairRenderable(const MinutiaPoint* probe, const MinutiaPoint* candidate, const float similarity)
+            : Pair(probe, candidate)
+            , m_similarity(similarity)
+        {
+        }
+
+        [[nodiscard]] float similarity() const { return m_similarity; }
+
+    private:
         float m_similarity {};
-#endif
     };
 
     using Minutiae = std::vector<MinutiaPoint>;
@@ -91,5 +87,6 @@ private:
 
     Field::MinutiaCoordType m_distance {}; // distance from adjacent side, also scaled
 };
+}
 
 #endif // MINUTIAPOINT_H

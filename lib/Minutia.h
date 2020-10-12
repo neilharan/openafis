@@ -6,6 +6,9 @@
 // This class is used when reading template binaries and is not held in memory during scoring.
 // As the size is not sensitive the definition uses types that suit the target architecture.
 //
+namespace OpenAFIS
+{
+
 class Minutia
 {
 public:
@@ -31,5 +34,6 @@ private:
     unsigned int m_y;
     unsigned int m_angle;
 };
+}
 
 #endif // MINUTIA_H
