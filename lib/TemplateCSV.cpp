@@ -67,7 +67,14 @@ template <class F> bool TemplateCSV<F>::load(const std::string& path)
             Log::error("invalid minutia type ", path);
             return false;
         }
-        minutiae.emplace_back(Minutia::Type(type), x, y, FastMath::radiansToDegrees(angle));
+
+        const auto radiansToDegrees = [](const float theta) {
+            static constexpr float Factor = PI / 180.0f;
+
+            return static_cast<unsigned int>(std::lround(theta / Factor));
+        };
+
+        minutiae.emplace_back(Minutia::Type(type), x, y, radiansToDegrees(angle));
     }
     return Template<F>::load(std::make_pair(width, height), fps);
 }

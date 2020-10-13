@@ -26,6 +26,10 @@ public:
     static constexpr size_t MinutiaCoordMax = std::numeric_limits<Field::MinutiaCoordType>::max();
     static constexpr size_t MinutiaCoordMatrixSize = (MinutiaCoordMax + 1) * (MinutiaCoordMax + 1);
 
+    //
+    using AngleType = float;
+
+    //
     using MinutiaKeyType = uint32_t;
 };
 }

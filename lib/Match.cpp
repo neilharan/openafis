@@ -80,9 +80,9 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
             // 5.2.2...
             const auto lengths = [&]() {
                 const auto x
-                    = p1.candidate()->x() + FastMath::round(cosTheta * static_cast<float>(p2.probe()->x() - p1.probe()->x()) - sinTheta * static_cast<float>(p2.probe()->y() - p1.probe()->y()));
+                    = p1.candidate()->x() + cosTheta * static_cast<float>(p2.probe()->x() - p1.probe()->x()) - sinTheta * static_cast<float>(p2.probe()->y() - p1.probe()->y());
                 const auto y
-                    = p1.candidate()->y() + FastMath::round(sinTheta * static_cast<float>(p2.probe()->x() - p1.probe()->x()) + cosTheta * static_cast<float>(p2.probe()->y() - p1.probe()->y()));
+                    = p1.candidate()->y() + sinTheta * static_cast<float>(p2.probe()->x() - p1.probe()->x()) + cosTheta * static_cast<float>(p2.probe()->y() - p1.probe()->y());
 
                 const auto a = x - p2.candidate()->x();
                 const auto b = y - p2.candidate()->y();
@@ -127,7 +127,7 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
         maxMatched = std::max(maxMatched, matched);
     }
     if constexpr (std::is_same_v<R, unsigned int>) {
-        result = FastMath::round(static_cast<float>(maxMatched * maxMatched) / static_cast<float>(probe.minutiaeCount() * candidate.minutiaeCount()) * 100.0f);
+        result = static_cast<unsigned int>(static_cast<float>(maxMatched * maxMatched) / static_cast<float>(probe.minutiaeCount() * candidate.minutiaeCount()) * 100.0f);
     }
 }
 

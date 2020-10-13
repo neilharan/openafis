@@ -59,8 +59,8 @@ public:
 
     // co-ordinates (and therefore distances) are always scales for 8-bits...
     MinutiaPoint(const Dimensions& dimensions, const Minutia& minutia)
-        : m_x(static_cast<Field::MinutiaCoordType>(FastMath::round(static_cast<float>(minutia.x()) * (256.0f / dimensions.first))))
-        , m_y(static_cast<Field::MinutiaCoordType>(FastMath::round(static_cast<float>(minutia.y()) * (256.0f / dimensions.second))))
+        : m_x(static_cast<Field::MinutiaCoordType>(std::lround(static_cast<float>(minutia.x()) * (256.0f / dimensions.first))))
+        , m_y(static_cast<Field::MinutiaCoordType>(std::lround(static_cast<float>(minutia.y()) * (256.0f / dimensions.second))))
         , m_angle(FastMath::degreesToRadians(minutia.angle()))
     {
     }
@@ -83,7 +83,7 @@ public:
 private:
     Field::MinutiaCoordType m_x; // scaled for dimensions
     Field::MinutiaCoordType m_y; // "
-    float m_angle; // radians
+    Field::AngleType m_angle; // radians
 
     Field::MinutiaCoordType m_distance {}; // distance from adjacent side, also scaled
 };

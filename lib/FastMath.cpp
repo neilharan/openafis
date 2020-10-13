@@ -29,7 +29,7 @@ int FastMath::isqrt(const int x)
 // Profiling reveals ~2x speedup using lookups vs CRT (with SSE2).
 // TODO: research cordic options https://www.coranac.com/documents/arctangent/ for memory constrained builds...
 //
-float FastMath::iatan2(const int x, const int y)
+Field::AngleType FastMath::iatan2(const int x, const int y)
 {
 #if 1
     static const ArcTangents Table;
@@ -42,7 +42,7 @@ float FastMath::iatan2(const int x, const int y)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-float FastMath::degreesToRadians(const unsigned int theta)
+Field::AngleType FastMath::degreesToRadians(const unsigned int theta)
 {
     static constexpr float Factor = PI / 180.0f;
 
@@ -51,18 +51,9 @@ float FastMath::degreesToRadians(const unsigned int theta)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-unsigned int FastMath::radiansToDegrees(const float theta)
-{
-    static constexpr float Factor = PI / 180.0f;
-
-    return static_cast<unsigned int>(std::lround(theta / Factor));
-}
-
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Equation 1...
 //
-float FastMath::minimumAngle(const float a, const float b)
+Field::AngleType FastMath::minimumAngle(const Field::AngleType a, const Field::AngleType b)
 {
     const auto d = abs(a - b);
     return std::min(d, FastMath::PI2 - d);
@@ -72,7 +63,7 @@ float FastMath::minimumAngle(const float a, const float b)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Equation 2...
 //
-float FastMath::rotateAngle(const float a, const float b)
+Field::AngleType FastMath::rotateAngle(const Field::AngleType a, const Field::AngleType b)
 {
     if (b > a) {
         return b - a;

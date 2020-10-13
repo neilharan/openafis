@@ -21,12 +21,10 @@ public:
     static constexpr float PI2 = PI * 2; // "
 
     static int isqrt(int x);
-    static float iatan2(int x, int y);
-    static float degreesToRadians(unsigned int theta);
-    static unsigned int radiansToDegrees(float theta);
-    static float minimumAngle(float a, float b);
-    static float rotateAngle(float a, float b);
-    static int round(float v);
+    static Field::AngleType iatan2(int x, int y);
+    static Field::AngleType degreesToRadians(unsigned int theta);
+    static Field::AngleType minimumAngle(Field::AngleType a, Field::AngleType b);
+    static Field::AngleType rotateAngle(Field::AngleType a, Field::AngleType b);
 
 private:
     class SquareRoots
@@ -83,7 +81,7 @@ private:
         static constexpr auto Max = static_cast<int>(Field::MinutiaCoordMax);
 
     private:
-        using Values = std::array<std::array<float, Max - Min>, Max - Min>;
+        using Values = std::array<std::array<Field::AngleType, Max - Min>, Max - Min>;
         const Values* m_values;
     };
 };
