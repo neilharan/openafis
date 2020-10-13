@@ -26,10 +26,13 @@ public:
     static constexpr size_t MinutiaCoordMax = std::numeric_limits<Field::MinutiaCoordType>::max();
     static constexpr size_t MinutiaCoordMatrixSize = (MinutiaCoordMax + 1) * (MinutiaCoordMax + 1);
 
-    //
-    using AngleType = float;
+    // Angles are expressed in radians, but are mapped over [0,255] when using ints here.
+    // Options are int or float. Double is not supported.
+    // During benchmarks approximately 1.2x total match speed was observed withs ints over floats (will vary considerably between platforms)...
+    using AngleType = int;
 
-    //
+    // We only use the 16 LSB's in the key type. While MinutiaCoordType is uint8_t this could be uint16_t.
+    // It is used only to identify duplicate triplets...
     using MinutiaKeyType = uint32_t;
 };
 }

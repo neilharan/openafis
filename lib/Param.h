@@ -3,6 +3,7 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#include "FastMath.h"
 #include "Field.h"
 
 
@@ -13,11 +14,35 @@ namespace OpenAFIS
 class Param
 {
 public:
-    static const Field::MinutiaCoordType MaximumLocalDistance;
-    static const Field::MinutiaCoordType MaximumGlobalDistance;
-    static const float MaximumAngleDifference;
-    static const float MaximumDirectionDifference;
-    static const unsigned int MinimumMinutiae;
+    static constexpr Field::MinutiaCoordType MaximumLocalDistance = 12;
+    static constexpr Field::MinutiaCoordType MaximumGlobalDistance = 12;
+    static constexpr float MaximumAngleDifference = FastMath::PI / 6;
+    static constexpr float MaximumDirectionDifference = FastMath::PI / 4;
+    static constexpr unsigned int MinimumMinutiae = 4;
+
+    static constexpr Field::AngleType maximumAngleDifference()
+    {
+        if constexpr (std::is_same_v<Field::AngleType, float>) {
+            return MaximumAngleDifference;
+        }
+        if constexpr (std::is_same_v<Field::AngleType, int>) {
+            return static_cast<Field::AngleType>(round(MaximumAngleDifference * FastMath::Radians8));
+        }
+    }
+
+    static constexpr Field::AngleType maximumDirectionDifference()
+    {
+        if constexpr (std::is_same_v<Field::AngleType, float>) {
+            return MaximumDirectionDifference;
+        }
+        if constexpr (std::is_same_v<Field::AngleType, int>) {
+            return static_cast<Field::AngleType>(round(MaximumDirectionDifference * FastMath::Radians8));
+        }
+    }
+
+private:
+    // A very limited, but constexpr, round function to help with params...
+    static constexpr Field::AngleType round(const float x) { return (x >= 0.0f) ? static_cast<Field::AngleType>(x + 0.5f) : static_cast<Field::AngleType>(x - 0.5f); }
 };
 }
 

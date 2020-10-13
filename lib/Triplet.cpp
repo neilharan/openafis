@@ -29,9 +29,9 @@ MinutiaPoint::Minutiae Triplet::shiftClockwise(MinutiaPoint::Minutiae minutiae)
     const auto cx = ((minutiae[0].x() + minutiae[1].x()) / 2 + minutiae[2].x()) / 2;
     const auto cy = ((minutiae[0].y() + minutiae[1].y()) / 2 + minutiae[2].y()) / 2;
 
-    auto a0 = FastMath::iatan2(minutiae[0].y() - cy, minutiae[0].x() - cx);
-    auto a1 = FastMath::iatan2(minutiae[1].y() - cy, minutiae[1].x() - cx);
-    auto a2 = FastMath::iatan2(minutiae[2].y() - cy, minutiae[2].x() - cx);
+    auto a0 = FastMath::atan2(minutiae[0].y() - cy, minutiae[0].x() - cx);
+    auto a1 = FastMath::atan2(minutiae[1].y() - cy, minutiae[1].x() - cx);
+    auto a2 = FastMath::atan2(minutiae[2].y() - cy, minutiae[2].x() - cx);
 
     const auto swap = [](auto& x, auto& y) {
         const auto copy = x;
@@ -104,7 +104,7 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
         // Equation 7 (3 iterations)...
         const auto directions = [&]() {
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                if (FastMath::minimumAngle(m_minutiae[i].angle(), probe.minutiae()[shift[i]].angle()) > Param::MaximumDirectionDifference) {
+                if (FastMath::minimumAngle(m_minutiae[i].angle(), probe.minutiae()[shift[i]].angle()) > Param::maximumDirectionDifference()) {
                     return false;
                 }
             }
@@ -116,19 +116,19 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
 
         // Equation 10 (3 iterations)...
         const auto anglesBeta = [&]() {
-            float max {};
+            Field::AngleType max {};
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
                 const auto j = Shifting[1][i];
                 const auto c = FastMath::rotateAngle(m_minutiae[i].angle(), m_minutiae[j].angle());
                 const auto p = FastMath::rotateAngle(probe.minutiae()[shift[i]].angle(), probe.minutiae()[shift[j]].angle());
                 const auto d = FastMath::minimumAngle(c, p);
-                if (d >= Param::MaximumAngleDifference) {
+                if (d >= Param::maximumAngleDifference()) {
                     return 1.0f;
                 }
                 max = std::max(max, d);
             }
-            return max / Param::MaximumAngleDifference;
+            return static_cast<float>(max) / Param::maximumAngleDifference();
         }();
         if (anglesBeta == 1.0f) {
             continue;
@@ -136,7 +136,7 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
 
         // Equation 9 (6 iterations)...
         const auto anglesAlpha = [&]() {
-            float max {};
+            Field::AngleType max {};
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
                 for (decltype(shift.size()) j = 0; j < shift.size(); ++j) {
@@ -145,20 +145,20 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
                     }
                     const auto y = m_minutiae[i].y() - m_minutiae[j].y();
                     const auto x = m_minutiae[i].x() - m_minutiae[j].x();
-                    const auto d = FastMath::rotateAngle(m_minutiae[i].angle(), FastMath::iatan2(y, x));
+                    const auto d = FastMath::rotateAngle(m_minutiae[i].angle(), FastMath::atan2(y, x));
 
                     const auto oy = probe.minutiae()[shift[i]].y() - probe.minutiae()[shift[j]].y();
                     const auto ox = probe.minutiae()[shift[i]].x() - probe.minutiae()[shift[j]].x();
-                    const auto od = FastMath::rotateAngle(probe.minutiae()[shift[i]].angle(), FastMath::iatan2(oy, ox));
+                    const auto od = FastMath::rotateAngle(probe.minutiae()[shift[i]].angle(), FastMath::atan2(oy, ox));
 
                     const auto ad = FastMath::minimumAngle(d, od);
-                    if (ad >= Param::MaximumAngleDifference) {
+                    if (ad >= Param::maximumAngleDifference()) {
                         return 1.0f;
                     }
                     max = std::max(max, ad);
                 }
             }
-            return max / Param::MaximumAngleDifference;
+            return static_cast<float>(max) / Param::maximumAngleDifference();
         }();
         if (anglesAlpha == 1.0f) {
             continue;

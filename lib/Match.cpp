@@ -66,8 +66,8 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 
     for (const auto& p1 : m_pairs) {
         const auto theta = p1.candidate()->angle() - p1.probe()->angle();
-        const auto cosTheta = std::cos(theta); // NJH-TODO use tables, domain can be determined
-        const auto sinTheta = std::sin(theta);
+        const auto cosTheta = FastMath::cos(theta);
+        const auto sinTheta = FastMath::sin(theta);
 
         auto matched = 1;
         auto min = m_pairs.size() - 1;
@@ -95,12 +95,22 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 
             const auto directions = [&]() {
                 auto a = p2.probe()->angle() + theta;
-                if (a > FastMath::PI2) { // wrap within range
-                    a -= FastMath::PI2;
-                } else if (a < 0) {
-                    a += FastMath::PI2;
+
+                if constexpr (std::is_same_v<Field::AngleType, float>) {
+                    if (a > FastMath::TwoPI) { // wrap within range
+                        a -= FastMath::TwoPI;
+                    } else if (a < 0) {
+                        a += FastMath::TwoPI;
+                    }
                 }
-                return FastMath::minimumAngle(a, p2.candidate()->angle()) <= Param::MaximumDirectionDifference;
+                if constexpr (std::is_same_v<Field::AngleType, float>) {
+                    if (a > FastMath::TwoPI8) { // wrap within range
+                        a -= FastMath::TwoPI8;
+                    } else if (a < 0) {
+                        a += FastMath::TwoPI8;
+                    }
+                }
+                return FastMath::minimumAngle(a, p2.candidate()->angle()) <= Param::maximumDirectionDifference();
             }();
             if (!directions) {
                 continue;
@@ -109,7 +119,7 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
             const auto anglesBeta = [&]() {
                 const auto p = FastMath::rotateAngle(p1.probe()->angle(), p2.probe()->angle());
                 const auto c = FastMath::rotateAngle(p1.candidate()->angle(), p2.candidate()->angle());
-                return FastMath::minimumAngle(p, c) <= Param::MaximumAngleDifference;
+                return FastMath::minimumAngle(p, c) <= Param::maximumAngleDifference();
             }();
             if (!anglesBeta) {
                 continue;

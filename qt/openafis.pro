@@ -29,7 +29,6 @@ SOURCES = \
     ../lib/FastMath.cpp \
     ../lib/Fingerprint.cpp \
     ../lib/Match.cpp \
-    ../lib/Param.cpp \
     ../lib/Render.cpp \
     ../lib/Template.cpp \
     ../lib/TemplateCSV.cpp \

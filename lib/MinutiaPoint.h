@@ -67,7 +67,7 @@ public:
 
     [[nodiscard]] Field::MinutiaCoordType x() const { return m_x; }
     [[nodiscard]] Field::MinutiaCoordType y() const { return m_y; }
-    [[nodiscard]] float angle() const { return m_angle; }
+    [[nodiscard]] Field::AngleType angle() const { return m_angle; }
     [[nodiscard]] Field::MinutiaCoordType distance() const { return m_distance; }
     [[nodiscard]] Field::MinutiaKeyType key() const { return static_cast<Field::MinutiaKeyType>(m_x) << 8 | m_y; }
     [[nodiscard]] size_t bytes() const { return sizeof(*this); }

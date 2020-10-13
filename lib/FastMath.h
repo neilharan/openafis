@@ -18,10 +18,14 @@ class FastMath
 {
 public:
     static constexpr float PI = 3.14159265358979323846f; // until C++20 we have to provide this
-    static constexpr float PI2 = PI * 2; // "
+    static constexpr float TwoPI = PI * 2; // "
+    static constexpr float Radians8 = 255.0f / TwoPI; // " = ~40.58: map radians [0,2PI] over uint8_t [0,255]
+    static constexpr int TwoPI8 = 255; // " our mapped radian limit
 
     static int isqrt(int x);
-    static Field::AngleType iatan2(int x, int y);
+    static Field::AngleType atan2(int x, int y);
+    static float cos(Field::AngleType theta);
+    static float sin(Field::AngleType theta);
     static Field::AngleType degreesToRadians(unsigned int theta);
     static Field::AngleType minimumAngle(Field::AngleType a, Field::AngleType b);
     static Field::AngleType rotateAngle(Field::AngleType a, Field::AngleType b);
@@ -62,7 +66,13 @@ private:
                 static Values v;
                 for (auto x = Min; x < Max; ++x) {
                     for (auto y = Min; y < Max; ++y) {
-                        v.at(x - Min).at(y - Min) = std::atan2f(static_cast<float>(x), static_cast<float>(y));
+                        const auto t = std::atan2f(static_cast<float>(x), static_cast<float>(y));
+                        if constexpr (std::is_same_v<Field::AngleType, float>) {
+                            v.at(x - Min).at(y - Min) = static_cast<Field::AngleType>(t);
+                        }
+                        if constexpr (std::is_same_v<Field::AngleType, int>) {
+                            v.at(x - Min).at(y - Min) = static_cast<Field::AngleType>(std::lround(t * Radians8));
+                        }
                     }
                 }
                 return &v;
@@ -70,7 +80,7 @@ private:
         {
         }
 
-        [[nodiscard]] constexpr float get(const int x, const int y) const
+        [[nodiscard]] constexpr Field::AngleType get(const int x, const int y) const
         {
             assert(x > Min && x < Max);
             assert(y > Min && y < Max);

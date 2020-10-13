@@ -324,11 +324,11 @@ static void testRender(const std::string& path)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 int main(int, const char**)
 {
-    const std::string path = "/dev/project/os/openafis/data/psy"; // NJH-TODO from command line
+    const std::string path = "/dev/project/os/openafis/data/valid"; // NJH-TODO from command line
 
     //OpenAFIS::testBulkLoad(path);
-    //OpenAFIS::testMatchSingle(path);
-    OpenAFIS::testMatchMany(path);
+    OpenAFIS::testMatchSingle(path);
+    //OpenAFIS::testMatchMany(path);
     //OpenAFIS::testRender(path);
     return 0;
 }

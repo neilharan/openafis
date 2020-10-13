@@ -17,8 +17,8 @@ The goal is to accurately identify one minutiae-set from 50K candidate sets with
   | Global matching | 100% | |
   | CMake support | | |
   | Test suite | 30% | EER, FMR100, FMR1000, ZeroFMR |
-  | Benchmarks | | |
-  | Optimizing | | float->int, vectorization (SSE/AVX), math functions |
+  | Benchmarks | 25% | |
+  | Optimizing | 30% | float->int, vectorization (SSE/AVX), math functions |
   | Parallelizing | | |
   | Minutiae/pair rendering | 100% | SVG output |
   | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction function) |
