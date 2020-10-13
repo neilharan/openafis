@@ -1,4 +1,5 @@
 
+#include "Log.h"
 #include "Match.h"
 #include "FastMath.h"
 #include "Param.h"
@@ -16,20 +17,17 @@ namespace OpenAFIS
 //
 template <class R, class F, class P> void Match<R, F, P>::compute(R& result, const F& probe, const F& candidate) const
 {
-    m_tripletPairs.clear();
-    m_dupes.first.fill(false);
-    m_dupes.second.fill(false);
-    m_pairs.clear();
-
+    const auto& probeT = probe.triplets();
     const auto& candidateT = candidate.triplets();
+    m_tripletPairs.clear();
 
     // Local matching 5.1.1-2...
-    for (const auto& probeT : probe.triplets()) {
-        auto it = std::lower_bound(candidateT.begin(), candidateT.end(), probeT.distances()[0] - Param::MaximumLocalDistance);
-        const auto end = std::upper_bound(it, candidateT.end(), probeT.distances()[0] + Param::MaximumLocalDistance); // NJH-TODO profile these - possibly bake custom binary search
+    for (const auto& p : probeT) {
+        auto it = std::lower_bound(candidateT.begin(), candidateT.end(), p.distances()[0] - Param::MaximumLocalDistance);
+        const auto end = std::upper_bound(it, candidateT.end(), p.distances()[0] + Param::MaximumLocalDistance); // NJH-TODO profile these - possibly bake custom binary search
 
         for (; it < end; ++it) {
-            probeT.emplacePair(m_tripletPairs, *it);
+            it->emplacePair(m_tripletPairs, p);
         }
     }
     if (m_tripletPairs.size() < Param::MinimumMinutiae) {
@@ -38,6 +36,9 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 
     // Local matching 5.1.3-5...
     std::sort(m_tripletPairs.begin(), m_tripletPairs.end());
+    m_dupes.first.fill(false);
+    m_dupes.second.fill(false);
+    m_pairs.clear();
 
     for (const auto& p : m_tripletPairs) {
         for (decltype(p.probe()->minutiae().size()) i = 0; i < p.probe()->minutiae().size(); ++i) {
@@ -54,7 +55,8 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
                 continue;
             }
             if constexpr (std::is_same_v<R, MinutiaPoint::PairRenderable::Set>) {
-                m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i], p.similarity());
+                // Similarity values are scaled for integers over [0,1000], for render % is fine...
+                m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i], std::lround(static_cast<float>(p.similarity()) / 10.0f));
             } else {
                 m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i]);
             }
@@ -79,11 +81,8 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 
             // 5.2.2...
             const auto lengths = [&]() {
-                const auto x
-                    = p1.candidate()->x() + cosTheta * static_cast<float>(p2.probe()->x() - p1.probe()->x()) - sinTheta * static_cast<float>(p2.probe()->y() - p1.probe()->y());
-                const auto y
-                    = p1.candidate()->y() + sinTheta * static_cast<float>(p2.probe()->x() - p1.probe()->x()) + cosTheta * static_cast<float>(p2.probe()->y() - p1.probe()->y());
-
+                const auto x = p1.candidate()->x() + cosTheta * (p2.probe()->x() - p1.probe()->x()) - sinTheta * (p2.probe()->y() - p1.probe()->y());
+                const auto y = p1.candidate()->y() + sinTheta * (p2.probe()->x() - p1.probe()->x()) + cosTheta * (p2.probe()->y() - p1.probe()->y());
                 const auto a = x - p2.candidate()->x();
                 const auto b = y - p2.candidate()->y();
                 const auto c = a * a + b * b;
@@ -138,7 +137,7 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
         maxMatched = std::max(maxMatched, matched);
     }
     if constexpr (std::is_same_v<R, unsigned int>) {
-        result = static_cast<unsigned int>(static_cast<float>(maxMatched * maxMatched) / static_cast<float>(probe.minutiaeCount() * candidate.minutiaeCount()) * 100.0f);
+        result = (maxMatched * maxMatched * 100) / (probe.minutiaeCount() * candidate.minutiaeCount());
     }
 }
 

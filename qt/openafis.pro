@@ -35,9 +35,18 @@ SOURCES = \
     ../lib/TemplateISO19794_2_2005.cpp \
     ../lib/Triplet.cpp
 
-*-msvc*: {
-    # /arch:AVX /fp:fast
-    DEFINES += _HAS_EXCEPTIONS=0
-    QMAKE_CXXFLAGS += /GS- /GT /Oy /Oi /std:c++17
-    QMAKE_CXXFLAGS_EXCEPTIONS_ON -= -EHsc
+contains(CONFIG, debug) {
+    *-msvc*: {
+        DEFINES += _HAS_EXCEPTIONS=0
+        QMAKE_CXXFLAGS += /std:c++17
+        QMAKE_CXXFLAGS_EXCEPTIONS_ON -= -EHsc
+    }
+}
+contains(CONFIG, release) {
+    *-msvc*: {
+        # /arch:SSE2 /fp:fast
+        DEFINES += _HAS_EXCEPTIONS=0
+        QMAKE_CXXFLAGS += /GS- /GT /Oy /Oi /std:c++17
+        QMAKE_CXXFLAGS_EXCEPTIONS_ON -= -EHsc
+    }
 }

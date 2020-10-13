@@ -48,6 +48,7 @@ public:
 
     [[nodiscard]] const Dimensions& dimensions() const { return m_dimensions; }
     [[nodiscard]] const Minutiae& minutiae() const { return m_minutiae; }
+    [[nodiscard]] size_t bytes() const;
 
 private:
     Dimensions m_dimensions;

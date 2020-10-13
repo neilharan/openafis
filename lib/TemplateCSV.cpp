@@ -69,7 +69,7 @@ template <class F> bool TemplateCSV<F>::load(const std::string& path)
         }
 
         const auto radiansToDegrees = [](const float theta) {
-            static constexpr float Factor = PI / 180.0f;
+            static constexpr float Factor = FastMath::PI / 180.0f;
 
             return static_cast<unsigned int>(std::lround(theta / Factor));
         };

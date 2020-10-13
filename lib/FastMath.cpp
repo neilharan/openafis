@@ -14,13 +14,8 @@ namespace OpenAFIS
 //
 int FastMath::isqrt(const int x)
 {
-#if 1
     static const SquareRoots Table;
-
     return Table.get(x);
-#else
-    return std::lround(std::sqrt(x));
-#endif
 }
 
 
@@ -32,13 +27,8 @@ int FastMath::isqrt(const int x)
 //
 Field::AngleType FastMath::atan2(const int x, const int y)
 {
-#if 1
     static const ArcTangents Table;
-
     return Table.get(x, y);
-#else
-    return std::atan2f(static_cast<float>(x), static_cast<float>(y));
-#endif
 }
 
 
@@ -51,13 +41,8 @@ float FastMath::cos(const Field::AngleType theta)
         return std::cosf(static_cast<float>(theta));
     }
     if constexpr (std::is_same_v<Field::AngleType, int>) {
-#if 1
         static const Cosines Table;
-
         return Table.get(theta);
-#else
-        return std::cosf(static_cast<float>(theta) / Radians8);
-#endif
     }
 }
 
@@ -71,13 +56,8 @@ float FastMath::sin(const Field::AngleType theta)
         return std::sinf(static_cast<float>(theta));
     }
     if constexpr (std::is_same_v<Field::AngleType, int>) {
-#if 1
         static const Sines Table;
-
         return Table.get(theta);
-#else
-        return std::sinf(static_cast<float>(theta) / Radians8);
-#endif
     }
 }
 
@@ -89,12 +69,10 @@ Field::AngleType FastMath::degreesToRadians(const unsigned int theta)
 {
     if constexpr (std::is_same_v<Field::AngleType, float>) {
         static constexpr float Factor = PI / 180.0f;
-
         return static_cast<float>(theta) * Factor;
     }
     if constexpr (std::is_same_v<Field::AngleType, int>) {
         static constexpr float Factor = PI / 180.0f * Radians8;
-
         return static_cast<Field::AngleType>(std::lround(static_cast<Field::AngleType>(theta) * Factor));
     }
 }
@@ -106,7 +84,7 @@ Field::AngleType FastMath::degreesToRadians(const unsigned int theta)
 //
 Field::AngleType FastMath::minimumAngle(const Field::AngleType a, const Field::AngleType b)
 {
-    const auto d = abs(a - b);
+    const auto d = std::abs(a - b);
 
     if constexpr (std::is_same_v<Field::AngleType, float>) {
         return std::min(static_cast<float>(d), FastMath::TwoPI - d);
@@ -127,7 +105,7 @@ Field::AngleType FastMath::rotateAngle(const Field::AngleType a, const Field::An
         return b - a;
     }
     if constexpr (std::is_same_v<Field::AngleType, float>) {
-        return b - a + FastMath::TwoPI;
+        return static_cast<float>(b - a) + FastMath::TwoPI;
     }
     if constexpr (std::is_same_v<Field::AngleType, int>) {
         return b - a + FastMath::TwoPI8;

@@ -43,16 +43,16 @@ public:
     public:
         using Set = std::unordered_set<const PairRenderable*>;
 
-        PairRenderable(const MinutiaPoint* probe, const MinutiaPoint* candidate, const float similarity)
+        PairRenderable(const MinutiaPoint* probe, const MinutiaPoint* candidate, const unsigned int similarity)
             : Pair(probe, candidate)
             , m_similarity(similarity)
         {
         }
 
-        [[nodiscard]] float similarity() const { return m_similarity; }
+        [[nodiscard]] unsigned int similarity() const { return m_similarity; }
 
     private:
-        float m_similarity {};
+        unsigned int m_similarity {};
     };
 
     using Minutiae = std::vector<MinutiaPoint>;
@@ -83,7 +83,7 @@ public:
 private:
     Field::MinutiaCoordType m_x; // scaled for dimensions
     Field::MinutiaCoordType m_y; // "
-    Field::AngleType m_angle; // radians
+    Field::AngleType m_angle; // radians [0,2PI] mapped over [0,255] (uint8_t)
 
     Field::MinutiaCoordType m_distance {}; // distance from adjacent side, also scaled
 };

@@ -83,15 +83,15 @@ void Render::addPairs(std::string& svg1, std::string& svg2, const FingerprintRen
     match.compute(pairs, fp1, fp2);
 
     for (const auto* p : pairs) {
-        const auto x1 = std::lround(static_cast<float>(p->candidate()->x()) * scaleX);
-        const auto y1 = std::lround(static_cast<float>(p->candidate()->y()) * scaleY);
+        const auto x1 = std::lround(static_cast<float>(p->probe()->x()) * scaleX);
+        const auto y1 = std::lround(static_cast<float>(p->probe()->y()) * scaleY);
         svg1 += StringUtil::format(R"(<circle cx="%d" cy="%d" r="8" stroke="#0000ff" stroke-width="2" fill="none"/>)", x1, y1);
-        svg1 += StringUtil::format(R"(<text x="%d" y="%d" stroke="#0000ff" class="small">%.2f</text>)", x1 + 9, y1 + 2, p->similarity());
+        svg1 += StringUtil::format(R"(<text x="%d" y="%d" stroke="#0000ff" class="small">%d</text>)", x1 + 9, y1 + 2, p->similarity());
 
-        const auto x2 = std::lround(static_cast<float>(p->probe()->x()) * scaleX);
-        const auto y2 = std::lround(static_cast<float>(p->probe()->y()) * scaleY);
+        const auto x2 = std::lround(static_cast<float>(p->candidate()->x()) * scaleX);
+        const auto y2 = std::lround(static_cast<float>(p->candidate()->y()) * scaleY);
         svg2 += StringUtil::format(R"(<circle cx="%d" cy="%d" r="8" stroke="#0000ff" stroke-width="2" fill="none"/>)", x2, y2);
-        svg2 += StringUtil::format(R"(<text x="%d" y="%d" stroke="#0000ff" class="small">%.2f</text>)", x2 + 9, y2 + 2, p->similarity());
+        svg2 += StringUtil::format(R"(<text x="%d" y="%d" stroke="#0000ff" class="small">%d</text>)", x2 + 9, y2 + 2, p->similarity());
     }
 }
 

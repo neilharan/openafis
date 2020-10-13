@@ -1,4 +1,5 @@
 
+#include "Log.h"
 #include "Triplet.h"
 #include "FastMath.h"
 #include "Param.h"
@@ -68,7 +69,7 @@ Triplet::Distances Triplet::sortDistances(const MinutiaPoint::Minutiae& minutiae
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Compute similarity per 5.1.1-3
-// Note: equation return values are inverted...
+// Note: equation return values are inverted and scaled for integer math...
 //
 void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
 {
@@ -80,27 +81,10 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
     }
     using Shift = std::vector<unsigned int>;
     static const std::vector<Shift> Shifting = { { 0, 1, 2 }, { 1, 2, 0 }, { 2, 0, 1 } }; // rotate triplets when comparing
-    float maxS {};
-    const Shift* maxShift {};
+    static const auto BestS = static_cast<unsigned int>(Pair::SimilarityMultiplier) * static_cast<unsigned int>(Pair::SimilarityMultiplier) * static_cast<unsigned int>(Pair::SimilarityMultiplier);
+    auto bestS = BestS;
 
     for (const auto& shift : Shifting) {
-        // Equation 8 (3 iterations)...
-        const auto lengths = [&]() {
-            auto max = 0;
-
-            for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                const auto d = std::abs(m_minutiae[i].distance() - probe.minutiae()[shift[i]].distance());
-                if (d > Param::MaximumLocalDistance) {
-                    return 1.0f;
-                }
-                max = std::max(max, d);
-            }
-            return max / static_cast<float>(Param::MaximumLocalDistance);
-        }();
-        if (lengths == 1.0f) {
-            continue;
-        }
-
         // Equation 7 (3 iterations)...
         const auto directions = [&]() {
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
@@ -114,6 +98,23 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
             continue;
         }
 
+        // Equation 8 (3 iterations)...
+        const auto lengths = [&]() {
+            auto max = 0u;
+
+            for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
+                const auto d = static_cast<unsigned int>(std::abs(m_minutiae[i].distance() - probe.minutiae()[shift[i]].distance()));
+                if (d > Param::MaximumLocalDistance) {
+                    return Pair::SimilarityMultiplier;
+                }
+                max = std::max(max, d);
+            }
+            return (max * Pair::SimilarityMultiplier) / Param::MaximumLocalDistance;
+        }();
+        if (lengths == Pair::SimilarityMultiplier) {
+            continue;
+        }
+
         // Equation 10 (3 iterations)...
         const auto anglesBeta = [&]() {
             Field::AngleType max {};
@@ -124,13 +125,13 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
                 const auto p = FastMath::rotateAngle(probe.minutiae()[shift[i]].angle(), probe.minutiae()[shift[j]].angle());
                 const auto d = FastMath::minimumAngle(c, p);
                 if (d >= Param::maximumAngleDifference()) {
-                    return 1.0f;
+                    return Pair::SimilarityMultiplier;
                 }
                 max = std::max(max, d);
             }
-            return static_cast<float>(max) / Param::maximumAngleDifference();
+            return (max * Pair::SimilarityMultiplier) / Param::maximumAngleDifference();
         }();
-        if (anglesBeta == 1.0f) {
+        if (anglesBeta == Pair::SimilarityMultiplier) {
             continue;
         }
 
@@ -153,28 +154,26 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
 
                     const auto ad = FastMath::minimumAngle(d, od);
                     if (ad >= Param::maximumAngleDifference()) {
-                        return 1.0f;
+                        return Pair::SimilarityMultiplier;
                     }
                     max = std::max(max, ad);
                 }
             }
-            return static_cast<float>(max) / Param::maximumAngleDifference();
+            return (max * Pair::SimilarityMultiplier) / Param::maximumAngleDifference();
         }();
-        if (anglesAlpha == 1.0f) {
+        if (anglesAlpha == Pair::SimilarityMultiplier) {
             continue;
         }
-        const auto s = 1.0f - lengths * anglesBeta * anglesAlpha;
-        if (s > maxS) {
-            maxS = s;
-            maxShift = &shift;
-
-            if (s == 1.0f) {
+        const auto s = lengths * anglesBeta * anglesAlpha;
+        if (s < bestS) {
+            bestS = s;
+            if (bestS == 0) {
                 break; // short-cut
             }
         }
     }
-    if (maxShift) {
-        pairs.emplace_back(maxS, &probe, this);
+    if (bestS != BestS) {
+        pairs.emplace_back(Pair::SimilarityMultiplier - (bestS / (Pair::SimilarityMultiplier * Pair::SimilarityMultiplier)), &probe, this);
     }
 }
 

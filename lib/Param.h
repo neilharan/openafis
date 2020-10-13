@@ -16,8 +16,6 @@ class Param
 public:
     static constexpr Field::MinutiaCoordType MaximumLocalDistance = 12;
     static constexpr Field::MinutiaCoordType MaximumGlobalDistance = 12;
-    static constexpr float MaximumAngleDifference = FastMath::PI / 6;
-    static constexpr float MaximumDirectionDifference = FastMath::PI / 4;
     static constexpr unsigned int MinimumMinutiae = 4;
 
     static constexpr Field::AngleType maximumAngleDifference()
@@ -41,6 +39,9 @@ public:
     }
 
 private:
+    static constexpr float MaximumAngleDifference = FastMath::PI / 6;
+    static constexpr float MaximumDirectionDifference = FastMath::PI / 4;
+
     // A very limited, but constexpr, round function to help with params...
     static constexpr Field::AngleType round(const float x) { return (x >= 0.0f) ? static_cast<Field::AngleType>(x + 0.5f) : static_cast<Field::AngleType>(x - 0.5f); }
 };

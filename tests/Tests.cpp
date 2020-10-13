@@ -7,6 +7,9 @@
 #include "TemplateCSV.h"
 #include "TemplateISO19794_2_2005.h"
 
+#undef _CONTAINER_DEBUG_LEVEL
+#define _CONTAINER_DEBUG_LEVEL 0
+
 #include <cassert>
 #include <chrono>
 #include <filesystem>
@@ -232,7 +235,7 @@ static void testMatchMany(const std::string& path)
     }
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    Log::test("Completed ", " in ", ms.count(), "ms");
+    Log::test("Completed in ", ms.count(), "ms (", std::round(static_cast<float>(scores.capacity()) / ms.count() * 1000), " fp/s)");
 
     Log::test("Reporting...");
 
@@ -328,7 +331,7 @@ int main(int, const char**)
 
     //OpenAFIS::testBulkLoad(path);
     OpenAFIS::testMatchSingle(path);
-    //OpenAFIS::testMatchMany(path);
+    OpenAFIS::testMatchMany(path);
     //OpenAFIS::testRender(path);
     return 0;
 }
