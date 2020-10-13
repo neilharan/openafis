@@ -7,9 +7,6 @@
 #include "TemplateCSV.h"
 #include "TemplateISO19794_2_2005.h"
 
-#undef _CONTAINER_DEBUG_LEVEL
-#define _CONTAINER_DEBUG_LEVEL 0
-
 #include <cassert>
 #include <chrono>
 #include <filesystem>
@@ -180,24 +177,24 @@ static void testMatchMany(const std::string& path)
 
             // Yes, there are better ways to do this...
             if (StringUtil::contains(s, "fvc2002")) {
-                id |= 2002, 20;
+                id |= 2002 << 20;
             } else if (StringUtil::contains(s, "fvc2004")) {
-                id |= 2004, 20;
+                id |= 2004 << 20;
             } else if (StringUtil::contains(s, "fvc2006")) {
-                id |= 2006, 20;
+                id |= 2006 << 20;
             } else {
                 Log::error("unknown FVC dataset [year] ", p);
                 return uint32_t {};
             }
 
             if (StringUtil::contains(s, "db1_b")) {
-                id |= 1, 16;
+                id |= 1 << 16;
             } else if (StringUtil::contains(s, "db2_b")) {
-                id |= 2, 16;
+                id |= 2 << 16;
             } else if (StringUtil::contains(s, "db3_b")) {
-                id |= 3, 16;
+                id |= 3 << 16;
             } else if (StringUtil::contains(s, "db4_b")) {
-                id |= 4, 16;
+                id |= 4 << 16;
             } else {
                 Log::error("unknown FVC dataset [set] ", p);
                 return uint32_t {};
@@ -217,8 +214,9 @@ static void testMatchMany(const std::string& path)
             return;
         }
     }
-    std::vector<unsigned int> scores(templates.size() * templates.size());
+    Log::test("Loaded ", templates.size(), " templates");
 
+    std::vector<unsigned int> scores(templates.size() * templates.size());
     Log::test("Matching ", scores.capacity(), " permutations...");
 
     static MatchSimilarity match;
@@ -235,7 +233,7 @@ static void testMatchMany(const std::string& path)
     }
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    Log::test("Completed in ", ms.count(), "ms (", std::round(static_cast<float>(scores.capacity()) / ms.count() * 1000), " fp/s)");
+    Log::test("Completed in ", ms.count(), "ms (", ms.count() ? std::round(static_cast<float>(scores.capacity()) / ms.count() * 1000) : 0, " fp/s)");
 
     Log::test("Reporting...");
 
@@ -294,6 +292,8 @@ static void testRender(const std::string& path)
     if (!t1_2.load(StringUtil::format(R"(%s/fvc2002/DB1_B/101_7.iso)", path.c_str()))) {
         return;
     }
+    Log::test("Template ", t1_2.id(), ": size ", t1_2.bytes(), " bytes, #fingerprints ", t1_2.fingerprints().size());
+
     if (t1_1.fingerprints().empty() || t1_2.fingerprints().empty()) {
         return;
     }
@@ -325,13 +325,56 @@ static void testRender(const std::string& path)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-int main(int, const char**)
+int main(int argc, char **argv)
 {
-    const std::string path = "/dev/project/os/openafis/data/valid"; // NJH-TODO from command line
+    const auto param = [](char** begin, char** end, const std::string& option) {
+        char** it = std::find(begin, end, option);
+        if (it != end && ++it != end) {
+            return *it;
+        }
+        return static_cast<char*>(nullptr);
+    };
 
-    //OpenAFIS::testBulkLoad(path);
-    OpenAFIS::testMatchSingle(path);
-    OpenAFIS::testMatchMany(path);
-    //OpenAFIS::testRender(path);
+    const auto option = [](char** begin, char** end, const std::string& option) {
+        return std::find(begin, end, option) != end;
+    };
+
+    OpenAFIS::Log::test("OpenAFIS: an efficient 1:N fingerprint matching library", OpenAFIS::Log::LF);
+
+    const auto _path = param(argv, argv + argc, "--path");
+    const auto path = _path ? _path : ".";
+
+    bool command{};
+    if (option(argv, argv + argc, "--bulk-load")) {
+        OpenAFIS::testBulkLoad(path);
+        command |= true;
+    }
+    if (option(argv, argv + argc, "--match-single")) {
+        OpenAFIS::testMatchSingle(path);
+        command |= true;
+    }
+    if (option(argv, argv + argc, "--match-many")) {
+        OpenAFIS::testMatchMany(path);
+        command |= true;
+    }
+    if (option(argv, argv + argc, "--render")) {
+        OpenAFIS::testRender(path);
+        command |= true;
+    }
+    if (option(argv, argv + argc, "--help") || !command) {
+        OpenAFIS::Log::test("Usage: tests [COMMAND]... [--path=FVC_PATH]");
+        OpenAFIS::Log::test("       FVC_PATH refers to a path such that:");
+        OpenAFIS::Log::test("           FVC_PATH/fvc2002/DB1_B/101_1.iso");
+        OpenAFIS::Log::test("           ...");
+        OpenAFIS::Log::test("           FVC_PATH/fvc2004/DB1_B/101_1.iso");
+        OpenAFIS::Log::test("           ...", OpenAFIS::Log::LF);
+        OpenAFIS::Log::test("Commands:");
+        OpenAFIS::Log::test("  --bulk-load");
+        OpenAFIS::Log::test("  --match-single");
+        OpenAFIS::Log::test("  --match-many");
+        OpenAFIS::Log::test("  --render");
+        OpenAFIS::Log::test("  --help", OpenAFIS::Log::LF);
+        OpenAFIS::Log::test("eg: tests --match--many --render --path ~/openafis/data/valid");
+    }
     return 0;
 }
