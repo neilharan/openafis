@@ -49,12 +49,14 @@ bool Render::all(std::string& svg1, std::string& svg2, const FingerprintRenderab
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void Render::addMinutiae(std::string& svg, const FingerprintRenderable& fp)
 {
+    static const auto LineLength = 10;
+
     for (const auto& minutia : fp.minutiae()) {
         const auto r = FastMath::degreesToRadians(minutia.angle());
         const auto x1 = minutia.x();
         const auto y1 = minutia.y();
-        const auto x2 = x1 + static_cast<int>(LineLength * std::cos(r));
-        const auto y2 = y1 + static_cast<int>(LineLength * std::sin(r));
+        const auto x2 = x1 + static_cast<int>(LineLength * FastMath::cos(r));
+        const auto y2 = y1 + static_cast<int>(LineLength * FastMath::sin(r));
         svg += StringUtil::format(R"(<line x1="%d" y1="%d" x2="%d" y2="%d"/>)", x1, y1, x2, y2);
 
         if (minutia.type() == Minutia::Type::RidgeBifurcation) {

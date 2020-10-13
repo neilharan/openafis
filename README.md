@@ -18,10 +18,18 @@ The goal is to accurately identify one minutiae-set from 50K candidate sets with
   | CMake support | | |
   | Test suite | 30% | EER, FMR100, FMR1000, ZeroFMR |
   | Benchmarks | 25% | |
-  | Optimizing | 30% | float->int, vectorization (SSE/AVX), math functions |
+  | Optimizing | 40% | float->int, vectorization (SSE/AVX), math functions |
   | Parallelizing | | |
   | Minutiae/pair rendering | 100% | SVG output |
-  | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction function) |
+  | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction feature) |
+
+## Roadmap
+
+- Minutiae extraction feature
+- Research quaternion descriptors
+- CUDA implementation
+- Additional template readers (ANSI INCITS 378-2004/2009 and proprietary formats)
+- Benchmark other libraries
 
 ## Supported operating systems
 
@@ -47,7 +55,8 @@ The FVC archives are supplied in the tif raster format. A small python program [
 
 ## Test readers/SDKs
 
-- https://secugen.com/products/hamster-pro-20
+- SecuGen Hamster Pro 10 https://secugen.com/products/hamster-pro-10
+- SecuGen Hamster Pro 20 https://secugen.com/products/hamster-pro-20
 
 ## Algorithm
 
@@ -71,11 +80,11 @@ Delaunay 2D Triangulation (https://github.com/delfrrr/delaunator-cpp) [MIT Licen
 
 FVC2002 DB1_B 101_1 and 101_7 respectively. The implementation can reliably match displaced and rotated minutiae.
 
-These images were produced by the included Render class. The output of that class is two SVG's identifying (a) all minutiae, (b) paired minutiae (in blue), and (c) similarity scores of pairs. The SVG's were then overlayed on top of the original FVC tif's.
+These images were produced using the libraries Render class. The class creates two SVG's identifying (a) all minutiae (grey circles and squares), (b) paired minutiae (circled blue), and (c) similarity scores of pairs. The SVG's were then overlayed on top of the original FVC images.
 
 #### Efficacy
 
-Preliminary M:M [RESULTS] matching all FVC 2002/2004 impressions against each other.
+Preliminary M:M [RESULTS] matching FVC 2002/2004 data. Every impression is matched against every other impression.
 
 TODO
 

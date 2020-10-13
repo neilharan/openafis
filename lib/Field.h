@@ -30,6 +30,7 @@ public:
     // Options are int or float. Double is not supported.
     // During benchmarks approximately 1.2x total match speed was observed withs ints over floats (will vary considerably between platforms)...
     using AngleType = int;
+    static constexpr size_t AngleMax = 255;
 
     // We only use the 16 LSB's in the key type. While MinutiaCoordType is uint8_t this could be uint16_t.
     // It is used only to identify duplicate triplets...

@@ -94,6 +94,62 @@ private:
         using Values = std::array<std::array<Field::AngleType, Max - Min>, Max - Min>;
         const Values* m_values;
     };
+
+    class Cosines
+    {
+    public:
+        Cosines()
+            : m_values([]() {
+                static Values v;
+                for (auto i = Min; i < Max; ++i) {
+                    v.at(i - Min) = std::cosf(static_cast<float>(i) / FastMath::Radians8);
+                }
+                return &v;
+            }())
+        {
+        }
+
+        [[nodiscard]] constexpr float get(const Field::AngleType x) const
+        {
+            assert(x > Min && x < Max);
+            return (*m_values)[x - Min];
+        }
+
+        static constexpr auto Min = -static_cast<int>(Field::AngleMax);
+        static constexpr auto Max = static_cast<int>(Field::AngleMax);
+
+    private:
+        using Values = std::array<float, Max - Min>;
+        const Values* m_values;
+    };
+
+    class Sines
+    {
+    public:
+        Sines()
+            : m_values([]() {
+                static Values v;
+                for (auto i = Min; i < Max; ++i) {
+                    v.at(i - Min) = std::sinf(static_cast<float>(i) / FastMath::Radians8);
+                }
+                return &v;
+            }())
+        {
+        }
+
+        [[nodiscard]] constexpr float get(const Field::AngleType x) const
+        {
+            assert(x > Min && x < Max);
+            return (*m_values)[x - Min];
+        }
+
+        static constexpr auto Min = -static_cast<int>(Field::AngleMax);
+        static constexpr auto Max = static_cast<int>(Field::AngleMax);
+
+    private:
+        using Values = std::array<float, Max - Min>;
+        const Values* m_values;
+    };
 };
 }
 

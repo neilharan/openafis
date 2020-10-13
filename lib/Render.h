@@ -20,8 +20,6 @@ public:
     static bool all(std::string& svg1, std::string& svg2, const FingerprintRenderable& fp1, const FingerprintRenderable& fp2);
 
 private:
-    static constexpr unsigned int LineLength = 10;
-
     static void addMinutiae(std::string& svg, const FingerprintRenderable& fp);
     static void addPairs(std::string& svg1, std::string& svg2, const FingerprintRenderable& fp1, const FingerprintRenderable& fp2);
     static void open(std::string& svg, const Dimensions& dimensions);

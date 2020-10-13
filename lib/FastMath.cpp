@@ -51,7 +51,13 @@ float FastMath::cos(const Field::AngleType theta)
         return std::cosf(static_cast<float>(theta));
     }
     if constexpr (std::is_same_v<Field::AngleType, int>) {
-        return std::cosf(static_cast<float>(theta) / Radians8); // NJH-TODO use tables
+#if 1
+        static const Cosines Table;
+
+        return Table.get(theta);
+#else
+        return std::cosf(static_cast<float>(theta) / Radians8);
+#endif
     }
 }
 
@@ -65,7 +71,13 @@ float FastMath::sin(const Field::AngleType theta)
         return std::sinf(static_cast<float>(theta));
     }
     if constexpr (std::is_same_v<Field::AngleType, int>) {
-        return std::sinf(static_cast<float>(theta) / Radians8); // NJH-TODO use tables
+#if 1
+        static const Sines Table;
+
+        return Table.get(theta);
+#else
+        return std::sinf(static_cast<float>(theta) / Radians8);
+#endif
     }
 }
 

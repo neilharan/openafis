@@ -94,23 +94,24 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
             }
 
             const auto directions = [&]() {
-                auto a = p2.probe()->angle() + theta;
+                const auto a = [&]() {
+                    // Wrap within range ...
+                    if constexpr (std::is_same_v<Field::AngleType, float>) {
+                        const auto s = p2.probe()->angle() + theta;
 
-                if constexpr (std::is_same_v<Field::AngleType, float>) {
-                    if (a > FastMath::TwoPI) { // wrap within range
-                        a -= FastMath::TwoPI;
-                    } else if (a < 0) {
-                        a += FastMath::TwoPI;
+                        if (s > FastMath::TwoPI) {
+                            return s - FastMath::TwoPI;
+                        }
+                        if (s < 0) {
+                            return s + FastMath::TwoPI;
+                        }
+                        return s;
                     }
-                }
-                if constexpr (std::is_same_v<Field::AngleType, float>) {
-                    if (a > FastMath::TwoPI8) { // wrap within range
-                        a -= FastMath::TwoPI8;
-                    } else if (a < 0) {
-                        a += FastMath::TwoPI8;
+                    if constexpr (std::is_same_v<Field::AngleType, int>) {
+                        return static_cast<uint8_t>(p2.probe()->angle() + theta);
                     }
-                }
-                return FastMath::minimumAngle(a, p2.candidate()->angle()) <= Param::maximumDirectionDifference();
+                };
+                return FastMath::minimumAngle(a(), p2.candidate()->angle()) <= Param::maximumDirectionDifference();
             }();
             if (!directions) {
                 continue;
