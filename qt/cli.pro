@@ -1,11 +1,11 @@
-TARGET = tests
-OBJECTS_DIR = tests
+TARGET = openafis-cli
+OBJECTS_DIR = openafis-cli
 
 QT -= core
 QT -= gui
 
 INCLUDEPATH += ../lib
-SOURCES = ../tests/Tests.cpp
+SOURCES = ../cli/Main.cpp
 
 *-msvc*: {
     DEFINES += _HAS_EXCEPTIONS=0
@@ -16,4 +16,5 @@ contains(CONFIG, release) {
 } else {
     BUILD_TYPE = "debug"
 }
-LIBS = $$BUILD_TYPE/openafis.lib
+#LIBS = $$BUILD_TYPE/openafis.lib
+LIBS = x64/$$BUILD_TYPE/openafis.lib

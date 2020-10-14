@@ -16,7 +16,7 @@ namespace OpenAFIS
 //     First line is width,height
 //     Followed by minutiae in the form type,x,y,angle (radians)
 //
-template <class F> bool TemplateCSV<F>::load(const std::string& path)
+template <class I, class F> bool TemplateCSV<I, F>::load(const std::string& path)
 {
     std::ifstream f(path, std::ifstream::in);
     if (!f) {
@@ -76,6 +76,6 @@ template <class F> bool TemplateCSV<F>::load(const std::string& path)
 
         minutiae.emplace_back(Minutia::Type(type), x, y, radiansToDegrees(angle));
     }
-    return Template<F>::load(std::make_pair(width, height), fps);
+    return Template<I, F>::load(std::make_pair(width, height), fps);
 }
 }

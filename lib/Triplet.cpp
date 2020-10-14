@@ -1,11 +1,10 @@
 
-#include "Log.h"
 #include "Triplet.h"
 #include "FastMath.h"
+#include "Log.h"
 #include "Param.h"
 
 #include <algorithm>
-#include <cassert>
 #include <numeric>
 
 
@@ -25,8 +24,6 @@ Triplet::Triplet(const MinutiaPoint::Minutiae& minutiae)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 MinutiaPoint::Minutiae Triplet::shiftClockwise(MinutiaPoint::Minutiae minutiae)
 {
-    assert(minutiae.size() == 3);
-
     const auto cx = ((minutiae[0].x() + minutiae[1].x()) / 2 + minutiae[2].x()) / 2;
     const auto cy = ((minutiae[0].y() + minutiae[1].y()) / 2 + minutiae[2].y()) / 2;
 
@@ -118,9 +115,10 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
         // Equation 10 (3 iterations)...
         const auto anglesBeta = [&]() {
             Field::AngleType max {};
+            const auto& s = Shifting[1];
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                const auto j = Shifting[1][i];
+                const auto& j = s[i];
                 const auto c = FastMath::rotateAngle(m_minutiae[i].angle(), m_minutiae[j].angle());
                 const auto p = FastMath::rotateAngle(probe.minutiae()[shift[i]].angle(), probe.minutiae()[shift[j]].angle());
                 const auto d = FastMath::minimumAngle(c, p);
@@ -181,7 +179,8 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 size_t Triplet::bytes() const
 {
-    return sizeof(*this) + std::accumulate(m_minutiae.begin(), m_minutiae.end(), 0, [](int sum, const auto& m) { return sum + m.bytes(); }) + m_distances.capacity() * sizeof(decltype(m_distances[0]));
+    return sizeof(*this) + std::accumulate(m_minutiae.begin(), m_minutiae.end(), size_t {}, [](size_t sum, const auto& m) { return sum + m.bytes(); })
+        + m_distances.capacity() * sizeof(decltype(m_distances[0]));
 }
 
 

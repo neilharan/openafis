@@ -22,10 +22,10 @@
 namespace OpenAFIS
 {
 
-template <class FingerprintType = Fingerprint> class TemplateISO19794_2_2005 : public Template<FingerprintType>
+template <class IdType, class FingerprintType> class TemplateISO19794_2_2005 : public Template<IdType, FingerprintType>
 {
 public:
-    explicit TemplateISO19794_2_2005(const Field::TemplateIdType& id)
+    explicit TemplateISO19794_2_2005(const IdType& id)
         : Template(id)
     {
     }
@@ -73,7 +73,8 @@ private:
 
 public:
     static constexpr size_t MinimumLength = sizeof(MagicVersion) + sizeof(_Header);
-    static constexpr size_t MaximumLength = MinimumLength + Template<FingerprintType>::MaximumFingerprints * (sizeof(_FingerPrint) + Template<FingerprintType>::MaximumMinutiae * sizeof(_Minutia));
+    static constexpr size_t MaximumLength
+        = MinimumLength + Template<IdType, FingerprintType>::MaximumFingerprints * (sizeof(_FingerPrint) + Template<IdType, FingerprintType>::MaximumMinutiae * sizeof(_Minutia));
 };
 }
 

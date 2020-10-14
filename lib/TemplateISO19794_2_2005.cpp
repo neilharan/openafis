@@ -11,11 +11,11 @@ namespace OpenAFIS
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class F> const unsigned char TemplateISO19794_2_2005<F>::MagicVersion[] = { 'F', 'M', 'R', 0, ' ', '2', '0', 0 };
+template <class I, class F> const unsigned char TemplateISO19794_2_2005<I, F>::MagicVersion[] = { 'F', 'M', 'R', 0, ' ', '2', '0', 0 };
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class F> bool TemplateISO19794_2_2005<F>::load(const std::string& path)
+template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const std::string& path)
 {
     std::basic_ifstream<uint8_t> f(path, std::ifstream::in | std::ifstream::binary);
     if (!f) {
@@ -37,7 +37,7 @@ template <class F> bool TemplateISO19794_2_2005<F>::load(const std::string& path
 // https://www.nist.gov/services-resources/software/biomdi-software-tools-supporting-standard-biometric-data-interchange
 // https://templates.machinezoo.com/iso-19794-2-2005
 //
-template <class F> bool TemplateISO19794_2_2005<F>::load(const uint8_t* data, const size_t length)
+template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const uint8_t* data, const size_t length)
 {
     if (length < MinimumLength) {
         Log::error("length < MinimumLength; ", length);
@@ -63,7 +63,7 @@ template <class F> bool TemplateISO19794_2_2005<F>::load(const uint8_t* data, co
 
         // check alignment - platforms that support unaligned access (like x86) _could_ just return p
         // realigning here does improve performance though & is a requirement for some platforms (like arm) where unaligned access is UB...
-        if (reinterpret_cast<uint32_t>(p) % sizeof(void*) == 0) {
+        if (reinterpret_cast<uintptr_t>(p) % sizeof(void*) == 0) {
             return p;
         }
         thread_local static std::vector<uint8_t> buff(LargestStruct);
@@ -101,7 +101,7 @@ template <class F> bool TemplateISO19794_2_2005<F>::load(const uint8_t* data, co
             return false;
         }
         auto& minutiae = fps.emplace_back();
-        minutiae.reserve(std::min(fp->minutiaCount, static_cast<uint8_t>(Template<F>::MaximumMinutiae)));
+        minutiae.reserve(std::min(fp->minutiaCount, static_cast<uint8_t>(Template<I, F>::MaximumMinutiae)));
 
         for (auto m = 0u; m < minutiae.capacity(); ++m) {
             const auto* mp = safeRead(reinterpret_cast<const _Minutia**>(&p));
@@ -124,11 +124,13 @@ template <class F> bool TemplateISO19794_2_2005<F>::load(const uint8_t* data, co
         memcpy(&extensionData, ex, sizeof(extensionData));
         p = &p[swap16(extensionData)];
     }
-    return Template<F>::load(std::make_pair(swap16(h->width), swap16(h->height)), fps);
+    return Template<I, F>::load(std::make_pair(swap16(h->width), swap16(h->height)), fps);
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template class TemplateISO19794_2_2005<Fingerprint>;
-template class TemplateISO19794_2_2005<FingerprintRenderable>;
+template class TemplateISO19794_2_2005<uint32_t, Fingerprint>;
+template class TemplateISO19794_2_2005<uint32_t, FingerprintRenderable>;
+template class TemplateISO19794_2_2005<std::string, Fingerprint>;
+template class TemplateISO19794_2_2005<std::string, FingerprintRenderable>;
 }

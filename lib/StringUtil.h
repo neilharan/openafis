@@ -23,7 +23,6 @@ public:
     }
 
     static bool contains(const std::string& s, const std::string& part) { return s.find(part) != std::string::npos; }
-    static std::string center(const std::string& s, const int width = 80) { return std::string((width - s.length()) / 2, ' ') + s; }
 
     template <typename... A> static std::string format(const std::string& format, A... args)
     {

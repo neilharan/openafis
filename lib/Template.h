@@ -3,7 +3,6 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Field.h"
 #include "Fingerprint.h"
 
 #include <vector>
@@ -13,17 +12,18 @@
 namespace OpenAFIS
 {
 
-template <class FingerprintType> class Template
+// Any identifier you like - maybe a std::string for research, or uint16_t when memory is a constraint...
+template <class IdType, class FingerprintType> class Template
 {
 public:
     using Fingerprints = std::vector<FingerprintType>;
 
-    explicit Template(const Field::TemplateIdType& id)
+    explicit Template(const IdType& id)
         : m_data(id)
     {
     }
 
-    [[nodiscard]] const Field::TemplateIdType& id() const { return m_data.id; }
+    [[nodiscard]] const IdType& id() const { return m_data.id; }
     [[nodiscard]] const Fingerprints& fingerprints() const { return m_data.fps; }
     [[nodiscard]] void clear() { m_data.fps.clear(); }
     [[nodiscard]] size_t bytes() const;
@@ -37,13 +37,13 @@ protected:
 
 private:
     struct Data {
-        explicit Data(const Field::TemplateIdType& id)
+        explicit Data(const IdType& id)
             : id(id)
         {
         }
 
         Fingerprints fps;
-        const Field::TemplateIdType id;
+        const IdType id;
     } m_data;
 };
 }

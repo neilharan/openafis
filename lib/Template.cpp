@@ -14,7 +14,7 @@ namespace OpenAFIS
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class F> bool Template<F>::load(const Dimensions& dimensions, const std::vector<Fingerprint::Minutiae>& fps)
+template <class I, class F> bool Template<I, F>::load(const Dimensions& dimensions, const std::vector<Fingerprint::Minutiae>& fps)
 {
     for (const auto& minutiae : fps) {
         if (minutiae.size() < MinimumMinutiae) {
@@ -65,13 +65,15 @@ template <class F> bool Template<F>::load(const Dimensions& dimensions, const st
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class F> size_t Template<F>::bytes() const
+template <class I, class F> size_t Template<I, F>::bytes() const
 {
-    return sizeof(*this) + std::accumulate(m_data.fps.begin(), m_data.fps.end(), 0, [](int sum, const auto& fp) { return sum + fp.bytes(); });
+    return sizeof(*this) + std::accumulate(m_data.fps.begin(), m_data.fps.end(), size_t {}, [](size_t sum, const auto& fp) { return sum + fp.bytes(); });
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template class Template<Fingerprint>;
-template class Template<FingerprintRenderable>;
+template class Template<uint32_t, Fingerprint>;
+template class Template<uint32_t, FingerprintRenderable>;
+template class Template<std::string, Fingerprint>;
+template class Template<std::string, FingerprintRenderable>;
 }

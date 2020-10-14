@@ -12,10 +12,10 @@
 namespace OpenAFIS
 {
 
-template <class FingerprintType> class TemplateCSV : public Template<FingerprintType>
+template <class IdType, class FingerprintType> class TemplateCSV : public Template<IdType, FingerprintType>
 {
 public:
-    explicit TemplateCSV(const Field::TemplateIdType& id)
+    explicit TemplateCSV(const IdType& id)
         : Template(id)
     {
     }

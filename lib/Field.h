@@ -14,9 +14,6 @@ namespace OpenAFIS
 class Field
 {
 public:
-    // Any identifier you like - maybe a std::string for research, or uint16_t when memory is a constraint...
-    using TemplateIdType = unsigned int;
-
     // Coordinates and distances are always scaled to 8-bits so uint8_t is sufficient, int is likely to be more efficient though.
     // When memory constrained specify a smaller type here, otehrwise leave default...
     using MinutiaCoordType = int;
