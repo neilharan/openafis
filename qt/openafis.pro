@@ -1,5 +1,4 @@
 TARGET = openafis
-OBJECTS_DIR = openafis
 
 QT -= core
 QT -= gui
@@ -52,3 +51,4 @@ contains(CONFIG, release) {
         QMAKE_CXXFLAGS_EXCEPTIONS_ON -= -EHsc
     }
 }
+OBJECTS_DIR = $$BUILD_TYPE/openafis

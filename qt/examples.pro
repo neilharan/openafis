@@ -1,5 +1,4 @@
 TARGET = examples
-OBJECTS_DIR = examples
 
 QT -= core
 QT -= gui
@@ -16,4 +15,5 @@ contains(CONFIG, release) {
 } else {
     BUILD_TYPE = "debug"
 }
+OBJECTS_DIR = $$BUILD_TYPE/examples
 LIBS = $$BUILD_TYPE/openafis.lib

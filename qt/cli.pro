@@ -1,5 +1,4 @@
 TARGET = openafis-cli
-OBJECTS_DIR = openafis-cli
 
 QT -= core
 QT -= gui
@@ -16,5 +15,6 @@ contains(CONFIG, release) {
 } else {
     BUILD_TYPE = "debug"
 }
+OBJECTS_DIR = $$BUILD_TYPE/openafis-cli
 #LIBS = $$BUILD_TYPE/openafis.lib
 LIBS = x64/$$BUILD_TYPE/openafis.lib

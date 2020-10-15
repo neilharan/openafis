@@ -14,7 +14,7 @@ template <class IdType, class FingerprintType> class TemplateCSV : public Templa
 {
 public:
     explicit TemplateCSV(const IdType& id)
-        : Template(id)
+        : Template<IdType, FingerprintType>(id)
     {
     }
 

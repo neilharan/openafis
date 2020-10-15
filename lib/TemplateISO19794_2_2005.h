@@ -24,7 +24,7 @@ template <class IdType, class FingerprintType> class TemplateISO19794_2_2005 : p
 {
 public:
     explicit TemplateISO19794_2_2005(const IdType& id)
-        : Template(id)
+        : Template<IdType, FingerprintType>(id)
     {
     }
 

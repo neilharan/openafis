@@ -26,7 +26,7 @@ public:
 
     [[nodiscard]] const IdType& id() const { return m_data.id; }
     [[nodiscard]] const Fingerprints& fingerprints() const { return m_data.fps; }
-    [[nodiscard]] void clear() { m_data.fps.clear(); }
+    void clear() { m_data.fps.clear(); }
     [[nodiscard]] size_t bytes() const;
 
 protected:
