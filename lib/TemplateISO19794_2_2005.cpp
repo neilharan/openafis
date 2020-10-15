@@ -15,7 +15,7 @@ template <class I, class F> const unsigned char TemplateISO19794_2_2005<I, F>::M
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const std::string& path)
+template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const std::filesystem::path& path)
 {
     std::basic_ifstream<uint8_t> f(path, std::ifstream::in | std::ifstream::binary);
     if (!f) {
@@ -131,6 +131,6 @@ template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const uint8
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 template class TemplateISO19794_2_2005<uint32_t, Fingerprint>;
 template class TemplateISO19794_2_2005<uint32_t, FingerprintRenderable>;
-template class TemplateISO19794_2_2005<std::string, Fingerprint>;
-template class TemplateISO19794_2_2005<std::string, FingerprintRenderable>;
+template class TemplateISO19794_2_2005<std::filesystem::path, Fingerprint>;
+template class TemplateISO19794_2_2005<std::filesystem::path, FingerprintRenderable>;
 }

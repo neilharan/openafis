@@ -1,7 +1,6 @@
 
 #include "Triplet.h"
 #include "FastMath.h"
-#include "Log.h"
 #include "Param.h"
 
 #include <algorithm>

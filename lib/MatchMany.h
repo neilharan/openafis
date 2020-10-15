@@ -1,25 +1,25 @@
-#ifndef TEMPLATECSV_H
-#define TEMPLATECSV_H
+#ifndef MATCHMANY_H
+#define MATCHMANY_H
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Template.h"
+#include "Match.h"
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Instantiate on the heap.
+// This class reserves a wide array to improve duplicate checking efficiency...
+//
 namespace OpenAFIS
 {
 
-template <class IdType, class FingerprintType> class TemplateCSV : public Template<IdType, FingerprintType>
+template <class TemplateType> class MatchMany
 {
 public:
-    explicit TemplateCSV(const IdType& id)
-        : Template(id)
-    {
-    }
+    using Templates = std::vector<TemplateType>;
 
-    bool load(const std::filesystem::path& path);
+    std::pair<unsigned int, const TemplateType*> compute(const TemplateType& probe, const Templates &candidates) const;
 };
 }
 
-#endif // TEMPLATECSV_H
+#endif // MATCHMANY_H

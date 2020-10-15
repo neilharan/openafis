@@ -2,6 +2,7 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "Log.h"
 #include "Match.h"
+#include "MatchMany.h"
 #include "Render.h"
 #include "StringUtil.h"
 #include "TemplateCSV.h"
@@ -12,7 +13,6 @@
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <regex>
 #include <sstream>
 #include <vector>
 
@@ -24,6 +24,32 @@ namespace OpenAFIS
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 constexpr auto LineWidth = 100;
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+template <class T>
+static bool helperLoadPath(T &templates, const std::string &path)
+{
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(path.c_str())) {
+        if (!entry.is_regular_file()) {
+            continue;
+        }
+        const auto& p = entry.path();
+        if (StringUtil::lower(p.extension().string()) != ".iso") {
+            continue;
+        }
+        auto& t = templates.emplace_back(p.relative_path().make_preferred().string());
+        if (!t.load(p.string())) {
+            Log::error("failed to load ", p.string());
+            return false;
+        }
+        if (t.fingerprints().empty()) {
+            Log::error("template is empty ", p.string());
+            return false;
+        }
+    }
+    return true;
+}
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,6 +176,50 @@ static void one(const std::string& path, const std::string& f1, const std::strin
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+static void oneMany(const std::string& path, const std::string& f1)
+{
+    Log::test(std::string(LineWidth, '='));
+    Log::test("1:N match", Log::LF);
+    Log::test("Path: ", path);
+    Log::test("Template 1: ", f1);
+    Log::test("Threads: ", 1);
+    Log::test(std::string(LineWidth, '='), Log::LF);
+
+    Log::test("Loading...");
+
+    using TemplateType = TemplateISO19794_2_2005<std::filesystem::path, Fingerprint>;
+    std::vector<TemplateType> candidates;
+    candidates.reserve(1000);
+    if (!helperLoadPath(candidates, path)) {
+        return;
+    }
+    const auto pathF1 = std::filesystem::path(StringUtil::format(R"(%s/%s)", path.c_str(), f1.c_str()));
+    TemplateType probe(pathF1.relative_path().make_preferred().string());
+    if (!probe.load(pathF1)) {
+        return;
+    }
+    Log::test("Loaded ", candidates.size() + 1, " templates");
+
+    Log::test(Log::LF, "Matching 1:", candidates.size(), "...");
+
+    static MatchMany<TemplateType> match;
+
+    const auto start = std::chrono::high_resolution_clock::now();
+    const auto result = match.compute(probe, candidates);
+    const auto finish = std::chrono::high_resolution_clock::now();
+    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
+
+    if (result.second) {
+        Log::test("Matched probe [", probe.id(), "] and candidate [", result.second->id(), "] with ", result.first, "% similarity");
+    } else {
+        Log::test("No matches");
+    }
+    Log::test("Completed in ", ms.count(), "ms (", ms.count() ? std::round(static_cast<float>(candidates.size()) / ms.count() * 1000) : 0, " fp/s)");
+    Log::test(std::string(LineWidth, '='), Log::LF);
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 static void manyMany(const std::string& path)
 {
     Log::test(std::string(LineWidth, '='));
@@ -158,29 +228,12 @@ static void manyMany(const std::string& path)
     Log::test("Threads: ", 1);
     Log::test(std::string(LineWidth, '='), Log::LF);
 
-    // We're not concerned with loading efficiency (a lot of disk I/O and irrelevant tasks like regex)...
     Log::test("Loading...");
 
-    std::regex re("\\_+"); // split underscore
-    std::vector<TemplateISO19794_2_2005<std::string, Fingerprint>> templates;
+    std::vector<TemplateISO19794_2_2005<std::filesystem::path, Fingerprint>> templates;
     templates.reserve(1000);
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(path.c_str())) {
-        if (!entry.is_regular_file()) {
-            continue;
-        }
-        const auto& p = entry.path();
-        if (StringUtil::lower(p.extension().string()) != ".iso") {
-            continue;
-        }
-        auto& t = templates.emplace_back(p.relative_path().string());
-        if (!t.load(p.string())) {
-            Log::error("failed to load ", p);
-            return;
-        }
-        if (t.fingerprints().empty()) {
-            Log::error("template is empty ", p);
-            return;
-        }
+    if (!helperLoadPath(templates, path)) {
+        return;
     }
     Log::test("Loaded ", templates.size(), " templates");
 
@@ -308,9 +361,9 @@ int main(const int argc, const char** argv)
 
     OpenAFIS::Log::test("OpenAFIS: an efficient 1:N fingerprint matching library", OpenAFIS::Log::LF);
 
-    const auto t1 = param(argv, argv + argc, "--f1");
-    const auto t2 = param(argv, argv + argc, "--f2");
-    const auto t3 = param(argv, argv + argc, "--f3");
+    const auto f1 = param(argv, argv + argc, "--f1");
+    const auto f2 = param(argv, argv + argc, "--f2");
+    const auto f3 = param(argv, argv + argc, "--f3");
     const auto path = param(argv, argv + argc, "--path");
 
     bool command {};
@@ -319,7 +372,11 @@ int main(const int argc, const char** argv)
         command |= true;
     }
     if (option(argv, argv + argc, "one")) {
-        OpenAFIS::one(path, t1, t2, t3);
+        OpenAFIS::one(path, f1, f2, f3);
+        command |= true;
+    }
+    if (option(argv, argv + argc, "one-many")) {
+        OpenAFIS::oneMany(path, f1);
         command |= true;
     }
     if (option(argv, argv + argc, "many-many")) {
@@ -327,15 +384,16 @@ int main(const int argc, const char** argv)
         command |= true;
     }
     if (option(argv, argv + argc, "render")) {
-        OpenAFIS::render(path, t1, t2);
+        OpenAFIS::render(path, f1, f2);
         command |= true;
     }
     if (option(argv, argv + argc, "--help") || !command) {
         OpenAFIS::Log::test("Usage: openafis-cli [COMMAND]... [--f1 ISO_FILE] [--f2 ISO_FILE] [--f3 ISO_FILE] [--path PATH]", OpenAFIS::Log::LF);
         OpenAFIS::Log::test("Commands:");
-        OpenAFIS::Log::test("  bulk-load : load and parse every *.iso underneath --path");
+        OpenAFIS::Log::test("  bulk-load : load and parse every *.iso below --path");
         OpenAFIS::Log::test("  one       : match --f1,--f2 and --f1,--f3");
-        OpenAFIS::Log::test("  many-many : match every *.iso underneath --path");
+        OpenAFIS::Log::test("  one-many  : match --f1 against every *.iso below --path");
+        OpenAFIS::Log::test("  many-many : match every *.iso below --path");
         OpenAFIS::Log::test("  render    : generate two SVG's showing minutiae and matched pairs between --f1,--f2");
         OpenAFIS::Log::test("  help      : this screen", OpenAFIS::Log::LF);
         OpenAFIS::Log::test("Examples:");

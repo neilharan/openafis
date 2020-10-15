@@ -74,6 +74,6 @@ template <class I, class F> size_t Template<I, F>::bytes() const
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 template class Template<uint32_t, Fingerprint>;
 template class Template<uint32_t, FingerprintRenderable>;
-template class Template<std::string, Fingerprint>;
-template class Template<std::string, FingerprintRenderable>;
+template class Template<std::filesystem::path, Fingerprint>;
+template class Template<std::filesystem::path, FingerprintRenderable>;
 }

@@ -1,7 +1,6 @@
 
 #include "Match.h"
 #include "FastMath.h"
-#include "Log.h"
 #include "Param.h"
 
 #include <algorithm>

@@ -15,6 +15,7 @@ HEADERS = \
     $$PWD/../lib/Fingerprint.h \
     $$PWD/../lib/Log.h \
     $$PWD/../lib/Match.h \
+    $$PWD/../lib/MatchMany.h \
     $$PWD/../lib/Minutia.h \
     $$PWD/../lib/MinutiaPoint.h \
     $$PWD/../lib/Param.h \
@@ -29,6 +30,7 @@ SOURCES = \
     ../lib/FastMath.cpp \
     ../lib/Fingerprint.cpp \
     ../lib/Match.cpp \
+    ../lib/MatchMany.cpp \
     ../lib/Render.cpp \
     ../lib/Template.cpp \
     ../lib/TemplateCSV.cpp \
