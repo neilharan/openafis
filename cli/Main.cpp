@@ -187,7 +187,7 @@ static void oneMany(const std::string& path, const std::string& f1)
 
     Log::test("Loading...");
 
-    using TemplateType = TemplateISO19794_2_2005<std::filesystem::path, Fingerprint>;
+    using TemplateType = TemplateISO19794_2_2005<std::string, Fingerprint>;
     std::vector<TemplateType> candidates;
     candidates.reserve(1000);
     if (!helperLoadPath(candidates, path)) {
@@ -195,7 +195,7 @@ static void oneMany(const std::string& path, const std::string& f1)
     }
     const auto pathF1 = std::filesystem::path(StringUtil::format(R"(%s/%s)", path.c_str(), f1.c_str()));
     TemplateType probe(pathF1.relative_path().make_preferred().string());
-    if (!probe.load(pathF1)) {
+    if (!probe.load(pathF1.string())) {
         return;
     }
     Log::test("Loaded ", candidates.size() + 1, " templates");
@@ -230,7 +230,7 @@ static void manyMany(const std::string& path)
 
     Log::test("Loading...");
 
-    std::vector<TemplateISO19794_2_2005<std::filesystem::path, Fingerprint>> templates;
+    std::vector<TemplateISO19794_2_2005<std::string, Fingerprint>> templates;
     templates.reserve(1000);
     if (!helperLoadPath(templates, path)) {
         return;

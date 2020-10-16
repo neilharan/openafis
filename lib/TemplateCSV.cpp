@@ -16,7 +16,7 @@ namespace OpenAFIS
 //     First line is width,height
 //     Followed by minutiae in the form type,x,y,angle (radians)
 //
-template <class I, class F> bool TemplateCSV<I, F>::load(const std::filesystem::path& path)
+template <class I, class F> bool TemplateCSV<I, F>::load(const std::string& path)
 {
     std::ifstream f(path, std::ifstream::in);
     if (!f) {

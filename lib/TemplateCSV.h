@@ -18,7 +18,7 @@ public:
     {
     }
 
-    bool load(const std::filesystem::path& path);
+    bool load(const std::string& path);
 };
 }
 

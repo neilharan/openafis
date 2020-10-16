@@ -142,6 +142,8 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Explicit instantiations...
+//
 template class Match<unsigned int, Fingerprint, MinutiaPoint::Pair>;
 template class Match<MinutiaPoint::PairRenderable::Set, FingerprintRenderable, MinutiaPoint::PairRenderable>;
 }

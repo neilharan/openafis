@@ -12,6 +12,17 @@ namespace OpenAFIS
 // Domain: 0 < x < max(Field::MinutiaCoordType)^2
 // Maximum result is also a dimension (default uint8_t), so a table is viable and quite small (<64K)...
 //
+FastMath::SquareRoots::SquareRoots()
+    : m_values([]() {
+        static Values v;
+        for (size_t i = 0; i < Max; ++i) {
+            v.at(i) = static_cast<Field::MinutiaCoordType>(std::lround(std::sqrt(i)));
+        }
+        return &v;
+    }())
+{
+}
+
 int FastMath::isqrt(const int x)
 {
     static const SquareRoots Table;
@@ -25,6 +36,25 @@ int FastMath::isqrt(const int x)
 // Profiling reveals ~2x speedup using lookups vs CRT (with SSE2).
 // TODO: research cordic options https://www.coranac.com/documents/arctangent/ for memory constrained builds...
 //
+FastMath::ArcTangents::ArcTangents()
+    : m_values([]() {
+        static Values v;
+        for (auto x = Min; x < Max; ++x) {
+            for (auto y = Min; y < Max; ++y) {
+                const auto t = std::atan2f(static_cast<float>(x), static_cast<float>(y));
+                if constexpr (std::is_same_v<Field::AngleType, float>) {
+                    v.at(x - Min).at(y - Min) = static_cast<Field::AngleType>(t);
+                }
+                if constexpr (std::is_same_v<Field::AngleType, int>) {
+                    v.at(x - Min).at(y - Min) = static_cast<Field::AngleType>(std::lround(t * Radians8));
+                }
+            }
+        }
+        return &v;
+    }())
+{
+}
+
 Field::AngleType FastMath::atan2(const int x, const int y)
 {
     static const ArcTangents Table;
@@ -35,6 +65,17 @@ Field::AngleType FastMath::atan2(const int x, const int y)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Hot path: yes
 //
+FastMath::Cosines::Cosines()
+    : m_values([]() {
+        static Values v;
+        for (auto i = Min; i < Max; ++i) {
+            v.at(i - Min) = std::cosf(static_cast<float>(i) / FastMath::Radians8);
+        }
+        return &v;
+    }())
+{
+}
+
 float FastMath::cos(const Field::AngleType theta)
 {
     if constexpr (std::is_same_v<Field::AngleType, float>) {
@@ -50,6 +91,17 @@ float FastMath::cos(const Field::AngleType theta)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Hot path: yes
 //
+FastMath::Sines::Sines()
+    : m_values([]() {
+        static Values v;
+        for (auto i = Min; i < Max; ++i) {
+            v.at(i - Min) = std::sinf(static_cast<float>(i) / FastMath::Radians8);
+        }
+        return &v;
+    }())
+{
+}
+
 float FastMath::sin(const Field::AngleType theta)
 {
     if constexpr (std::is_same_v<Field::AngleType, float>) {

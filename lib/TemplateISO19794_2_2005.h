@@ -28,7 +28,7 @@ public:
     {
     }
 
-    bool load(const std::filesystem::path& path);
+    bool load(const std::string& path);
     bool load(const uint8_t* data, size_t length);
 
 private:

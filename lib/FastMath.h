@@ -34,16 +34,7 @@ private:
     class SquareRoots
     {
     public:
-        SquareRoots()
-            : m_values([]() {
-                static Values v;
-                for (size_t i = 0; i < Max; ++i) {
-                    v.at(i) = static_cast<Field::MinutiaCoordType>(std::lround(std::sqrt(i)));
-                }
-                return &v;
-            }())
-        {
-        }
+        SquareRoots();
 
         [[nodiscard]] constexpr int get(const int x) const
         {
@@ -61,24 +52,7 @@ private:
     class ArcTangents
     {
     public:
-        ArcTangents()
-            : m_values([]() {
-                static Values v;
-                for (auto x = Min; x < Max; ++x) {
-                    for (auto y = Min; y < Max; ++y) {
-                        const auto t = std::atan2f(static_cast<float>(x), static_cast<float>(y));
-                        if constexpr (std::is_same_v<Field::AngleType, float>) {
-                            v.at(x - Min).at(y - Min) = static_cast<Field::AngleType>(t);
-                        }
-                        if constexpr (std::is_same_v<Field::AngleType, int>) {
-                            v.at(x - Min).at(y - Min) = static_cast<Field::AngleType>(std::lround(t * Radians8));
-                        }
-                    }
-                }
-                return &v;
-            }())
-        {
-        }
+        ArcTangents();
 
         [[nodiscard]] constexpr Field::AngleType get(const int x, const int y) const
         {
@@ -98,16 +72,7 @@ private:
     class Cosines
     {
     public:
-        Cosines()
-            : m_values([]() {
-                static Values v;
-                for (auto i = Min; i < Max; ++i) {
-                    v.at(i - Min) = std::cosf(static_cast<float>(i) / FastMath::Radians8);
-                }
-                return &v;
-            }())
-        {
-        }
+        Cosines();
 
         [[nodiscard]] constexpr float get(const Field::AngleType x) const
         {
@@ -126,16 +91,7 @@ private:
     class Sines
     {
     public:
-        Sines()
-            : m_values([]() {
-                static Values v;
-                for (auto i = Min; i < Max; ++i) {
-                    v.at(i - Min) = std::sinf(static_cast<float>(i) / FastMath::Radians8);
-                }
-                return &v;
-            }())
-        {
-        }
+        Sines();
 
         [[nodiscard]] constexpr float get(const Field::AngleType x) const
         {

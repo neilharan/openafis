@@ -72,8 +72,14 @@ template <class I, class F> size_t Template<I, F>::bytes() const
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Explicit instantiations...
+//
+template class Template<uint16_t, Fingerprint>;
+template class Template<uint16_t, FingerprintRenderable>;
 template class Template<uint32_t, Fingerprint>;
 template class Template<uint32_t, FingerprintRenderable>;
-template class Template<std::filesystem::path, Fingerprint>;
-template class Template<std::filesystem::path, FingerprintRenderable>;
+template class Template<uint64_t, Fingerprint>;
+template class Template<uint64_t, FingerprintRenderable>;
+template class Template<std::string, Fingerprint>;
+template class Template<std::string, FingerprintRenderable>;
 }
