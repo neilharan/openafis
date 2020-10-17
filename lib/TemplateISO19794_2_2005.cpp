@@ -58,7 +58,7 @@ template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const uint8
             const void* np { nullptr };
             return reinterpret_cast<T>(np);
         }
-        const auto p = *readFrom;
+        const auto* p = *readFrom;
         *reinterpret_cast<const uint8_t**>(readFrom) += sz;
 
         // check alignment - platforms that support unaligned access (like x86) _could_ just return p

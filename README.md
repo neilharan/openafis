@@ -4,11 +4,12 @@ A high-performance one-to-many (1:N) fingerprint matching library for commodity 
 
 Note: this library is focused on the matching problem. It does not currently extract minutiae from images.
 
-The goal is to accurately identify one minutiae-set from 50K candidate sets within one second using modest laptop equipment.
+The goal is to accurately identify one minutiae-set from 250K candidate sets within one second using modest laptop equipment. A secondary goal is to identify one minutiae-set from 1M candidate sets within one second, at a lower level of accuracy.
+
 
 ## Progress
 
-**Target is to be certification ready by mid-October 2020**.
+**Target is to be certification ready in October 2020**.
 
   | TASK | COMPLETE | NOTES |
   | ---- | -------- | ----- |
@@ -19,7 +20,7 @@ The goal is to accurately identify one minutiae-set from 50K candidate sets with
   | Test suite | 30% | EER, FMR100, FMR1000, ZeroFMR |
   | Benchmarks | 25% | |
   | Optimizing | 40% | float->int, vectorization (SSE/AVX), math functions |
-  | Parallelizing | | |
+  | Parallelizing | 80% | |
   | Minutiae/pair rendering | 100% | SVG output |
   | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction feature) |
 

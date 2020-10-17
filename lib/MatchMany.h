@@ -5,6 +5,8 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "Match.h"
 
+#include <future>
+
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Instantiate on the heap.
@@ -17,24 +19,75 @@ template <class TemplateType> class MatchMany
 {
 public:
     using Templates = std::vector<TemplateType>;
+    using OneManyResult = std::pair<unsigned int, const TemplateType*>;
 
-    std::pair<unsigned int, const TemplateType*> compute(const TemplateType& probe, const Templates &candidates) const
+    OneManyResult oneMany(const TemplateType& probe, const Templates& candidates) const
     {
-        static MatchSimilarity match;
+        static const auto Concurrency = std::thread::hardware_concurrency();
 
-        unsigned int maxSimilarity{};
-        const TemplateType* maxCandidate{};
+        if (candidates.empty()) {
+            return std::make_pair(0, nullptr);
+        }
+        std::vector<std::future<OneManyResult>> futures;
+        futures.reserve(1 + Concurrency);
 
-        for (const auto& candidate : candidates) {
-            unsigned int similarity{};
+        for (auto fromIt = candidates.begin();;) {
+            auto endIt = fromIt + std::min(static_cast<size_t>(candidates.end() - fromIt), candidates.size() / Concurrency);
 
-            match.compute(similarity, probe.fingerprints()[0], candidate.fingerprints()[0]);
-            if (similarity > maxSimilarity) {
-                maxSimilarity = similarity;
-                maxCandidate = &candidate;
+            futures.emplace_back(std::async(std::launch::async, [=, &probe]() {
+                thread_local static MatchSimilarity match;
+
+                unsigned int maxSimilarity {};
+                const TemplateType* maxCandidate {};
+
+                for (auto it = fromIt; it < endIt; ++it) {
+                    unsigned int similarity {};
+
+                    match.compute(similarity, probe.fingerprints()[0], it->fingerprints()[0]);
+                    if (similarity > maxSimilarity) {
+                        maxSimilarity = similarity;
+                        maxCandidate = &(*it);
+                    }
+                }
+                return std::make_pair(maxSimilarity, maxCandidate);
+            }));
+
+            if (endIt == candidates.end()) {
+                break;
+            }
+            fromIt = endIt;
+        }
+        OneManyResult bestR;
+        for (auto& f : futures) {
+            const auto& r = f.get();
+            if (r.second && r.first > bestR.first) {
+                bestR = r;
             }
         }
-        return std::make_pair(maxSimilarity, maxCandidate);
+        return bestR;
+    }
+
+    void manyMany(std::vector<unsigned int>& scores, const Templates& templates) const
+    {
+        if (scores.size() != templates.size() * templates.size()) {
+            return;
+        }
+        std::vector<std::future<void>> futures;
+        futures.reserve(templates.size());
+        size_t i {};
+        for (const auto& t1 : templates) {
+            futures.emplace_back(std::async(std::launch::async, [=, &scores, &templates]() {
+                thread_local static MatchSimilarity match;
+                auto scoresPtr = &scores[i];
+                for (const auto& t2 : templates) {
+                    match.compute(*scoresPtr++, t1.fingerprints()[0], t2.fingerprints()[0]);
+                }
+            }));
+            i += templates.size();
+        }
+        for (const auto& f : futures) {
+            f.wait();
+        }
     }
 };
 }

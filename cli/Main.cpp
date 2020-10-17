@@ -27,8 +27,7 @@ constexpr auto LineWidth = 100;
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class T>
-static bool helperLoadPath(T &templates, const std::string &path)
+template <class T> static bool helperLoadPath(T& templates, const std::string& path)
 {
     for (const auto& entry : std::filesystem::recursive_directory_iterator(path.c_str())) {
         if (!entry.is_regular_file()) {
@@ -121,7 +120,6 @@ static void one(const std::string& path, const std::string& f1, const std::strin
     Log::test("Template 1: ", f1);
     Log::test("Template 2: ", f2);
     Log::test("Template 3: ", f3);
-    Log::test("Threads: ", 1);
     Log::test(std::string(LineWidth, '='), Log::LF);
 
     Log::test("Loading...");
@@ -176,22 +174,23 @@ static void one(const std::string& path, const std::string& f1, const std::strin
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-static void oneMany(const std::string& path, const std::string& f1)
+static void oneMany(const std::string& path, const std::string& f1, const unsigned int loadFactor)
 {
     Log::test(std::string(LineWidth, '='));
     Log::test("1:N match", Log::LF);
     Log::test("Path: ", path);
     Log::test("Template 1: ", f1);
-    Log::test("Threads: ", 1);
     Log::test(std::string(LineWidth, '='), Log::LF);
 
     Log::test("Loading...");
 
     using TemplateType = TemplateISO19794_2_2005<std::string, Fingerprint>;
     std::vector<TemplateType> candidates;
-    candidates.reserve(1000);
-    if (!helperLoadPath(candidates, path)) {
-        return;
+    candidates.reserve(loadFactor * 1000);
+    for (auto i = 0u; i < loadFactor; ++i) { // NJH-TODO copy first iteration instead
+        if (!helperLoadPath(candidates, path)) {
+            return;
+        }
     }
     const auto pathF1 = std::filesystem::path(StringUtil::format(R"(%s/%s)", path.c_str(), f1.c_str()));
     TemplateType probe(pathF1.relative_path().make_preferred().string());
@@ -202,10 +201,9 @@ static void oneMany(const std::string& path, const std::string& f1)
 
     Log::test(Log::LF, "Matching 1:", candidates.size(), "...");
 
-    static MatchMany<TemplateType> match;
-
+    MatchMany<TemplateType> match;
     const auto start = std::chrono::high_resolution_clock::now();
-    const auto result = match.compute(probe, candidates);
+    const auto result = match.oneMany(probe, candidates);
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 
@@ -220,38 +218,31 @@ static void oneMany(const std::string& path, const std::string& f1)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-static void manyMany(const std::string& path)
+static void manyMany(const std::string& path, const unsigned int loadFactor)
 {
     Log::test(std::string(LineWidth, '='));
     Log::test("Exponential N:N match", Log::LF);
     Log::test("Path: ", path);
-    Log::test("Threads: ", 1);
     Log::test(std::string(LineWidth, '='), Log::LF);
 
     Log::test("Loading...");
 
-    std::vector<TemplateISO19794_2_2005<std::string, Fingerprint>> templates;
-    templates.reserve(1000);
-    if (!helperLoadPath(templates, path)) {
-        return;
+    using TemplateType = TemplateISO19794_2_2005<std::string, Fingerprint>;
+    std::vector<TemplateType> templates;
+    templates.reserve(loadFactor * 1000);
+    for (auto i = 0u; i < loadFactor; ++i) { // NJH-TODO copy first iteration instead
+        if (!helperLoadPath(templates, path)) {
+            return;
+        }
     }
     Log::test("Loaded ", templates.size(), " templates");
 
     std::vector<unsigned int> scores(templates.size() * templates.size());
     Log::test(Log::LF, "Matching ", scores.capacity(), " permutations...");
 
-    static MatchSimilarity match;
-    size_t i {};
-
+    MatchMany<TemplateType> match;
     const auto start = std::chrono::high_resolution_clock::now();
-    for (const auto& t1 : templates) {
-        for (const auto& t2 : templates) {
-            match.compute(scores[i++], t1.fingerprints()[0], t2.fingerprints()[0]);
-            if ((i % 50000) == 0) {
-                Log::test("Matched ", i);
-            }
-        }
-    }
+    match.manyMany(scores, templates);
     const auto finish = std::chrono::high_resolution_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
     Log::test("Completed in ", ms.count(), "ms (", ms.count() ? std::round(static_cast<float>(scores.capacity()) / ms.count() * 1000) : 0, " fp/s)");
@@ -273,7 +264,7 @@ static void manyMany(const std::string& path)
         return;
     }
 
-    i = 0;
+    size_t i {};
     for (const auto& t1 : templates) {
         f << "," << t1.id();
     }
@@ -365,6 +356,7 @@ int main(const int argc, const char** argv)
     const auto f2 = param(argv, argv + argc, "--f2");
     const auto f3 = param(argv, argv + argc, "--f3");
     const auto path = param(argv, argv + argc, "--path");
+    const auto loadFactor = atoi(param(argv, argv + argc, "--load-factor").c_str());
 
     bool command {};
     if (option(argv, argv + argc, "bulk-load")) {
@@ -376,11 +368,11 @@ int main(const int argc, const char** argv)
         command |= true;
     }
     if (option(argv, argv + argc, "one-many")) {
-        OpenAFIS::oneMany(path, f1);
+        OpenAFIS::oneMany(path, f1, std::max(1, loadFactor));
         command |= true;
     }
     if (option(argv, argv + argc, "many-many")) {
-        OpenAFIS::manyMany(path);
+        OpenAFIS::manyMany(path, std::max(1, loadFactor));
         command |= true;
     }
     if (option(argv, argv + argc, "render")) {
@@ -388,7 +380,7 @@ int main(const int argc, const char** argv)
         command |= true;
     }
     if (option(argv, argv + argc, "--help") || !command) {
-        OpenAFIS::Log::test("Usage: openafis-cli [COMMAND]... [--f1 ISO_FILE] [--f2 ISO_FILE] [--f3 ISO_FILE] [--path PATH]", OpenAFIS::Log::LF);
+        OpenAFIS::Log::test("Usage: openafis-cli [COMMAND]... [OPTIONS]... [--f1 ISO_FILE] [--f2 ISO_FILE] [--f3 ISO_FILE] [--path PATH]", OpenAFIS::Log::LF);
         OpenAFIS::Log::test("Commands:");
         OpenAFIS::Log::test("  bulk-load : load and parse every *.iso below --path");
         OpenAFIS::Log::test("  one       : match --f1,--f2 and --f1,--f3");
@@ -396,6 +388,8 @@ int main(const int argc, const char** argv)
         OpenAFIS::Log::test("  many-many : match every *.iso below --path");
         OpenAFIS::Log::test("  render    : generate two SVG's showing minutiae and matched pairs between --f1,--f2");
         OpenAFIS::Log::test("  help      : this screen", OpenAFIS::Log::LF);
+        OpenAFIS::Log::test("Options:");
+        OpenAFIS::Log::test("  --load-factor : load *.iso below --path multiple times (default 1)", OpenAFIS::Log::LF);
         OpenAFIS::Log::test("Examples:");
         OpenAFIS::Log::test("  openafis-cli many-many --path ~/openafis/data/fvc");
         OpenAFIS::Log::test("  openafis-cli one --f1 db1_b/101_1.iso --f2 db1_b/101_2.iso --f3 db1_b/102_1.iso --path ~/openafis/data/fvc2002");
