@@ -37,7 +37,7 @@ public:
 
         bool operator<(const Pair& other) const { return m_similarity > other.m_similarity; } // descending sort
 
-        static const unsigned int SimilarityMultiplier = 1024;
+        static const int SimilarityMultiplier = 1024;
 
     private:
         unsigned int m_similarity {}; // only required for sorting (getter is for Render class only)

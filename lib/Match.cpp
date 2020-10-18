@@ -135,7 +135,9 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
         maxMatched = std::max(maxMatched, matched);
     }
     if constexpr (std::is_same_v<R, unsigned int>) {
-        result = (maxMatched * maxMatched * 100) / static_cast<R>(probe.minutiaeCount() * candidate.minutiaeCount());
+        if (maxMatched > Param::MinimumMinutiae) {
+            result = (maxMatched * maxMatched * 100) / static_cast<R>(probe.minutiaeCount() * candidate.minutiaeCount());
+        }
     }
 }
 

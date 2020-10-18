@@ -102,7 +102,7 @@ static void bulkLoad(const std::string& path)
 
     auto count = 0;
     size_t size {};
-    const auto start = std::chrono::high_resolution_clock::now();
+    const auto start = std::chrono::steady_clock::now();
     TemplateISO19794_2_2005<uint32_t, Fingerprint> t(1);
 
     for (const auto& f : files) {
@@ -113,7 +113,7 @@ static void bulkLoad(const std::string& path)
         t.clear();
         count++;
     }
-    const auto finish = std::chrono::high_resolution_clock::now();
+    const auto finish = std::chrono::steady_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
     Log::test("Loaded ", count, " templates in ", ms.count(), "ms, consuming ", size, " bytes");
     Log::test(std::string(LineWidth, '='), Log::LF);
@@ -165,11 +165,11 @@ static void one(const std::string& path, const std::string& f1, const std::strin
         for (auto i = 0; i < Passes; ++i) {
             unsigned int s {};
 
-            const auto start = std::chrono::high_resolution_clock::now();
+            const auto start = std::chrono::steady_clock::now();
             for (auto i = 0; i < Iterations; ++i) {
                 match.compute(s, a.fingerprints()[0], b.fingerprints()[0]);
             }
-            const auto finish = std::chrono::high_resolution_clock::now();
+            const auto finish = std::chrono::steady_clock::now();
             const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 
             Log::test("Pass ", i + 1, ", similarity of ", a.id(), " and ", b.id(), ": ", s, "% [", Iterations, " iterations in ", ms.count(), "ms]");
@@ -212,9 +212,9 @@ static void oneMany(const std::string& path, const std::string& f1, const unsign
 
     Log::test(Log::LF, "Matching 1:", candidates.size(), "...");
 
-    const auto start = std::chrono::high_resolution_clock::now();
+    const auto start = std::chrono::steady_clock::now();
     const auto result = match.oneMany(probe, candidates);
-    const auto finish = std::chrono::high_resolution_clock::now();
+    const auto finish = std::chrono::steady_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 
     if (result.second) {
@@ -250,9 +250,9 @@ static void manyMany(const std::string& path, const unsigned int loadFactor)
     std::vector<unsigned int> scores(templates.size() * templates.size());
     Log::test(Log::LF, "Matching ", scores.capacity(), " permutations...");
 
-    const auto start = std::chrono::high_resolution_clock::now();
+    const auto start = std::chrono::steady_clock::now();
     match.manyMany(scores, templates);
-    const auto finish = std::chrono::high_resolution_clock::now();
+    const auto finish = std::chrono::steady_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
     Log::test("Completed in ", ms.count(), "ms (", ms.count() ? std::round(static_cast<float>(scores.capacity()) / ms.count() * 1000) : 0, " fp/s)");
 

@@ -77,13 +77,15 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
     }
     using Shift = std::vector<unsigned int>;
     static const std::vector<Shift> Shifting = { { 0, 1, 2 } , { 1, 2, 0 } , { 2, 0, 1 } }; // rotate triplets when comparing
-    static const auto BestS = static_cast<unsigned int>(Pair::SimilarityMultiplier) * static_cast<unsigned int>(Pair::SimilarityMultiplier) * static_cast<unsigned int>(Pair::SimilarityMultiplier);
+    static constexpr auto BestS = Pair::SimilarityMultiplier * Pair::SimilarityMultiplier * Pair::SimilarityMultiplier;
     auto bestS = BestS;
     auto rotations = Param::MaximumRotations;
 
     for (const auto& shift : Shifting) {
-        if (!rotations--) {
-            break;
+        if constexpr (Param::MaximumRotations != 3) {
+            if (!rotations--) {
+                break;
+            }
         }
 
         // Equation 7 (3 iterations)...
@@ -101,10 +103,10 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
 
         // Equation 8 (3 iterations)...
         const auto lengths = [&]() {
-            auto max = 0u;
+            auto max = 0;
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                const auto d = static_cast<unsigned int>(std::abs(m_minutiae[i].distance() - probe.minutiae()[shift[i]].distance()));
+                const auto d = static_cast<int>(std::abs(m_minutiae[i].distance() - probe.minutiae()[shift[i]].distance()));
                 if (d > Param::MaximumLocalDistance) {
                     return Pair::SimilarityMultiplier;
                 }
@@ -170,7 +172,9 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
         if (s < bestS) {
             bestS = s;
             if (bestS == 0) {
-                break; // short-cut
+                // Short-cut, exact match...
+                pairs.emplace_back(Pair::SimilarityMultiplier, &probe, this);
+                return;
             }
         }
     }

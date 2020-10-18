@@ -16,7 +16,7 @@ class Field
 public:
     // Coordinates and distances are always scaled to 8-bits so uint8_t is sufficient, int is likely to be more efficient though.
     // When memory constrained specify a smaller type here, otehrwise leave default...
-    using MinutiaCoordType = uint8_t;
+    using MinutiaCoordType = int;
     static constexpr size_t MinutiaCoordMax = std::numeric_limits<uint8_t>::max();
     static constexpr size_t MinutiaCoordMatrixSize = (MinutiaCoordMax + 1) * (MinutiaCoordMax + 1);
 
