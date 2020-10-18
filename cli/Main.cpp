@@ -27,7 +27,7 @@ constexpr auto LineWidth = 100;
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class T> static bool helperLoadPath(T& templates, const std::string& path, const unsigned int loadFactor)
+template <class T> static bool helperLoadPath(T& templates, const std::string& path, const int loadFactor)
 {
     templates.reserve(loadFactor * 1000);
 
@@ -52,7 +52,7 @@ template <class T> static bool helperLoadPath(T& templates, const std::string& p
     // Duplicate templates if requested...
     if (loadFactor > 1) {
         const T copy = templates;
-        for (auto i = 0u; i < loadFactor; ++i) {
+        for (auto i = 0; i < loadFactor; ++i) {
             for (const auto &t : copy) {
                 templates.emplace_back(t);
             }
@@ -163,7 +163,7 @@ static void one(const std::string& path, const std::string& f1, const std::strin
         static MatchSimilarity match;
 
         for (auto i = 0; i < Passes; ++i) {
-            unsigned int s {};
+            int s {};
 
             const auto start = std::chrono::steady_clock::now();
             for (auto i = 0; i < Iterations; ++i) {
@@ -185,7 +185,7 @@ static void one(const std::string& path, const std::string& f1, const std::strin
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-static void oneMany(const std::string& path, const std::string& f1, const unsigned int loadFactor)
+static void oneMany(const std::string& path, const std::string& f1, const int loadFactor)
 {
     using TemplateType = TemplateISO19794_2_2005<std::string, Fingerprint>;
     MatchMany<TemplateType> match;
@@ -228,7 +228,7 @@ static void oneMany(const std::string& path, const std::string& f1, const unsign
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-static void manyMany(const std::string& path, const unsigned int loadFactor)
+static void manyMany(const std::string& path, const int loadFactor)
 {
     using TemplateType = TemplateISO19794_2_2005<std::string, Fingerprint>;
     MatchMany<TemplateType> match;
@@ -247,7 +247,7 @@ static void manyMany(const std::string& path, const unsigned int loadFactor)
     }
     Log::test("Loaded ", templates.size(), " templates");
 
-    std::vector<unsigned int> scores(templates.size() * templates.size());
+    std::vector<int> scores(templates.size() * templates.size());
     Log::test(Log::LF, "Matching ", scores.capacity(), " permutations...");
 
     const auto start = std::chrono::steady_clock::now();

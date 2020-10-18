@@ -20,7 +20,7 @@ template <class TemplateType> class MatchMany
 {
 public:
     using Templates = std::vector<TemplateType>;
-    using OneManyResult = std::pair<unsigned int, const TemplateType*>;
+    using OneManyResult = std::pair<int, const TemplateType*>;
 
     MatchMany()
         : m_concurrency(std::min(Param::MaximumConcurrency, std::thread::hardware_concurrency())) { }
@@ -33,12 +33,12 @@ public:
         if (m_concurrency == 1) {
             static MatchSimilarity match;
 
-            unsigned int maxSimilarity {};
+            int maxSimilarity {};
             const TemplateType* maxCandidate {};
             const auto &probeT = probe.fingerprints()[0];
 
             for (const auto& t : candidates) {
-                unsigned int similarity {};
+                int similarity {};
                 match.compute(similarity, probeT, t.fingerprints()[0]);
                 if (similarity > maxSimilarity) {
                     maxSimilarity = similarity;
@@ -56,11 +56,11 @@ public:
             futures.emplace_back(std::async(std::launch::async, [=, &probeT = probe.fingerprints()[0]]() {
                 thread_local static MatchSimilarity match;
 
-                unsigned int maxSimilarity {};
+                int maxSimilarity {};
                 const TemplateType* maxCandidate {};
 
                 for (auto it = fromIt; it < endIt; ++it) {
-                    unsigned int similarity {};
+                    int similarity {};
                     match.compute(similarity, probeT, it->fingerprints()[0]);
                     if (similarity > maxSimilarity) {
                         maxSimilarity = similarity;
@@ -85,7 +85,7 @@ public:
         return bestR;
     }
 
-    void manyMany(std::vector<unsigned int>& scores, const Templates& templates) const
+    void manyMany(std::vector<int>& scores, const Templates& templates) const
     {
         if (scores.size() != templates.size() * templates.size()) {
             return;
@@ -123,7 +123,7 @@ public:
     [[nodiscard]] unsigned int concurrency() const { return m_concurrency; }
 
 private:
-    unsigned int m_concurrency;
+    const unsigned int m_concurrency;
 };
 }
 

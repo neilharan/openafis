@@ -25,7 +25,7 @@ public:
     static Field::AngleType atan2(int x, int y);
     static float cos(Field::AngleType theta);
     static float sin(Field::AngleType theta);
-    static Field::AngleType degreesToRadians(unsigned int theta);
+    static Field::AngleType degreesToRadians(int theta);
     static Field::AngleType minimumAngle(Field::AngleType a, Field::AngleType b);
     static Field::AngleType rotateAngle(Field::AngleType a, Field::AngleType b);
 

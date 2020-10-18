@@ -26,11 +26,12 @@ public:
 
 private:
     mutable Triplet::Pair::Pairs m_tripletPairs;
-    mutable Triplet::Dupes m_dupes;
+    mutable Triplet::Dupes m_probeDupes;
+    mutable Triplet::Dupes m_candidateDupes;
     mutable std::vector<PairType> m_pairs;
 };
 
-using MatchSimilarity = Match<unsigned int, Fingerprint, MinutiaPoint::Pair>;
+using MatchSimilarity = Match<int, Fingerprint, MinutiaPoint::Pair>;
 using MatchRenderable = Match<MinutiaPoint::PairRenderable::Set, FingerprintRenderable, MinutiaPoint::PairRenderable>;
 }
 

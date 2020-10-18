@@ -28,7 +28,7 @@ template <class I, class F> bool TemplateCSV<I, F>::load(const std::string& path
     auto& minutiae = fps.emplace_back();
 
     std::string line;
-    unsigned int width {}, height {};
+    int width {}, height {};
 
     if (std::getline(f, line)) {
         std::stringstream ss(line);
@@ -43,7 +43,7 @@ template <class I, class F> bool TemplateCSV<I, F>::load(const std::string& path
         Log::error("invalid width or height ", path);
         return false;
     }
-    unsigned int type {}, x {}, y {};
+    int type {}, x {}, y {};
     float angle {};
 
     while (std::getline(f, line)) {
@@ -70,7 +70,7 @@ template <class I, class F> bool TemplateCSV<I, F>::load(const std::string& path
 
         const auto radiansToDegrees = [](const float theta) {
             static constexpr float Factor = FastMath::PI / 180.0f;
-            return static_cast<unsigned int>(std::lround(theta / Factor));
+            return static_cast<int>(std::lround(theta / Factor));
         };
 
         minutiae.emplace_back(Minutia::Type(type), x, y, radiansToDegrees(angle));

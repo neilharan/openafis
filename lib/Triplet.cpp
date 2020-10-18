@@ -75,7 +75,7 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
             return;
         }
     }
-    using Shift = std::vector<unsigned int>;
+    using Shift = std::vector<int>;
     static const std::vector<Shift> Shifting = { { 0, 1, 2 } , { 1, 2, 0 } , { 2, 0, 1 } }; // rotate triplets when comparing
     static constexpr auto BestS = Pair::SimilarityMultiplier * Pair::SimilarityMultiplier * Pair::SimilarityMultiplier;
     auto bestS = BestS;

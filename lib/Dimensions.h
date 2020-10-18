@@ -10,7 +10,7 @@
 namespace OpenAFIS
 {
 
-using Dimensions = std::pair<unsigned int, unsigned int>;
+using Dimensions = std::pair<int, int>;
 }
 
 #endif // DIMENSIONS_H

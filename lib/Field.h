@@ -28,7 +28,7 @@ public:
 
     // We only use the 16 LSB's in the key type. While MinutiaCoordType is uint8_t this could be uint16_t.
     // It is used only to identify duplicate triplets...
-    using MinutiaKeyType = unsigned int;
+    using MinutiaKeyType = int;
 };
 }
 

@@ -43,16 +43,16 @@ public:
     public:
         using Set = std::unordered_set<const PairRenderable*>;
 
-        PairRenderable(const MinutiaPoint* probe, const MinutiaPoint* candidate, const unsigned int similarity)
+        PairRenderable(const MinutiaPoint* probe, const MinutiaPoint* candidate, const int similarity)
             : Pair(probe, candidate)
             , m_similarity(similarity)
         {
         }
 
-        [[nodiscard]] unsigned int similarity() const { return m_similarity; }
+        [[nodiscard]] int similarity() const { return m_similarity; }
 
     private:
-        unsigned int m_similarity {};
+        int m_similarity {};
     };
 
     using Minutiae = std::vector<MinutiaPoint>;

@@ -6,7 +6,7 @@
 #include "Field.h"
 #include "MinutiaPoint.h"
 
-#include <array>
+#include <unordered_set>
 #include <vector>
 
 
@@ -24,14 +24,14 @@ public:
 
         Pair() = default;
 
-        Pair(const unsigned int similarity, const Triplet* probe, const Triplet* candidate)
+        Pair(const int similarity, const Triplet* probe, const Triplet* candidate)
             : m_similarity(similarity)
             , m_probe(probe)
             , m_candidate(candidate)
         {
         }
 
-        [[nodiscard]] inline unsigned int similarity() const { return m_similarity; }
+        [[nodiscard]] inline int similarity() const { return m_similarity; }
         [[nodiscard]] inline const Triplet* probe() const { return m_probe; }
         [[nodiscard]] inline const Triplet* candidate() const { return m_candidate; }
 
@@ -40,13 +40,13 @@ public:
         static const int SimilarityMultiplier = 1024;
 
     private:
-        unsigned int m_similarity {}; // only required for sorting (getter is for Render class only)
+        int m_similarity {}; // only required for sorting (getter is for Render class only)
         const Triplet* m_probe {};
         const Triplet* m_candidate {};
     };
 
     using Distances = std::vector<Field::MinutiaCoordType>;
-    using Dupes = std::pair<std::array<bool, Field::MinutiaCoordMatrixSize>, std::array<bool, Field::MinutiaCoordMatrixSize>>;
+    using Dupes = std::unordered_set<Field::MinutiaKeyType>;
 
     explicit Triplet(const MinutiaPoint::Minutiae& minutiae);
     Triplet() = default;

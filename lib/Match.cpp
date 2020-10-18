@@ -35,28 +35,22 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 
     // Local matching 5.1.3-5...
     std::sort(m_tripletPairs.begin(), m_tripletPairs.end());
-    m_dupes.first.fill(false);
-    m_dupes.second.fill(false);
+    m_probeDupes.clear();
+    m_candidateDupes.clear();
     m_pairs.clear();
 
     for (const auto& p : m_tripletPairs) {
         for (decltype(p.probe()->minutiae().size()) i = 0; i < p.probe()->minutiae().size(); ++i) {
-            bool z {};
-            auto& dp = m_dupes.first[p.probe()->minutiae()[i].key()];
-            if (!dp) {
-                dp = true;
-                z = true;
-            }
-            auto& dc = m_dupes.second[p.candidate()->minutiae()[i].key()];
-            if (!dc) {
-                dc = true;
-            } else if (!z) {
+            const auto dp = m_probeDupes.emplace(p.probe()->minutiae()[i].key());
+            const auto dc = m_candidateDupes.emplace(p.candidate()->minutiae()[i].key());
+            if (!dp.second && !dc.second) {
                 continue;
             }
             if constexpr (std::is_same_v<R, MinutiaPoint::PairRenderable::Set>) {
                 // Similarity values are scaled for integers over [0,1000], for render % is fine...
                 m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i], std::lround(static_cast<float>(p.similarity()) / 10.0f));
-            } else {
+            }
+            if constexpr (std::is_same_v<R, int>) {
                 m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i]);
             }
         }
@@ -134,7 +128,7 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
         }
         maxMatched = std::max(maxMatched, matched);
     }
-    if constexpr (std::is_same_v<R, unsigned int>) {
+    if constexpr (std::is_same_v<R, int>) {
         if (maxMatched > Param::MinimumMinutiae) {
             result = (maxMatched * maxMatched * 100) / static_cast<R>(probe.minutiaeCount() * candidate.minutiaeCount());
         }
@@ -145,6 +139,6 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Explicit instantiations...
 //
-template class Match<unsigned int, Fingerprint, MinutiaPoint::Pair>;
+template class Match<int, Fingerprint, MinutiaPoint::Pair>;
 template class Match<MinutiaPoint::PairRenderable::Set, FingerprintRenderable, MinutiaPoint::PairRenderable>;
 }
