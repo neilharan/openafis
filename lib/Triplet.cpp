@@ -76,11 +76,16 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
         }
     }
     using Shift = std::vector<unsigned int>;
-    static const std::vector<Shift> Shifting = { { 0, 1, 2 }, { 1, 2, 0 }, { 2, 0, 1 } }; // rotate triplets when comparing
+    static const std::vector<Shift> Shifting = { { 0, 1, 2 } , { 1, 2, 0 } , { 2, 0, 1 } }; // rotate triplets when comparing
     static const auto BestS = static_cast<unsigned int>(Pair::SimilarityMultiplier) * static_cast<unsigned int>(Pair::SimilarityMultiplier) * static_cast<unsigned int>(Pair::SimilarityMultiplier);
     auto bestS = BestS;
+    auto rotations = Param::MaximumRotations;
 
     for (const auto& shift : Shifting) {
+        if (!rotations--) {
+            break;
+        }
+
         // Equation 7 (3 iterations)...
         const auto directions = [&]() {
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {

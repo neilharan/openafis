@@ -27,8 +27,10 @@ constexpr auto LineWidth = 100;
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class T> static bool helperLoadPath(T& templates, const std::string& path)
+template <class T> static bool helperLoadPath(T& templates, const std::string& path, const unsigned int loadFactor)
 {
+    templates.reserve(loadFactor * 1000);
+
     for (const auto& entry : std::filesystem::recursive_directory_iterator(path.c_str())) {
         if (!entry.is_regular_file()) {
             continue;
@@ -45,6 +47,15 @@ template <class T> static bool helperLoadPath(T& templates, const std::string& p
         if (t.fingerprints().empty()) {
             Log::error("template is empty ", p.string());
             return false;
+        }
+    }
+    // Duplicate templates if requested...
+    if (loadFactor > 1) {
+        const T copy = templates;
+        for (auto i = 0u; i < loadFactor; ++i) {
+            for (const auto &t : copy) {
+                templates.emplace_back(t);
+            }
         }
     }
     return true;
@@ -176,21 +187,21 @@ static void one(const std::string& path, const std::string& f1, const std::strin
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 static void oneMany(const std::string& path, const std::string& f1, const unsigned int loadFactor)
 {
+    using TemplateType = TemplateISO19794_2_2005<std::string, Fingerprint>;
+    MatchMany<TemplateType> match;
+
     Log::test(std::string(LineWidth, '='));
     Log::test("1:N match", Log::LF);
     Log::test("Path: ", path);
     Log::test("Template 1: ", f1);
+    Log::test("Concurrency: ", match.concurrency());
     Log::test(std::string(LineWidth, '='), Log::LF);
 
     Log::test("Loading...");
 
-    using TemplateType = TemplateISO19794_2_2005<std::string, Fingerprint>;
     std::vector<TemplateType> candidates;
-    candidates.reserve(loadFactor * 1000);
-    for (auto i = 0u; i < loadFactor; ++i) { // NJH-TODO copy first iteration instead
-        if (!helperLoadPath(candidates, path)) {
-            return;
-        }
+    if (!helperLoadPath(candidates, path, loadFactor)) {
+        return;
     }
     const auto pathF1 = std::filesystem::path(StringUtil::format(R"(%s/%s)", path.c_str(), f1.c_str()));
     TemplateType probe(pathF1.relative_path().make_preferred().string());
@@ -201,7 +212,6 @@ static void oneMany(const std::string& path, const std::string& f1, const unsign
 
     Log::test(Log::LF, "Matching 1:", candidates.size(), "...");
 
-    MatchMany<TemplateType> match;
     const auto start = std::chrono::high_resolution_clock::now();
     const auto result = match.oneMany(probe, candidates);
     const auto finish = std::chrono::high_resolution_clock::now();
@@ -220,27 +230,26 @@ static void oneMany(const std::string& path, const std::string& f1, const unsign
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 static void manyMany(const std::string& path, const unsigned int loadFactor)
 {
+    using TemplateType = TemplateISO19794_2_2005<std::string, Fingerprint>;
+    MatchMany<TemplateType> match;
+
     Log::test(std::string(LineWidth, '='));
     Log::test("Exponential N:N match", Log::LF);
     Log::test("Path: ", path);
+    Log::test("Concurrency: ", match.concurrency());
     Log::test(std::string(LineWidth, '='), Log::LF);
 
     Log::test("Loading...");
 
-    using TemplateType = TemplateISO19794_2_2005<std::string, Fingerprint>;
     std::vector<TemplateType> templates;
-    templates.reserve(loadFactor * 1000);
-    for (auto i = 0u; i < loadFactor; ++i) { // NJH-TODO copy first iteration instead
-        if (!helperLoadPath(templates, path)) {
-            return;
-        }
+    if (!helperLoadPath(templates, path, loadFactor)) {
+        return;
     }
     Log::test("Loaded ", templates.size(), " templates");
 
     std::vector<unsigned int> scores(templates.size() * templates.size());
     Log::test(Log::LF, "Matching ", scores.capacity(), " permutations...");
 
-    MatchMany<TemplateType> match;
     const auto start = std::chrono::high_resolution_clock::now();
     match.manyMany(scores, templates);
     const auto finish = std::chrono::high_resolution_clock::now();
@@ -350,7 +359,13 @@ int main(const int argc, const char** argv)
 
     const auto option = [](const char** begin, const char** end, const std::string& option) { return std::find(begin, end, option) != end; };
 
-    OpenAFIS::Log::test("OpenAFIS: an efficient 1:N fingerprint matching library", OpenAFIS::Log::LF);
+    OpenAFIS::Log::test("OpenAFIS: an efficient 1:N fingerprint matching library");
+    OpenAFIS::Log::test("Build options:");
+    OpenAFIS::Log::test("  MaximumLocalDistance: ", static_cast<int>(OpenAFIS::Param::MaximumLocalDistance));
+    OpenAFIS::Log::test("  MaximumGlobalDistance: ", static_cast<int>(OpenAFIS::Param::MaximumGlobalDistance));
+    OpenAFIS::Log::test("  MinimumMinutiae: ", static_cast<int>(OpenAFIS::Param::MinimumMinutiae));
+    OpenAFIS::Log::test("  MaximumConcurrency: ", static_cast<int>(OpenAFIS::Param::MaximumConcurrency));
+    OpenAFIS::Log::test("  MaximumRotations: ", static_cast<int>(OpenAFIS::Param::MaximumRotations), OpenAFIS::Log::LF);
 
     const auto f1 = param(argv, argv + argc, "--f1");
     const auto f2 = param(argv, argv + argc, "--f2");

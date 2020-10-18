@@ -17,6 +17,8 @@ public:
     static constexpr Field::MinutiaCoordType MaximumLocalDistance = 12;
     static constexpr Field::MinutiaCoordType MaximumGlobalDistance = 12;
     static constexpr unsigned int MinimumMinutiae = 4;
+    static constexpr unsigned int MaximumConcurrency = 256; // 1 = single-threaded
+    static constexpr unsigned int MaximumRotations = 3; // 3 = best accuracy, [1,2] faster match times
 
     static constexpr Field::AngleType maximumAngleDifference()
     {

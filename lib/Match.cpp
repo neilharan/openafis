@@ -64,7 +64,6 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 
     // Global matching 5.2...
     auto maxMatched = 0;
-
     for (const auto& p1 : m_pairs) {
         const auto theta = p1.candidate()->angle() - p1.probe()->angle();
         const auto cosTheta = FastMath::cos(theta);

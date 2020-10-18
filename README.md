@@ -6,7 +6,6 @@ Note: this library is focused on the matching problem. It does not currently ext
 
 The goal is to accurately identify one minutiae-set from 250K candidate sets within one second using modest laptop equipment. A secondary goal is to identify one minutiae-set from 1M candidate sets within one second, at a lower level of accuracy.
 
-
 ## Progress
 
 **Target is to be certification ready in October 2020**.
@@ -19,8 +18,8 @@ The goal is to accurately identify one minutiae-set from 250K candidate sets wit
   | CMake support | | |
   | Test suite | 30% | EER, FMR100, FMR1000, ZeroFMR |
   | Benchmarks | 25% | |
-  | Optimizing | 40% | float->int, vectorization (SSE/AVX), math functions |
-  | Parallelizing | 80% | |
+  | Optimizing | 50% | float->int, vectorization (SSE/AVX), math functions |
+  | Parallelizing | 100% | |
   | Minutiae/pair rendering | 100% | SVG output |
   | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction feature) |
 

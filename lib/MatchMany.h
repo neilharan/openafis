@@ -4,6 +4,7 @@
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "Match.h"
+#include "Param.h"
 
 #include <future>
 
@@ -21,20 +22,38 @@ public:
     using Templates = std::vector<TemplateType>;
     using OneManyResult = std::pair<unsigned int, const TemplateType*>;
 
+    MatchMany()
+        : m_concurrency(std::min(Param::MaximumConcurrency, std::thread::hardware_concurrency())) { }
+
     OneManyResult oneMany(const TemplateType& probe, const Templates& candidates) const
     {
-        static const auto Concurrency = std::thread::hardware_concurrency();
-
         if (candidates.empty()) {
             return std::make_pair(0, nullptr);
         }
+        if (m_concurrency == 1) {
+            static MatchSimilarity match;
+
+            unsigned int maxSimilarity {};
+            const TemplateType* maxCandidate {};
+            const auto &probeT = probe.fingerprints()[0];
+
+            for (const auto& t : candidates) {
+                unsigned int similarity {};
+                match.compute(similarity, probeT, t.fingerprints()[0]);
+                if (similarity > maxSimilarity) {
+                    maxSimilarity = similarity;
+                    maxCandidate = &t;
+                }
+            }
+            return std::make_pair(maxSimilarity, maxCandidate);
+        }
         std::vector<std::future<OneManyResult>> futures;
-        futures.reserve(1 + Concurrency);
+        futures.reserve(1 + m_concurrency);
 
         for (auto fromIt = candidates.begin();;) {
-            auto endIt = fromIt + std::min(static_cast<size_t>(candidates.end() - fromIt), candidates.size() / Concurrency);
+            auto endIt = fromIt + std::min(static_cast<size_t>(candidates.end() - fromIt), candidates.size() / m_concurrency);
 
-            futures.emplace_back(std::async(std::launch::async, [=, &probe]() {
+            futures.emplace_back(std::async(std::launch::async, [=, &probeT = probe.fingerprints()[0]]() {
                 thread_local static MatchSimilarity match;
 
                 unsigned int maxSimilarity {};
@@ -42,8 +61,7 @@ public:
 
                 for (auto it = fromIt; it < endIt; ++it) {
                     unsigned int similarity {};
-
-                    match.compute(similarity, probe.fingerprints()[0], it->fingerprints()[0]);
+                    match.compute(similarity, probeT, it->fingerprints()[0]);
                     if (similarity > maxSimilarity) {
                         maxSimilarity = similarity;
                         maxCandidate = &(*it);
@@ -72,15 +90,27 @@ public:
         if (scores.size() != templates.size() * templates.size()) {
             return;
         }
+        if (m_concurrency == 1) {
+            static MatchSimilarity match;
+            auto scoresPtr = scores.data();
+
+            for (const auto& t1 : templates) {
+                auto &t1t = t1.fingerprints()[0];
+                for (const auto& t2 : templates) {
+                    match.compute(*scoresPtr++, t1t, t2.fingerprints()[0]);
+                }
+            }
+            return;
+        }
         std::vector<std::future<void>> futures;
         futures.reserve(templates.size());
         size_t i {};
         for (const auto& t1 : templates) {
-            futures.emplace_back(std::async(std::launch::async, [=, &scores, &templates]() {
+            futures.emplace_back(std::async(std::launch::async, [=, &t1t = t1.fingerprints()[0], &scores, &templates]() {
                 thread_local static MatchSimilarity match;
                 auto scoresPtr = &scores[i];
                 for (const auto& t2 : templates) {
-                    match.compute(*scoresPtr++, t1.fingerprints()[0], t2.fingerprints()[0]);
+                    match.compute(*scoresPtr++, t1t, t2.fingerprints()[0]);
                 }
             }));
             i += templates.size();
@@ -89,6 +119,11 @@ public:
             f.wait();
         }
     }
+
+    [[nodiscard]] unsigned int concurrency() const { return m_concurrency; }
+
+private:
+    unsigned int m_concurrency;
 };
 }
 
