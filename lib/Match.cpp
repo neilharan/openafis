@@ -26,7 +26,9 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
         const auto end = std::upper_bound(it, candidateT.end(), p.distances()[0] + Param::MaximumLocalDistance); // NJH-TODO profile these - possibly bake custom binary search
 
         for (; it < end; ++it) {
-            it->emplacePair(m_tripletPairs, p);
+            if (!it->skipPair(p)) {
+                it->emplacePair(m_tripletPairs, p);
+            }
         }
     }
     if (m_tripletPairs.size() < Param::MinimumMinutiae) {
@@ -98,7 +100,7 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
                         }
                         return s;
                     }
-                    if constexpr (std::is_same_v<Field::AngleType, int>) {
+                    if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
                         return static_cast<uint8_t>(p2.probe()->angle() + theta);
                     }
                 };

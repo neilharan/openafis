@@ -68,7 +68,7 @@ public:
     [[nodiscard]] Field::MinutiaCoordType x() const { return m_x; }
     [[nodiscard]] Field::MinutiaCoordType y() const { return m_y; }
     [[nodiscard]] Field::AngleType angle() const { return m_angle; }
-    [[nodiscard]] Field::MinutiaCoordType distance() const { return m_distance; }
+    [[nodiscard]] Field::MinutiaDistanceType distance() const { return m_distance; }
     [[nodiscard]] Field::MinutiaKeyType key() const { return static_cast<Field::MinutiaKeyType>(m_x) << 8 | m_y; }
     [[nodiscard]] size_t bytes() const { return sizeof(*this); }
 
@@ -77,7 +77,7 @@ public:
     {
         const auto a = static_cast<int>(m_x) - other.x();
         const auto b = static_cast<int>(m_y) - other.y();
-        m_distance = static_cast<Field::MinutiaCoordType>(FastMath::isqrt(a * a + b * b));
+        m_distance = static_cast<Field::MinutiaDistanceType>(FastMath::isqrt(a * a + b * b));
     }
 
 private:
@@ -85,7 +85,7 @@ private:
     Field::MinutiaCoordType m_y; // "
     Field::AngleType m_angle; // radians [0,2PI] mapped over [0,255] (uint8_t)
 
-    Field::MinutiaCoordType m_distance {}; // distance from adjacent side, also scaled
+    Field::MinutiaDistanceType m_distance {}; // distance from adjacent side, also scaled
 };
 }
 

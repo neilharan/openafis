@@ -17,15 +17,16 @@ public:
     static constexpr Field::MinutiaCoordType MaximumLocalDistance = 12;
     static constexpr Field::MinutiaCoordType MaximumGlobalDistance = 12;
     static constexpr int MinimumMinutiae = 4;
-    static constexpr int MaximumRotations = 3; // 3 = best accuracy, [1,2] faster match times
+    static constexpr int MaximumRotations = 1; // 3 = best accuracy, [1,2] faster match times
     static constexpr unsigned int MaximumConcurrency = 256; // 1 = single-threaded
+    static constexpr bool EnableSIMD = true;
 
     static constexpr Field::AngleType maximumAngleDifference()
     {
         if constexpr (std::is_same_v<Field::AngleType, float>) {
             return MaximumAngleDifference;
         }
-        if constexpr (std::is_same_v<Field::AngleType, int>) {
+        if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
             return static_cast<Field::AngleType>(round(MaximumAngleDifference * FastMath::Radians8));
         }
     }
@@ -35,7 +36,7 @@ public:
         if constexpr (std::is_same_v<Field::AngleType, float>) {
             return MaximumDirectionDifference;
         }
-        if constexpr (std::is_same_v<Field::AngleType, int>) {
+        if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
             return static_cast<Field::AngleType>(round(MaximumDirectionDifference * FastMath::Radians8));
         }
     }

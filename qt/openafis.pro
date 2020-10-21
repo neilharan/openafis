@@ -5,6 +5,8 @@ QT -= gui
 
 INCLUDEPATH += \
     ../3rdparty/delaunator-cpp/include \
+    ../3rdparty/MIPP/src \
+    ../3rdparty/xsimd\include \s
     ../lib
 
 HEADERS = \
@@ -17,6 +19,7 @@ HEADERS = \
     $$PWD/../lib/MatchMany.h \
     $$PWD/../lib/Minutia.h \
     $$PWD/../lib/MinutiaPoint.h \
+    $$PWD/../lib/OpenAFIS.h \
     $$PWD/../lib/Param.h \
     $$PWD/../lib/Render.h \
     $$PWD/../lib/Template.h \
@@ -29,6 +32,8 @@ SOURCES = \
     ../lib/FastMath.cpp \
     ../lib/Fingerprint.cpp \
     ../lib/Match.cpp \
+    ../lib/MatchMany.cpp \
+    ../lib/OpenAFIS.cpp \
     ../lib/Render.cpp \
     ../lib/Template.cpp \
     ../lib/TemplateCSV.cpp \

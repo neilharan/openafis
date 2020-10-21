@@ -1,7 +1,10 @@
 
+#include "Log.h"
 #include "Triplet.h"
 #include "FastMath.h"
 #include "Param.h"
+
+#include "mipp.h"
 
 #include <algorithm>
 #include <numeric>
@@ -15,8 +18,8 @@ namespace OpenAFIS
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Triplet::Triplet(const MinutiaPoint::Minutiae& minutiae)
     : m_minutiae(shiftClockwise(minutiae))
-    , m_distances(sortDistances(m_minutiae))
 {
+    sortDistances();
 }
 
 
@@ -55,11 +58,40 @@ MinutiaPoint::Minutiae Triplet::shiftClockwise(MinutiaPoint::Minutiae minutiae)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Triplet::Distances Triplet::sortDistances(const MinutiaPoint::Minutiae& minutiae)
+void Triplet::sortDistances()
 {
-    Distances d({ minutiae[0].distance(), minutiae[1].distance(), minutiae[2].distance() });
+    Distances d({ m_minutiae[0].distance(), m_minutiae[1].distance(), m_minutiae[2].distance() });
     std::sort(d.begin(), d.end(), [](const Field::MinutiaCoordType& d1, const Field::MinutiaCoordType& d2) { return d1 > d2; });
-    return d;
+
+    m_distances.resize(32);
+    m_distances[0] = d[0];
+    m_distances[1] = d[1];
+    m_distances[2] = d[2];
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool Triplet::skipPair(const Triplet& probe) const
+{
+    // Theorems 1, 2 & 3...
+    if constexpr (Param::EnableSIMD) {
+        mipp::Reg<Field::MinutiaDistanceType> cd;
+        cd.load(m_distances.data());
+
+        mipp::Reg<Field::MinutiaDistanceType> pd;
+        pd.load(probe.distances().data());
+
+        const auto d = mipp::abs(cd - pd) >= Param::MaximumLocalDistance;
+        return !mipp::testz(d);
+    }
+    if constexpr (!Param::EnableSIMD) {
+        for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
+            if (std::abs(m_distances[i] - probe.distances()[i]) >= Param::MaximumLocalDistance) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 
@@ -69,12 +101,6 @@ Triplet::Distances Triplet::sortDistances(const MinutiaPoint::Minutiae& minutiae
 //
 void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
 {
-    // Theorems 1, 2 & 3...
-    for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
-        if (std::abs(m_distances[i] - probe.distances()[i]) >= Param::MaximumLocalDistance) {
-            return;
-        }
-    }
     using Shift = std::vector<int>;
     static const std::vector<Shift> Shifting = { { 0, 1, 2 } , { 1, 2, 0 } , { 2, 0, 1 } }; // rotate triplets when comparing
     static constexpr auto BestS = Pair::SimilarityMultiplier * Pair::SimilarityMultiplier * Pair::SimilarityMultiplier;

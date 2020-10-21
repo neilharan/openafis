@@ -14,6 +14,12 @@ namespace OpenAFIS
 class Log
 {
 public:
+    static void init()
+    {
+        std::cout << std::fixed;
+        std::cout.precision(1);
+    }
+
     static constexpr std::string_view LF = "\n";
 
     template <typename... A> static void test(A&&... args) { (std::cout << ... << std::forward<A>(args)) << std::endl; }

@@ -22,8 +22,6 @@ public:
     public:
         using Pairs = std::vector<Pair>;
 
-        Pair() = default;
-
         Pair(const int similarity, const Triplet* probe, const Triplet* candidate)
             : m_similarity(similarity)
             , m_probe(probe)
@@ -45,12 +43,13 @@ public:
         const Triplet* m_candidate {};
     };
 
-    using Distances = std::vector<Field::MinutiaCoordType>;
+    using Distances = std::vector<Field::MinutiaDistanceType>;
     using Dupes = std::unordered_set<Field::MinutiaKeyType>;
 
     explicit Triplet(const MinutiaPoint::Minutiae& minutiae);
     Triplet() = default;
 
+    bool skipPair(const Triplet& probe) const;
     void emplacePair(Pair::Pairs& pairs, const Triplet& probe) const;
 
     [[nodiscard]] inline const MinutiaPoint::Minutiae& minutiae() const { return m_minutiae; }
@@ -70,7 +69,7 @@ public:
 
 private:
     static MinutiaPoint::Minutiae shiftClockwise(MinutiaPoint::Minutiae minutiae);
-    static Distances sortDistances(const MinutiaPoint::Minutiae& minutiae);
+    void sortDistances();
 
     MinutiaPoint::Minutiae m_minutiae; // three points making up the triplet
     Distances m_distances {}; // max, mid, min side lengths respectively (sorted minutiae distances)

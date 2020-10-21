@@ -18,8 +18,9 @@ The goal is to accurately identify one minutiae-set from 250K candidate sets wit
   | CMake support | | |
   | Test suite | 30% | EER, FMR100, FMR1000, ZeroFMR |
   | Benchmarks | 25% | |
-  | Optimizing | 50% | float->int, vectorization (SSE/AVX), math functions |
-  | Parallelizing | 100% | |
+  | Parallelization | 100% | |
+  | Optimization | 50% | |
+  | Vectorizaton (SIMD) | 5% | AVX2, NEON |
   | Minutiae/pair rendering | 100% | SVG output |
   | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction feature) |
 
@@ -65,6 +66,7 @@ Improving Fingerprint Verification Using Minutiae Triplets (https://doi.org/10.3
 ## Dependencies
 
 Delaunay 2D Triangulation (https://github.com/delfrrr/delaunator-cpp) [MIT License]
+MyIntrinsics++ (MIPP) (https://github.com/aff3ct/MIPP) [MIT License]
 
 ## Supported minutiae template formats
 

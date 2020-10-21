@@ -1,12 +1,7 @@
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Log.h"
-#include "Match.h"
-#include "MatchMany.h"
-#include "Render.h"
+#include "OpenAFIS.h"
 #include "StringUtil.h"
-#include "TemplateCSV.h"
-#include "TemplateISO19794_2_2005.h"
 
 #include <chrono>
 #include <filesystem>
@@ -218,11 +213,11 @@ static void oneMany(const std::string& path, const std::string& f1, const int lo
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 
     if (result.second) {
-        Log::test("Matched probe [", probe.id(), "] and candidate [", result.second->id(), "] with ", result.first, "% similarity");
+        Log::test("Matched", Log::LF, "    probe [", probe.id(), "]", Log::LF, "    and candidate [", result.second->id(), "]", Log::LF, "    with ", result.first, "% similarity");
     } else {
         Log::test("No matches");
     }
-    Log::test("Completed in ", ms.count(), "ms (", ms.count() ? std::round(static_cast<float>(candidates.size()) / ms.count() * 1000) : 0, " fp/s)");
+    Log::test("Completed in ", ms.count(), "ms (", ms.count() ? static_cast<float>(candidates.size()) / ms.count() * 1000 : 0, " fp/s)");
     Log::test(std::string(LineWidth, '='), Log::LF);
 }
 
@@ -254,7 +249,7 @@ static void manyMany(const std::string& path, const int loadFactor)
     match.manyMany(scores, templates);
     const auto finish = std::chrono::steady_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    Log::test("Completed in ", ms.count(), "ms (", ms.count() ? std::round(static_cast<float>(scores.capacity()) / ms.count() * 1000) : 0, " fp/s)");
+    Log::test("Completed in ", ms.count(), "ms (", ms.count() ? static_cast<float>(scores.capacity()) / ms.count() * 1000 : 0, " fp/s)");
 
     Log::test(Log::LF, "Reporting...");
 
@@ -359,19 +354,20 @@ int main(const int argc, const char** argv)
 
     const auto option = [](const char** begin, const char** end, const std::string& option) { return std::find(begin, end, option) != end; };
 
-    OpenAFIS::Log::test("OpenAFIS: an efficient 1:N fingerprint matching library");
+    OpenAFIS::Log::init();
+    OpenAFIS::Log::test("OpenAFIS: an efficient 1:N fingerprint matching library (", OpenAFIS::InstructionSet, ")");
     OpenAFIS::Log::test("Build options:");
-    OpenAFIS::Log::test("  MaximumLocalDistance: ", static_cast<int>(OpenAFIS::Param::MaximumLocalDistance));
-    OpenAFIS::Log::test("  MaximumGlobalDistance: ", static_cast<int>(OpenAFIS::Param::MaximumGlobalDistance));
-    OpenAFIS::Log::test("  MinimumMinutiae: ", static_cast<int>(OpenAFIS::Param::MinimumMinutiae));
-    OpenAFIS::Log::test("  MaximumConcurrency: ", static_cast<int>(OpenAFIS::Param::MaximumConcurrency));
-    OpenAFIS::Log::test("  MaximumRotations: ", static_cast<int>(OpenAFIS::Param::MaximumRotations), OpenAFIS::Log::LF);
+    OpenAFIS::Log::test("    MaximumLocalDistance: ", static_cast<int>(OpenAFIS::Param::MaximumLocalDistance));
+    OpenAFIS::Log::test("    MaximumGlobalDistance: ", static_cast<int>(OpenAFIS::Param::MaximumGlobalDistance));
+    OpenAFIS::Log::test("    MinimumMinutiae: ", static_cast<int>(OpenAFIS::Param::MinimumMinutiae));
+    OpenAFIS::Log::test("    MaximumConcurrency: ", static_cast<int>(OpenAFIS::Param::MaximumConcurrency));
+    OpenAFIS::Log::test("    MaximumRotations: ", static_cast<int>(OpenAFIS::Param::MaximumRotations), OpenAFIS::Log::LF);
 
     const auto f1 = param(argv, argv + argc, "--f1");
     const auto f2 = param(argv, argv + argc, "--f2");
     const auto f3 = param(argv, argv + argc, "--f3");
     const auto path = param(argv, argv + argc, "--path");
-    const auto loadFactor = atoi(param(argv, argv + argc, "--load-factor").c_str());
+    const auto loadFactor = std::atoi(param(argv, argv + argc, "--load-factor").c_str());
 
     bool command {};
     if (option(argv, argv + argc, "bulk-load")) {
@@ -397,18 +393,18 @@ int main(const int argc, const char** argv)
     if (option(argv, argv + argc, "--help") || !command) {
         OpenAFIS::Log::test("Usage: openafis-cli [COMMAND]... [OPTIONS]... [--f1 ISO_FILE] [--f2 ISO_FILE] [--f3 ISO_FILE] [--path PATH]", OpenAFIS::Log::LF);
         OpenAFIS::Log::test("Commands:");
-        OpenAFIS::Log::test("  bulk-load : load and parse every *.iso below --path");
-        OpenAFIS::Log::test("  one       : match --f1,--f2 and --f1,--f3");
-        OpenAFIS::Log::test("  one-many  : match --f1 against every *.iso below --path");
-        OpenAFIS::Log::test("  many-many : match every *.iso below --path");
-        OpenAFIS::Log::test("  render    : generate two SVG's showing minutiae and matched pairs between --f1,--f2");
-        OpenAFIS::Log::test("  help      : this screen", OpenAFIS::Log::LF);
+        OpenAFIS::Log::test("    bulk-load : load and parse every *.iso below --path");
+        OpenAFIS::Log::test("    one       : match --f1,--f2 and --f1,--f3");
+        OpenAFIS::Log::test("    one-many  : match --f1 against every *.iso below --path");
+        OpenAFIS::Log::test("    many-many : match every *.iso below --path");
+        OpenAFIS::Log::test("    render    : generate two SVG's showing minutiae and matched pairs between --f1,--f2");
+        OpenAFIS::Log::test("    help      : this screen", OpenAFIS::Log::LF);
         OpenAFIS::Log::test("Options:");
-        OpenAFIS::Log::test("  --load-factor : load *.iso below --path multiple times (default 1)", OpenAFIS::Log::LF);
+        OpenAFIS::Log::test("    --load-factor : load *.iso below --path multiple times (default 1)", OpenAFIS::Log::LF);
         OpenAFIS::Log::test("Examples:");
-        OpenAFIS::Log::test("  openafis-cli many-many --path ~/openafis/data/fvc");
-        OpenAFIS::Log::test("  openafis-cli one --f1 db1_b/101_1.iso --f2 db1_b/101_2.iso --f3 db1_b/102_1.iso --path ~/openafis/data/fvc2002");
-        OpenAFIS::Log::test("  openafis-cli render --f1 db1_b/101_1.iso --f2 db1_b/101_7.iso --path ~/openafis/data/fvc2002");
+        OpenAFIS::Log::test("    openafis-cli many-many --path ~/openafis/data/fvc");
+        OpenAFIS::Log::test("    openafis-cli one --f1 db1_b/101_1.iso --f2 db1_b/101_2.iso --f3 db1_b/102_1.iso --path ~/openafis/data/fvc2002");
+        OpenAFIS::Log::test("    openafis-cli render --f1 db1_b/101_1.iso --f2 db1_b/101_7.iso --path ~/openafis/data/fvc2002");
     }
     return 0;
 }
