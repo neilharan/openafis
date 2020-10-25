@@ -27,12 +27,12 @@ template <class T> typename MatchMany<T>::OneManyResult MatchMany<T>::oneMany(co
     if (m_concurrency == 1) {
         static MatchSimilarity match;
 
-        int maxSimilarity {};
+        uint8_t maxSimilarity {};
         const T* maxCandidate {};
         const auto &probeT = probe.fingerprints()[0];
 
         for (const auto& t : candidates) {
-            int similarity {};
+            uint8_t similarity {};
             match.compute(similarity, probeT, t.fingerprints()[0]);
             if (similarity > maxSimilarity) {
                 maxSimilarity = similarity;
@@ -50,11 +50,11 @@ template <class T> typename MatchMany<T>::OneManyResult MatchMany<T>::oneMany(co
         futures.emplace_back(std::async(std::launch::async, [=, &probeT = probe.fingerprints()[0]]() {
             thread_local static MatchSimilarity match;
 
-            int maxSimilarity {};
+            uint8_t maxSimilarity {};
             const T* maxCandidate {};
 
             for (auto it = fromIt; it < endIt; ++it) {
-                int similarity {};
+                uint8_t similarity {};
                 match.compute(similarity, probeT, it->fingerprints()[0]);
                 if (similarity > maxSimilarity) {
                     maxSimilarity = similarity;
@@ -81,7 +81,7 @@ template <class T> typename MatchMany<T>::OneManyResult MatchMany<T>::oneMany(co
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class T> void MatchMany<T>::manyMany(std::vector<int>& scores, const Templates& templates) const
+template <class T> void MatchMany<T>::manyMany(std::vector<uint8_t>& scores, const Templates& templates) const
 {
     if (scores.size() != templates.size() * templates.size()) {
         return;

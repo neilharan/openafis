@@ -14,7 +14,7 @@ class Minutia
 public:
     enum class Type { Invalid, RidgeEnding, RidgeBifurcation };
 
-    Minutia(const Type type, const int x, const int y, const int angle)
+    Minutia(const Type type, const uint16_t x, const uint16_t y, const uint16_t angle)
         : m_type(type)
         , m_x(x)
         , m_y(y)
@@ -23,16 +23,16 @@ public:
     }
 
     [[nodiscard]] Type type() const { return m_type; }
-    [[nodiscard]] int x() const { return m_x; } // cm
-    [[nodiscard]] int y() const { return m_y; } // "
-    [[nodiscard]] int angle() const { return m_angle; } // degrees
+    [[nodiscard]] uint16_t x() const { return m_x; } // cm
+    [[nodiscard]] uint16_t y() const { return m_y; } // "
+    [[nodiscard]] uint16_t angle() const { return m_angle; } // degrees
     [[nodiscard]] size_t bytes() const { return sizeof(*this); }
 
 private:
     Type m_type;
-    int m_x;
-    int m_y;
-    int m_angle;
+    uint16_t m_x;
+    uint16_t m_y;
+    uint16_t m_angle;
 };
 }
 

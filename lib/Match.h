@@ -31,7 +31,7 @@ private:
     mutable std::vector<PairType> m_pairs;
 };
 
-using MatchSimilarity = Match<int, Fingerprint, MinutiaPoint::Pair>;
+using MatchSimilarity = Match<uint8_t, Fingerprint, MinutiaPoint::Pair>;
 using MatchRenderable = Match<MinutiaPoint::PairRenderable::Set, FingerprintRenderable, MinutiaPoint::PairRenderable>;
 }
 

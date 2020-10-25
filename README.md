@@ -2,6 +2,8 @@
 
 A high-performance one-to-many (1:N) fingerprint matching library for commodity hardware, written in modern platform-independent C++.
 
+[![License: BSD-2-Clause](https://img.shields.io/github/license/neilharan/openafis.svg)](./LICENSE)
+
 Note: this library is focused on the matching problem. It does not currently extract minutiae from images.
 
 The goal is to accurately identify one minutiae-set from 250K candidate sets within one second using modest laptop equipment. A secondary goal is to identify one minutiae-set from 1M candidate sets within one second, at a lower level of accuracy.
@@ -43,6 +45,20 @@ The goal is to accurately identify one minutiae-set from 250K candidate sets wit
 
 There is also a wrapper and qmake project file for incorporating with Qt projects.
 
+## Algorithm
+
+Improving Fingerprint Verification Using Minutiae Triplets (https://doi.org/10.3390/s120303418).
+
+## Dependencies
+
+- Delaunay 2D Triangulation (https://github.com/delfrrr/delaunator-cpp) [MIT License]
+- MyIntrinsics++ (MIPP) (https://github.com/aff3ct/MIPP) [MIT License]
+
+## Supported minutiae template formats
+
+- ISO/IEC 19794-2:2005 (https://www.iso.org/standard/38746.html)
+- CSV. For research and interchange purposes
+
 ## Test datasets
 
 Tests and benchmarks are performed on freely available datasets from the Fingerprint Verification Competition hosted by the University of Bologna.
@@ -53,25 +69,6 @@ These data include several hundred reference fingerprints of varying quality:
 - FVC2004 (http://bias.csr.unibo.it/fvc2004)
 
 The FVC archives are supplied in the tif raster format. A small python program [EXTRACT][] is provided to extract minutiae in ISO 19794-2:2005 format template files using SecuGens free SDK (https://secugen.com/products/sdk). Many fingerprint readers/SDKs can produce ISO format templates natively.
-
-## Test readers/SDKs
-
-- SecuGen Hamster Pro 10 https://secugen.com/products/hamster-pro-10
-- SecuGen Hamster Pro 20 https://secugen.com/products/hamster-pro-20
-
-## Algorithm
-
-Improving Fingerprint Verification Using Minutiae Triplets (https://doi.org/10.3390/s120303418).
-
-## Dependencies
-
-Delaunay 2D Triangulation (https://github.com/delfrrr/delaunator-cpp) [MIT License]
-MyIntrinsics++ (MIPP) (https://github.com/aff3ct/MIPP) [MIT License]
-
-## Supported minutiae template formats
-
-- ISO/IEC 19794-2:2005 (https://www.iso.org/standard/38746.html)
-- CSV. For research and interchange purposes
 
 ## Results
 

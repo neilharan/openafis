@@ -10,7 +10,7 @@ namespace OpenAFIS
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Hot path: yes
+// Hot path: no (loading only)
 // Domain: 0 < x < max(Field::MinutiaCoordType)^2
 // Maximum result is also a dimension (default uint8_t), so a table is viable and quite small (<64K)...
 //
@@ -18,14 +18,14 @@ FastMath::SquareRoots::SquareRoots()
     : m_values([]() {
         static Values v;
         for (size_t i = 0; i < Max; ++i) {
-            v.at(i) = static_cast<Field::MinutiaCoordType>(std::lround(std::sqrt(i)));
+            v.at(i) = static_cast<Field::MinutiaDistanceType>(std::lround(std::sqrt(i)));
         }
         return &v;
     }())
 {
 }
 
-int FastMath::isqrt(const int x)
+Field::MinutiaDistanceType FastMath::isqrt(const unsigned int x)
 {
     static const SquareRoots Table;
     return Table.get(x);
@@ -43,7 +43,7 @@ FastMath::ArcTangents::ArcTangents()
         static Values v;
         for (auto x = Min; x < Max; ++x) {
             for (auto y = Min; y < Max; ++y) {
-                const auto t = std::atan2f(static_cast<float>(x), static_cast<float>(y));
+                const auto t = std::atan2f(x, y);
                 if constexpr (std::is_same_v<Field::AngleType, float>) {
                     v.at(x - Min).at(y - Min) = static_cast<Field::AngleType>(t);
                 }
@@ -57,7 +57,7 @@ FastMath::ArcTangents::ArcTangents()
 {
 }
 
-Field::AngleType FastMath::atan2(const int x, const int y)
+Field::AngleType FastMath::atan2(const Field::MinutiaCoordType x, const Field::MinutiaCoordType y)
 {
     static const ArcTangents Table;
     return Table.get(x, y);
@@ -70,8 +70,8 @@ Field::AngleType FastMath::atan2(const int x, const int y)
 FastMath::Cosines::Cosines()
     : m_values([]() {
         static Values v;
-        for (auto i = Min; i < Max; ++i) {
-            v.at(i - Min) = std::cosf(static_cast<float>(i) / FastMath::Radians8);
+        for (auto i = Min; i <= Max; ++i) {
+            v.at(i - Min) = std::cosf(i / FastMath::Radians8);
         }
         return &v;
     }())
@@ -81,7 +81,7 @@ FastMath::Cosines::Cosines()
 float FastMath::cos(const Field::AngleType theta)
 {
     if constexpr (std::is_same_v<Field::AngleType, float>) {
-        return std::cosf(static_cast<float>(theta));
+        return std::cosf(theta);
     }
     if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
         static const Cosines Table;
@@ -96,8 +96,8 @@ float FastMath::cos(const Field::AngleType theta)
 FastMath::Sines::Sines()
     : m_values([]() {
         static Values v;
-        for (auto i = Min; i < Max; ++i) {
-            v.at(i - Min) = std::sinf(static_cast<float>(i) / FastMath::Radians8);
+        for (auto i = Min; i <= Max; ++i) {
+            v.at(i - Min) = std::sinf(i / FastMath::Radians8);
         }
         return &v;
     }())
@@ -107,7 +107,7 @@ FastMath::Sines::Sines()
 float FastMath::sin(const Field::AngleType theta)
 {
     if constexpr (std::is_same_v<Field::AngleType, float>) {
-        return std::sinf(static_cast<float>(theta));
+        return std::sinf(theta);
     }
     if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
         static const Sines Table;
@@ -117,17 +117,17 @@ float FastMath::sin(const Field::AngleType theta)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Hot path: no
+// Hot path: no (loading only)
 //
-Field::AngleType FastMath::degreesToRadians(const int theta)
+Field::AngleType FastMath::degreesToRadians(const uint16_t theta)
 {
     if constexpr (std::is_same_v<Field::AngleType, float>) {
         static constexpr float Factor = PI / 180.0f;
-        return static_cast<float>(theta) * Factor;
+        return theta * Factor;
     }
     if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
         static constexpr float Factor = PI / 180.0f * Radians8;
-        return static_cast<Field::AngleType>(std::lround(static_cast<Field::AngleType>(theta) * Factor));
+        return static_cast<Field::AngleType>(std::lround(theta * Factor));
     }
 }
 

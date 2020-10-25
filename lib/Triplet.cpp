@@ -132,7 +132,7 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
             auto max = 0;
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                const auto d = static_cast<int>(std::abs(m_minutiae[i].distance() - probe.minutiae()[shift[i]].distance()));
+                const auto d = std::abs(m_minutiae[i].distance() - probe.minutiae()[shift[i]].distance());
                 if (d > Param::MaximumLocalDistance) {
                     return Pair::SimilarityMultiplier;
                 }

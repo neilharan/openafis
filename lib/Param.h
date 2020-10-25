@@ -14,10 +14,10 @@ namespace OpenAFIS
 class Param
 {
 public:
-    static constexpr Field::MinutiaCoordType MaximumLocalDistance = 12;
-    static constexpr Field::MinutiaCoordType MaximumGlobalDistance = 12;
+    static constexpr Field::MinutiaCoordType MaximumLocalDistance = 12; // NJH-TODO require scaling
+    static constexpr Field::MinutiaCoordType MaximumGlobalDistance = 12; // "
     static constexpr int MinimumMinutiae = 4;
-    static constexpr int MaximumRotations = 1; // 3 = best accuracy, [1,2] faster match times
+    static constexpr int MaximumRotations = 3; // 3 = best accuracy, [1,2] faster match times
     static constexpr unsigned int MaximumConcurrency = 256; // 1 = single-threaded
     static constexpr bool EnableSIMD = true;
 
@@ -46,7 +46,7 @@ private:
     static constexpr float MaximumDirectionDifference = FastMath::PI / 4;
 
     // A very limited, but constexpr, round function to help with params...
-    static constexpr Field::AngleType round(const float x) { return (x >= 0.0f) ? static_cast<Field::AngleType>(x + 0.5f) : static_cast<Field::AngleType>(x - 0.5f); }
+    static constexpr Field::AngleType round(const float x) { return static_cast<Field::AngleType>(x >= 0.0f ? x + 0.5f : x - 0.5f); }
 };
 }
 

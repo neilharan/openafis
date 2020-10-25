@@ -158,7 +158,7 @@ static void one(const std::string& path, const std::string& f1, const std::strin
         static MatchSimilarity match;
 
         for (auto i = 0; i < Passes; ++i) {
-            int s {};
+            uint8_t s {};
 
             const auto start = std::chrono::steady_clock::now();
             for (auto i = 0; i < Iterations; ++i) {
@@ -242,7 +242,7 @@ static void manyMany(const std::string& path, const int loadFactor)
     }
     Log::test("Loaded ", templates.size(), " templates");
 
-    std::vector<int> scores(templates.size() * templates.size());
+    std::vector<uint8_t> scores(templates.size() * templates.size());
     Log::test(Log::LF, "Matching ", scores.capacity(), " permutations...");
 
     const auto start = std::chrono::steady_clock::now();
@@ -278,7 +278,7 @@ static void manyMany(const std::string& path, const int loadFactor)
 
         for (const auto& t2 : templates) {
             std::ignore = t2;
-            f << "," << scores[i++];
+            f << "," << (int) scores[i++];
         }
         f << std::endl;
     }

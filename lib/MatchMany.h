@@ -18,12 +18,12 @@ template <class TemplateType> class MatchMany
 {
 public:
     using Templates = std::vector<TemplateType>;
-    using OneManyResult = std::pair<int, const TemplateType*>;
+    using OneManyResult = std::pair<uint8_t, const TemplateType*>;
 
     MatchMany();
 
     OneManyResult oneMany(const TemplateType& probe, const Templates& candidates) const;
-    void manyMany(std::vector<int>& scores, const Templates& templates) const;
+    void manyMany(std::vector<uint8_t>& scores, const Templates& templates) const;
 
     [[nodiscard]] unsigned int concurrency() const { return m_concurrency; }
 

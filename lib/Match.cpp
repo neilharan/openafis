@@ -50,9 +50,9 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
             }
             if constexpr (std::is_same_v<R, MinutiaPoint::PairRenderable::Set>) {
                 // Similarity values are scaled for integers over [0,1000], for render % is fine...
-                m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i], std::lround(static_cast<float>(p.similarity()) / 10.0f));
+                m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i], std::lround(p.similarity() / 10.0f));
             }
-            if constexpr (std::is_same_v<R, int>) {
+            if constexpr (std::is_same_v<R, uint8_t>) {
                 m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i]);
             }
         }
@@ -88,8 +88,8 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 
             const auto directions = [&]() {
                 const auto a = [&]() {
-                    // Wrap within range ...
                     if constexpr (std::is_same_v<Field::AngleType, float>) {
+                        // Wrap within range ...
                         const auto s = p2.probe()->angle() + theta;
 
                         if (s > FastMath::TwoPI) {
@@ -101,7 +101,8 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
                         return s;
                     }
                     if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
-                        return static_cast<uint8_t>(p2.probe()->angle() + theta);
+                        // Wrap within size of uint8_t...
+                        return static_cast<Field::AngleSize>(p2.probe()->angle() + theta);
                     }
                 };
                 return FastMath::minimumAngle(a(), p2.candidate()->angle()) <= Param::maximumDirectionDifference();
@@ -130,9 +131,9 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
         }
         maxMatched = std::max(maxMatched, matched);
     }
-    if constexpr (std::is_same_v<R, int>) {
+    if constexpr (std::is_same_v<R, uint8_t>) {
         if (maxMatched > Param::MinimumMinutiae) {
-            result = (maxMatched * maxMatched * 100) / static_cast<R>(probe.minutiaeCount() * candidate.minutiaeCount());
+            result = static_cast<uint8_t>((maxMatched * maxMatched * 100) / (probe.minutiaeCount() * candidate.minutiaeCount()));
         }
     }
 }
@@ -141,6 +142,6 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Explicit instantiations...
 //
-template class Match<int, Fingerprint, MinutiaPoint::Pair>;
+template class Match<uint8_t, Fingerprint, MinutiaPoint::Pair>;
 template class Match<MinutiaPoint::PairRenderable::Set, FingerprintRenderable, MinutiaPoint::PairRenderable>;
 }

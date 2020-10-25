@@ -59,8 +59,8 @@ public:
 
     // co-ordinates (and therefore distances) are always scales for 8-bits...
     MinutiaPoint(const Dimensions& dimensions, const Minutia& minutia)
-        : m_x(static_cast<Field::MinutiaCoordType>(std::lround(static_cast<float>(minutia.x()) * (256.0f / dimensions.first))))
-        , m_y(static_cast<Field::MinutiaCoordType>(std::lround(static_cast<float>(minutia.y()) * (256.0f / dimensions.second))))
+        : m_x(static_cast<Field::MinutiaCoordType>(std::lround(minutia.x() * (256.0f / dimensions.first))))
+        , m_y(static_cast<Field::MinutiaCoordType>(std::lround(minutia.y() * (256.0f / dimensions.second))))
         , m_angle(FastMath::degreesToRadians(minutia.angle()))
     {
     }
@@ -75,9 +75,9 @@ public:
     // distance between two vectors: a^2 + b^2 = c^2
     void setDistanceFrom(const MinutiaPoint& other)
     {
-        const auto a = static_cast<int>(m_x) - other.x();
-        const auto b = static_cast<int>(m_y) - other.y();
-        m_distance = static_cast<Field::MinutiaDistanceType>(FastMath::isqrt(a * a + b * b));
+        const auto a = m_x - other.x();
+        const auto b = m_y - other.y();
+        m_distance = FastMath::isqrt(a * a + b * b);
     }
 
 private:
