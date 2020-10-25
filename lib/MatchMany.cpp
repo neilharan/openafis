@@ -88,7 +88,7 @@ template <class T> void MatchMany<T>::manyMany(std::vector<uint8_t>& scores, con
     }
     if (m_concurrency == 1) {
         static MatchSimilarity match;
-        auto scoresPtr = scores.data();
+        auto* scoresPtr = scores.data();
 
         for (const auto& t1 : templates) {
             auto &t1t = t1.fingerprints()[0];
@@ -104,7 +104,7 @@ template <class T> void MatchMany<T>::manyMany(std::vector<uint8_t>& scores, con
     for (const auto& t1 : templates) {
         futures.emplace_back(std::async(std::launch::async, [=, &t1t = t1.fingerprints()[0], &scores, &templates]() {
             thread_local static MatchSimilarity match;
-            auto scoresPtr = &scores[i];
+            auto* scoresPtr = &scores[i];
             for (const auto& t2 : templates) {
                 match.compute(*scoresPtr++, t1t, t2.fingerprints()[0]);
             }

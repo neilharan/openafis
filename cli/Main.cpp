@@ -1,6 +1,7 @@
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include "OpenAFIS.h"
+#include "Param.h"
 #include "StringUtil.h"
 
 #include <chrono>
@@ -167,7 +168,7 @@ static void one(const std::string& path, const std::string& f1, const std::strin
             const auto finish = std::chrono::steady_clock::now();
             const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 
-            Log::test("Pass ", i + 1, ", similarity of ", a.id(), " and ", b.id(), ": ", s, "% [", Iterations, " iterations in ", ms.count(), "ms]");
+            Log::test("Pass ", i + 1, ", similarity of ", a.id(), " and ", b.id(), ": ", static_cast<int>(s), "% [", Iterations, " iterations in ", ms.count(), "ms]");
         }
     };
 
@@ -213,7 +214,7 @@ static void oneMany(const std::string& path, const std::string& f1, const int lo
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 
     if (result.second) {
-        Log::test("Matched", Log::LF, "    probe [", probe.id(), "]", Log::LF, "    and candidate [", result.second->id(), "]", Log::LF, "    with ", result.first, "% similarity");
+        Log::test("Matched", Log::LF, "    probe [", probe.id(), "]", Log::LF, "    and candidate [", result.second->id(), "]", Log::LF, "    with ", static_cast<int>(result.first), "% similarity");
     } else {
         Log::test("No matches");
     }
@@ -278,7 +279,7 @@ static void manyMany(const std::string& path, const int loadFactor)
 
         for (const auto& t2 : templates) {
             std::ignore = t2;
-            f << "," << (int) scores[i++];
+            f << "," << static_cast<int>(scores[i++]);
         }
         f << std::endl;
     }

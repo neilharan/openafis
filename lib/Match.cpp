@@ -50,7 +50,7 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
             }
             if constexpr (std::is_same_v<R, MinutiaPoint::PairRenderable::Set>) {
                 // Similarity values are scaled for integers over [0,1000], for render % is fine...
-                m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i], std::lround(p.similarity() / 10.0f));
+                m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i], std::lround(static_cast<float>(p.similarity()) / 10.0f));
             }
             if constexpr (std::is_same_v<R, uint8_t>) {
                 m_pairs.emplace_back(&p.probe()->minutiae()[i], &p.candidate()->minutiae()[i]);

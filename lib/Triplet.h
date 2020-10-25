@@ -49,7 +49,7 @@ public:
     explicit Triplet(const MinutiaPoint::Minutiae& minutiae);
     Triplet() = default;
 
-    bool skipPair(const Triplet& probe) const;
+    [[nodiscard]] bool skipPair(const Triplet& probe) const;
     void emplacePair(Pair::Pairs& pairs, const Triplet& probe) const;
 
     [[nodiscard]] inline const MinutiaPoint::Minutiae& minutiae() const { return m_minutiae; }

@@ -30,8 +30,8 @@ public:
         {
         }
 
-        [[nodiscard]] const MinutiaPoint* probe() const { return m_probe; }
-        [[nodiscard]] const MinutiaPoint* candidate() const { return m_candidate; }
+        [[nodiscard]] inline const MinutiaPoint* probe() const { return m_probe; }
+        [[nodiscard]] inline const MinutiaPoint* candidate() const { return m_candidate; }
 
     private:
         const MinutiaPoint* m_probe {};
@@ -65,11 +65,11 @@ public:
     {
     }
 
-    [[nodiscard]] Field::MinutiaCoordType x() const { return m_x; }
-    [[nodiscard]] Field::MinutiaCoordType y() const { return m_y; }
-    [[nodiscard]] Field::AngleType angle() const { return m_angle; }
-    [[nodiscard]] Field::MinutiaDistanceType distance() const { return m_distance; }
-    [[nodiscard]] Field::MinutiaKeyType key() const { return static_cast<Field::MinutiaKeyType>(m_x) << 8 | m_y; }
+    [[nodiscard]] inline Field::MinutiaCoordType x() const { return m_x; }
+    [[nodiscard]] inline Field::MinutiaCoordType y() const { return m_y; }
+    [[nodiscard]] inline Field::AngleType angle() const { return m_angle; }
+    [[nodiscard]] inline Field::MinutiaDistanceType distance() const { return m_distance; }
+    [[nodiscard]] inline Field::MinutiaKeyType key() const { return static_cast<Field::MinutiaKeyType>(m_x) << 8 | m_y; }
     [[nodiscard]] size_t bytes() const { return sizeof(*this); }
 
     // distance between two vectors: a^2 + b^2 = c^2
