@@ -22,7 +22,7 @@ public:
 
     explicit TripletSIMD(const Minutiae& minutiae);
 
-    [[nodiscard]] bool skipPair(const TripletSIMD& probe) const;
+    [[nodiscard]] inline bool skipPair(const TripletSIMD&) const { return false; }
     void emplacePair(Pair::Pairs& pairs, const TripletSIMD& probe) const;
 
     [[nodiscard]] inline Field::MinutiaDistanceType maxDistance() const { return static_cast<Field::MinutiaDistanceType>(m_distances[0]); }

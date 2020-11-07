@@ -17,7 +17,7 @@ public:
     static constexpr Field::MinutiaCoordType MaximumLocalDistance = 12; // NJH-TODO require scaling
     static constexpr Field::MinutiaCoordType MaximumGlobalDistance = 12; // "
     static constexpr int MinimumMinutiae = 4;
-    static constexpr int MaximumRotations = 1; // 3 = best accuracy, [1,2] faster match times
+    static constexpr int MaximumRotations = 3; // 3 = best accuracy, [1,2] faster match times
     static constexpr unsigned int MaximumConcurrency = 256; // 1 = single-threaded
     static constexpr bool EnableSIMD = false;
 

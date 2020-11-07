@@ -53,10 +53,6 @@ void TripletSIMD::sortDistances()
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool TripletSIMD::skipPair(const TripletSIMD&) const { return false; }
-
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Compute similarity per 5.1.1-3
 // Note: equation return values are inverted and scaled for integer math...
 //
@@ -70,7 +66,6 @@ void TripletSIMD::emplacePair(Pair::Pairs& pairs, const TripletSIMD& probe) cons
     if (!mipp::testz(d0)) {
         return;
     }
-
     const mipp::Reg<int8_t> shuffle { 0, 1, 2, 3, 4, 5, 6, 7, 8, 3, 4, 5, 6, 7, 8, 0, 1, 2, 6, 7, 8, 0, 1, 2, 3, 4, 5, -1, -1, -1, -1, -1 };
     pd = pd.shuff2(shuffle);
     const auto v = mipp::abs(cd - pd);

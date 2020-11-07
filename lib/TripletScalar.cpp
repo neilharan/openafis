@@ -21,22 +21,23 @@ TripletScalar::TripletScalar(const Minutiae& minutiae)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-void TripletScalar::sortDistances()
-{
-    Distances d({ m_minutiae[0].distance(), m_minutiae[1].distance(), m_minutiae[2].distance() });
-    std::sort(d.begin(), d.end(), [](const Field::MinutiaCoordType& d1, const Field::MinutiaCoordType& d2) { return d1 > d2; });
-    m_distances = d;
-}
-
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 bool TripletScalar::skipPair(const TripletScalar& probe) const
 {
     // Theorems 1, 2 & 3...
-    for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
-        if (std::abs(m_distances[i] - probe.distances()[i]) >= Param::MaximumLocalDistance) {
-            return true;
-        }
+    auto cd = m_distances;
+    auto pd = probe.m_distances;
+    if (std::abs(static_cast<Field::MinutiaDistanceType>(cd) - static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
+        return true;
+    }
+    cd >>= 8;
+    pd >>= 8;
+    if (std::abs(static_cast<Field::MinutiaDistanceType>(cd) - static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
+        return true;
+    }
+    cd >>= 8;
+    pd >>= 8;
+    if (std::abs(static_cast<Field::MinutiaDistanceType>(cd) - static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
+        return true;
     }
     return false;
 }
@@ -160,14 +161,43 @@ void TripletScalar::emplacePair(Pair::Pairs& pairs, const TripletScalar& probe) 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 bool TripletScalar::operator<(const TripletScalar& other) const
 {
-    for (decltype(m_distances.size()) i = 0; i < 3; ++i) {
-        if (m_distances[i] < other.m_distances[i]) {
-            return true;
-        }
-        if (other.m_distances[i] < m_distances[i]) {
-            return false;
-        }
+    auto cd = m_distances;
+    auto pd = other.m_distances;
+
+    // max...
+    if (static_cast<Field::MinutiaDistanceType>(cd) < static_cast<Field::MinutiaDistanceType>(pd)) {
+        return true;
+    }
+    if (static_cast<Field::MinutiaDistanceType>(pd) < static_cast<Field::MinutiaDistanceType>(cd)) {
+        return false;
+    }
+
+    // mid...
+    cd >>= 8;
+    pd >>= 8;
+    if (static_cast<Field::MinutiaDistanceType>(cd) < static_cast<Field::MinutiaDistanceType>(pd)) {
+        return true;
+    }
+    if (static_cast<Field::MinutiaDistanceType>(pd) < static_cast<Field::MinutiaDistanceType>(cd)) {
+        return false;
+    }
+
+    // min...
+    cd >>= 8;
+    pd >>= 8;
+    if (static_cast<Field::MinutiaDistanceType>(cd) < static_cast<Field::MinutiaDistanceType>(pd)) {
+        return true;
     }
     return false;
 }
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void TripletScalar::sortDistances()
+{
+    std::array<Field::MinutiaDistanceType, 3>d { m_minutiae[0].distance(), m_minutiae[1].distance(), m_minutiae[2].distance() };
+    std::sort(d.begin(), d.end(), [](const Field::MinutiaCoordType& d1, const Field::MinutiaCoordType& d2) { return d1 > d2; });
+    m_distances = static_cast<uint32_t>(d[2]) << 16 | static_cast<uint32_t>(d[1]) << 8 | d[0];
+}
+
 }
