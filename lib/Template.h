@@ -16,6 +16,7 @@ namespace OpenAFIS
 template <class IdType, class FingerprintType> class Template
 {
 public:
+    using Minutiae = std::vector<Minutia>;
     using Fingerprints = std::vector<FingerprintType>;
 
     explicit Template(const IdType& id)
@@ -26,14 +27,17 @@ public:
     [[nodiscard]] const IdType& id() const { return m_data.id; }
     [[nodiscard]] const Fingerprints& fingerprints() const { return m_data.fps; }
     void clear() { m_data.fps.clear(); }
-    [[nodiscard]] size_t bytes() const;
+    [[nodiscard]] size_t bytes() const
+    {
+        return sizeof(*this) + std::accumulate(m_data.fps.begin(), m_data.fps.end(), size_t {}, [](size_t sum, const auto& fp) { return sum + fp.bytes(); });
+    }
 
 protected:
     static constexpr size_t MaximumFingerprints = 8;
     static constexpr size_t MinimumMinutiae = 2;
     static constexpr size_t MaximumMinutiae = 128;
 
-    bool load(const Dimensions& dimensions, const std::vector<Fingerprint::Minutiae>& fps);
+    bool load(const Dimensions& dimensions, const std::vector<Minutiae>& fps);
 
 private:
     struct Data {

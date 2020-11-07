@@ -25,9 +25,11 @@ public:
     void compute(ResultType& result, const FingerprintType& probe, const FingerprintType& candidate) const;
 
 private:
-    mutable Triplet::Pair::Pairs m_tripletPairs;
-    mutable Triplet::Dupes m_probeDupes;
-    mutable Triplet::Dupes m_candidateDupes;
+    using Dupes = std::unordered_set<Field::MinutiaKeyType>;
+
+    mutable Fingerprint::TripletType::Pair::Pairs m_tripletPairs;
+    mutable Dupes m_probeDupes;
+    mutable Dupes m_candidateDupes;
     mutable std::vector<PairType> m_pairs;
 };
 

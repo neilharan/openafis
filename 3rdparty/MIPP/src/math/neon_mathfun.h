@@ -38,7 +38,7 @@ inline v4sf log_ps(v4sf x);
 inline v4sf exp_ps(v4sf x);
 inline v4sf sin_ps(v4sf x);
 inline v4sf cos_ps(v4sf x);
-inline void sincos_ps(v4sf x, v4sf *s, v4sf *c);
+inline void sincos_ps(v4sf x, v4sf* s, v4sf* c);
 
 #include "neon_mathfun.hxx"
 

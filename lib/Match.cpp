@@ -22,8 +22,8 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 
     // Local matching 5.1.1-2...
     for (const auto& p : probeT) {
-        auto it = std::lower_bound(candidateT.begin(), candidateT.end(), p.distances()[0] - Param::MaximumLocalDistance);
-        const auto end = std::upper_bound(it, candidateT.end(), p.distances()[0] + Param::MaximumLocalDistance); // NJH-TODO profile these - possibly bake custom binary search
+        auto it = std::lower_bound(candidateT.begin(), candidateT.end(), p.maxDistance() - Param::MaximumLocalDistance);
+        const auto end = std::upper_bound(it, candidateT.end(), p.maxDistance() + Param::MaximumLocalDistance); // NJH-TODO profile these - possibly bake custom binary search
 
         for (; it < end; ++it) {
             if (!it->skipPair(p)) {

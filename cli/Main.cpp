@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <numeric>
 #include <sstream>
 #include <vector>
 
@@ -49,7 +50,7 @@ template <class T> static bool helperLoadPath(T& templates, const std::string& p
     if (loadFactor > 1) {
         const T copy = templates;
         for (auto i = 0; i < loadFactor; ++i) {
-            for (const auto &t : copy) {
+            for (const auto& t : copy) {
                 templates.emplace_back(t);
             }
         }
@@ -111,7 +112,7 @@ static void bulkLoad(const std::string& path)
     }
     const auto finish = std::chrono::steady_clock::now();
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-    Log::test("Loaded ", count, " templates in ", ms.count(), "ms, consuming ", size, " bytes");
+    Log::test("Loaded ", count, " templates in ", ms.count(), "ms (requiring ", size, " bytes)");
     Log::test(std::string(LineWidth, '='), Log::LF);
 }
 
@@ -204,7 +205,8 @@ static void oneMany(const std::string& path, const std::string& f1, const int lo
     if (!probe.load(pathF1.string())) {
         return;
     }
-    Log::test("Loaded ", candidates.size() + 1, " templates");
+    const auto size = std::accumulate(candidates.begin(), candidates.end(), size_t {}, [](size_t sum, const auto& t) { return sum + t.bytes(); });
+    Log::test("Loaded ", candidates.size() + 1, " templates (requiring ", size, " bytes)");
 
     Log::test(Log::LF, "Matching 1:", candidates.size(), "...");
 
@@ -241,7 +243,8 @@ static void manyMany(const std::string& path, const int loadFactor)
     if (!helperLoadPath(templates, path, loadFactor)) {
         return;
     }
-    Log::test("Loaded ", templates.size(), " templates");
+    const auto size = std::accumulate(templates.begin(), templates.end(), size_t {}, [](size_t sum, const auto& t) { return sum + t.bytes(); });
+    Log::test("Loaded ", templates.size(), " templates (requiring ", size, " bytes)");
 
     std::vector<uint8_t> scores(templates.size() * templates.size());
     Log::test(Log::LF, "Matching ", scores.capacity(), " permutations...");
@@ -356,7 +359,7 @@ int main(const int argc, const char** argv)
     const auto option = [](const char** begin, const char** end, const std::string& option) { return std::find(begin, end, option) != end; };
 
     OpenAFIS::Log::init();
-    OpenAFIS::Log::test("OpenAFIS: an efficient 1:N fingerprint matching library (", OpenAFIS::InstructionSet, ")");
+    OpenAFIS::Log::test("OpenAFIS: an efficient 1:N fingerprint matching library (", OpenAFIS::Param::EnableSIMD ? OpenAFIS::InstructionSet : "SCALAR", ")");
     OpenAFIS::Log::test("Build options:");
     OpenAFIS::Log::test("    MaximumLocalDistance: ", static_cast<int>(OpenAFIS::Param::MaximumLocalDistance));
     OpenAFIS::Log::test("    MaximumGlobalDistance: ", static_cast<int>(OpenAFIS::Param::MaximumGlobalDistance));

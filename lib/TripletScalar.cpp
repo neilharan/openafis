@@ -1,10 +1,7 @@
 
-#include "Log.h"
-#include "Triplet.h"
+#include "TripletScalar.h"
 #include "FastMath.h"
 #include "Param.h"
-
-#include "mipp.h"
 
 #include <algorithm>
 #include <numeric>
@@ -16,82 +13,32 @@ namespace OpenAFIS
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Triplet::Triplet(const MinutiaPoint::Minutiae& minutiae)
-    : m_minutiae(shiftClockwise(minutiae))
+TripletScalar::TripletScalar(const Minutiae& minutiae)
+    : Triplet(minutiae)
 {
     sortDistances();
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-MinutiaPoint::Minutiae Triplet::shiftClockwise(MinutiaPoint::Minutiae minutiae)
-{
-    const auto cx = ((minutiae[0].x() + minutiae[1].x()) / 2 + minutiae[2].x()) / 2;
-    const auto cy = ((minutiae[0].y() + minutiae[1].y()) / 2 + minutiae[2].y()) / 2;
-
-    auto a0 = FastMath::atan2(minutiae[0].y() - cy, minutiae[0].x() - cx);
-    auto a1 = FastMath::atan2(minutiae[1].y() - cy, minutiae[1].x() - cx);
-    auto a2 = FastMath::atan2(minutiae[2].y() - cy, minutiae[2].x() - cx);
-
-    const auto swap = [](auto& x, auto& y) {
-        const auto copy = x;
-        x = y;
-        y = copy;
-    };
-    if (a0 > a2) {
-        swap(a0, a2);
-        swap(minutiae[0], minutiae[2]);
-    }
-    if (a0 > a1) {
-        swap(a0, a1);
-        swap(minutiae[0], minutiae[1]);
-    }
-    if (a1 > a2) {
-        swap(a1, a2);
-        swap(minutiae[1], minutiae[2]);
-    }
-    minutiae[0].setDistanceFrom(minutiae[1]);
-    minutiae[1].setDistanceFrom(minutiae[2]);
-    minutiae[2].setDistanceFrom(minutiae[0]);
-    return minutiae;
-}
-
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Triplet::sortDistances()
+void TripletScalar::sortDistances()
 {
     Distances d({ m_minutiae[0].distance(), m_minutiae[1].distance(), m_minutiae[2].distance() });
     std::sort(d.begin(), d.end(), [](const Field::MinutiaCoordType& d1, const Field::MinutiaCoordType& d2) { return d1 > d2; });
-
-    m_distances.resize(32);
-    m_distances[0] = d[0];
-    m_distances[1] = d[1];
-    m_distances[2] = d[2];
+    m_distances = d;
 }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool Triplet::skipPair(const Triplet& probe) const
+bool TripletScalar::skipPair(const TripletScalar& probe) const
 {
     // Theorems 1, 2 & 3...
-    if constexpr (Param::EnableSIMD) {
-        mipp::Reg<Field::MinutiaDistanceType> cd;
-        cd.load(m_distances.data());
-
-        mipp::Reg<Field::MinutiaDistanceType> pd;
-        pd.load(probe.distances().data());
-
-        const auto d = mipp::abs(cd - pd) >= Param::MaximumLocalDistance;
-        return !mipp::testz(d);
-    }
-    if constexpr (!Param::EnableSIMD) {
-        for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
-            if (std::abs(m_distances[i] - probe.distances()[i]) >= Param::MaximumLocalDistance) {
-                return true;
-            }
+    for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
+        if (std::abs(m_distances[i] - probe.distances()[i]) >= Param::MaximumLocalDistance) {
+            return true;
         }
-        return false;
     }
+    return false;
 }
 
 
@@ -99,10 +46,10 @@ bool Triplet::skipPair(const Triplet& probe) const
 // Compute similarity per 5.1.1-3
 // Note: equation return values are inverted and scaled for integer math...
 //
-void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
+void TripletScalar::emplacePair(Pair::Pairs& pairs, const TripletScalar& probe) const
 {
     using Shift = std::vector<int>;
-    static const std::vector<Shift> Shifting = { { 0, 1, 2 } , { 1, 2, 0 } , { 2, 0, 1 } }; // rotate triplets when comparing
+    static const std::vector<Shift> Shifting = { { 0, 1, 2 }, { 1, 2, 0 }, { 2, 0, 1 } }; // rotate triplets when comparing
     static constexpr auto BestS = Pair::SimilarityMultiplier * Pair::SimilarityMultiplier * Pair::SimilarityMultiplier;
     auto bestS = BestS;
     auto rotations = Param::MaximumRotations;
@@ -211,17 +158,9 @@ void Triplet::emplacePair(Pair::Pairs& pairs, const Triplet& probe) const
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-size_t Triplet::bytes() const
+bool TripletScalar::operator<(const TripletScalar& other) const
 {
-    return sizeof(*this) + std::accumulate(m_minutiae.begin(), m_minutiae.end(), size_t {}, [](size_t sum, const auto& m) { return sum + m.bytes(); })
-        + m_distances.capacity() * sizeof(decltype(m_distances[0]));
-}
-
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool Triplet::operator<(const Triplet& other) const
-{
-    for (decltype(m_distances.size()) i = 0; i < m_distances.size(); ++i) {
+    for (decltype(m_distances.size()) i = 0; i < 3; ++i) {
         if (m_distances[i] < other.m_distances[i]) {
             return true;
         }

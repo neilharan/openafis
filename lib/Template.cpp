@@ -5,7 +5,6 @@
 #include "delaunator.hpp"
 
 #include <cassert>
-#include <numeric>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -14,7 +13,7 @@ namespace OpenAFIS
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class I, class F> bool Template<I, F>::load(const Dimensions& dimensions, const std::vector<Fingerprint::Minutiae>& fps)
+template <class I, class F> bool Template<I, F>::load(const Dimensions& dimensions, const std::vector<Minutiae>& fps)
 {
     for (const auto& minutiae : fps) {
         if (minutiae.size() < MinimumMinutiae) {
@@ -36,10 +35,10 @@ template <class I, class F> bool Template<I, F>::load(const Dimensions& dimensio
 
         F* fp {};
         if constexpr (std::is_same_v<F, Fingerprint>) {
-            fp = &m_data.fps.emplace_back(minutiae.size(), d.triangles.size() / 3);
+            fp = &m_data.fps.emplace_back(Fingerprint(minutiae.size(), d.triangles.size() / 3));
         }
         if constexpr (std::is_same_v<F, FingerprintRenderable>) {
-            fp = &m_data.fps.emplace_back(minutiae.size(), d.triangles.size() / 3, dimensions, minutiae);
+            fp = &m_data.fps.emplace_back(FingerprintRenderable(minutiae.size(), d.triangles.size() / 3, dimensions, minutiae));
         }
         auto& t = fp->triplets();
 
@@ -49,7 +48,7 @@ template <class I, class F> bool Template<I, F>::load(const Dimensions& dimensio
             if (a) {
                 const auto& b = d.triangles[i + 1];
                 const auto& c = d.triangles[i + 2];
-                t.emplace_back(MinutiaPoint::Minutiae({ MinutiaPoint(dimensions, minutiae[a]), MinutiaPoint(dimensions, minutiae[b]), MinutiaPoint(dimensions, minutiae[c]) }));
+                t.emplace_back(Triplet::Minutiae({ MinutiaPoint(dimensions, minutiae[a]), MinutiaPoint(dimensions, minutiae[b]), MinutiaPoint(dimensions, minutiae[c]) }));
             }
             if (!i) {
                 break;
@@ -61,13 +60,6 @@ template <class I, class F> bool Template<I, F>::load(const Dimensions& dimensio
         std::sort(t.begin(), t.end());
     }
     return true;
-}
-
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class I, class F> size_t Template<I, F>::bytes() const
-{
-    return sizeof(*this) + std::accumulate(m_data.fps.begin(), m_data.fps.end(), size_t {}, [](size_t sum, const auto& fp) { return sum + fp.bytes(); });
 }
 
 

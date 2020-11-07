@@ -16,7 +16,7 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 namespace OpenAFIS
 {
-    extern const std::string InstructionSet;
+extern const std::string InstructionSet;
 };
 
 #endif // OPENAFIS_H

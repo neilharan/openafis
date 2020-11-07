@@ -10,8 +10,6 @@ The goal is to accurately identify one minutiae-set from 250K candidate sets wit
 
 ## Progress
 
-**Target is to be certification ready in October 2020**.
-
   | TASK | COMPLETE | NOTES |
   | ---- | -------- | ----- |
   | Template loading | 100% | |

@@ -26,11 +26,12 @@ HEADERS = \
     $$PWD/../lib/TemplateCSV.h \
     $$PWD/../lib/TemplateISO19794_2_2005.h \
     $$PWD/../lib/Triplet.h \
+    $$PWD/../lib/TripletScalar.h \
+    $$PWD/../lib/TripletSIMD.h \
     $$PWD/../lib/StringUtil.h
 
 SOURCES = \
     ../lib/FastMath.cpp \
-    ../lib/Fingerprint.cpp \
     ../lib/Match.cpp \
     ../lib/MatchMany.cpp \
     ../lib/OpenAFIS.cpp \
@@ -38,7 +39,9 @@ SOURCES = \
     ../lib/Template.cpp \
     ../lib/TemplateCSV.cpp \
     ../lib/TemplateISO19794_2_2005.cpp \
-    ../lib/Triplet.cpp
+    ../lib/Triplet.cpp \
+    ../lib/TripletScalar.cpp \
+    ../lib/TripletSIMD.cpp
 
 contains(CONFIG, debug) {
     *-msvc*: {

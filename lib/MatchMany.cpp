@@ -12,7 +12,8 @@ namespace OpenAFIS
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-template <class T> MatchMany<T>::MatchMany()
+template <class T>
+MatchMany<T>::MatchMany()
     : m_concurrency(std::min(Param::MaximumConcurrency, std::thread::hardware_concurrency()))
 {
 }
@@ -29,7 +30,7 @@ template <class T> typename MatchMany<T>::OneManyResult MatchMany<T>::oneMany(co
 
         uint8_t maxSimilarity {};
         const T* maxCandidate {};
-        const auto &probeT = probe.fingerprints()[0];
+        const auto& probeT = probe.fingerprints()[0];
 
         for (const auto& t : candidates) {
             uint8_t similarity {};
@@ -91,7 +92,7 @@ template <class T> void MatchMany<T>::manyMany(std::vector<uint8_t>& scores, con
         auto* scoresPtr = scores.data();
 
         for (const auto& t1 : templates) {
-            auto &t1t = t1.fingerprints()[0];
+            auto& t1t = t1.fingerprints()[0];
             for (const auto& t2 : templates) {
                 match.compute(*scoresPtr++, t1t, t2.fingerprints()[0]);
             }

@@ -1,4 +1,4 @@
-/* 
+/*
    AVX implementation of sin, cos, sincos, exp and log
 
    Based on "sse_mathfun.h", by Julien Pommier
@@ -41,7 +41,7 @@ inline v8sf log256_ps(v8sf x);
 inline v8sf exp256_ps(v8sf x);
 inline v8sf sin256_ps(v8sf x);
 inline v8sf cos256_ps(v8sf x);
-inline void sincos256_ps(v8sf x, v8sf *s, v8sf *c);
+inline void sincos256_ps(v8sf x, v8sf* s, v8sf* c);
 
 #include "avx_mathfun.hxx"
 
