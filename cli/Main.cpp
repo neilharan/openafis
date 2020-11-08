@@ -208,19 +208,23 @@ static void oneMany(const std::string& path, const std::string& f1, const int lo
     const auto size = std::accumulate(candidates.begin(), candidates.end(), size_t {}, [](size_t sum, const auto& t) { return sum + t.bytes(); });
     Log::test("Loaded ", candidates.size() + 1, " templates (requiring ", size, " bytes)");
 
-    Log::test(Log::LF, "Matching 1:", candidates.size(), "...");
+    Log::test(Log::LF, "Matching 1:", candidates.size());
 
-    const auto start = std::chrono::steady_clock::now();
-    const auto result = match.oneMany(probe, candidates);
-    const auto finish = std::chrono::steady_clock::now();
-    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
+    for(auto i = 1; i <= 3; ++i) {
+        Log::test(Log::LF, "Pass ", i, "...");
 
-    if (result.second) {
-        Log::test("Matched", Log::LF, "    probe [", probe.id(), "]", Log::LF, "    and candidate [", result.second->id(), "]", Log::LF, "    with ", static_cast<int>(result.first), "% similarity");
-    } else {
-        Log::test("No matches");
+        const auto start = std::chrono::steady_clock::now();
+        const auto result = match.oneMany(probe, candidates);
+        const auto finish = std::chrono::steady_clock::now();
+        const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
+
+        if (result.second) {
+            Log::test("    Matched", Log::LF, "    probe [", probe.id(), "]", Log::LF, "    and candidate [", result.second->id(), "]", Log::LF, "    with ", static_cast<int>(result.first), "% similarity");
+        } else {
+            Log::test("    No matches");
+        }
+        Log::test("    Completed in ", ms.count(), "ms (", ms.count() ? static_cast<float>(candidates.size()) / ms.count() * 1000 : 0, " fp/s)");
     }
-    Log::test("Completed in ", ms.count(), "ms (", ms.count() ? static_cast<float>(candidates.size()) / ms.count() * 1000 : 0, " fp/s)");
     Log::test(std::string(LineWidth, '='), Log::LF);
 }
 

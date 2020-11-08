@@ -27,7 +27,7 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
         if (it == candidateT.end()) {
             continue;
         }
-        const auto end = std::upper_bound(it, candidateT.end(), p.maxDistance() + Param::MaximumLocalDistance); // NJH-TODO profile these - possibly bake custom binary search
+        const auto end = std::upper_bound(it, candidateT.end(), p.maxDistance() + Param::MaximumLocalDistance);
 
         for (; it < end; ++it) {
             if (!it->skipPair(p)) {

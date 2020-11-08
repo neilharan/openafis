@@ -119,7 +119,7 @@ float FastMath::sin(const Field::AngleType theta)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Hot path: no (loading only)
 //
-Field::AngleType FastMath::degreesToRadians(const uint16_t theta)
+Field::AngleSize FastMath::degreesToRadians(const uint16_t theta)
 {
     if constexpr (std::is_same_v<Field::AngleType, float>) {
         static constexpr float Factor = PI / 180.0f;
@@ -127,7 +127,7 @@ Field::AngleType FastMath::degreesToRadians(const uint16_t theta)
     }
     if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
         static constexpr float Factor = PI / 180.0f * Radians8;
-        return static_cast<Field::AngleType>(std::lround(theta * Factor));
+        return static_cast<Field::AngleSize>(std::lround(theta * Factor));
     }
 }
 

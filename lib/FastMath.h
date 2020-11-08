@@ -26,7 +26,7 @@ public:
     static Field::AngleType atan2(Field::MinutiaCoordType x, Field::MinutiaCoordType y);
     static float cos(Field::AngleType theta);
     static float sin(Field::AngleType theta);
-    static Field::AngleType degreesToRadians(uint16_t theta);
+    static Field::AngleSize degreesToRadians(uint16_t theta);
     static Field::AngleType minimumAngle(Field::AngleType a, Field::AngleType b);
     static Field::AngleType rotateAngle(Field::AngleType a, Field::AngleType b);
 
