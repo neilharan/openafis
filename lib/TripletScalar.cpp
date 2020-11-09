@@ -49,8 +49,8 @@ bool TripletScalar::skipPair(const TripletScalar& probe) const
 //
 void TripletScalar::emplacePair(Pair::Pairs& pairs, const TripletScalar& probe) const
 {
-    using Shift = std::vector<int>;
-    static const std::vector<Shift> Shifting = { { 0, 1, 2 }, { 1, 2, 0 }, { 2, 0, 1 } }; // rotate triplets when comparing
+    using Shift = std::array<int, 3>;
+    static const std::array<Shift, 3> Shifting = { 0, 1, 2, 1, 2, 0, 2, 0, 1 }; // rotate triplets when comparing
     static constexpr auto BestS = Pair::SimilarityMultiplier * Pair::SimilarityMultiplier * Pair::SimilarityMultiplier;
     auto bestS = BestS;
     auto rotations = Param::MaximumRotations;

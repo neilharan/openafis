@@ -1,4 +1,5 @@
 
+#include "Log.h"
 #include "MatchMany.h"
 #include "Param.h"
 #include "TemplateISO19794_2_2005.h"
@@ -26,7 +27,7 @@ template <class T> typename MatchMany<T>::OneManyResult MatchMany<T>::oneMany(co
         return std::make_pair(0, nullptr);
     }
     if (m_concurrency == 1) {
-        static MatchSimilarity match;
+        MatchSimilarity match;
 
         uint8_t maxSimilarity {};
         const T* maxCandidate {};
@@ -43,13 +44,13 @@ template <class T> typename MatchMany<T>::OneManyResult MatchMany<T>::oneMany(co
         return std::make_pair(maxSimilarity, maxCandidate);
     }
     std::vector<std::future<OneManyResult>> futures;
-    futures.reserve(1 + m_concurrency);
+    futures.reserve(static_cast<size_t>(std::ceil(static_cast<float>(candidates.size()) / m_concurrency)));
 
     for (auto fromIt = candidates.begin();;) {
-        auto endIt = fromIt + std::min(static_cast<size_t>(candidates.end() - fromIt), candidates.size() / m_concurrency);
+        auto endIt = fromIt + std::min(static_cast<size_t>(candidates.end() - fromIt), futures.capacity());
 
         futures.emplace_back(std::async(std::launch::async, [=, &probeT = probe.fingerprints()[0]]() {
-            thread_local static MatchSimilarity match;
+            MatchSimilarity match;
 
             uint8_t maxSimilarity {};
             const T* maxCandidate {};
@@ -88,7 +89,7 @@ template <class T> void MatchMany<T>::manyMany(std::vector<uint8_t>& scores, con
         return;
     }
     if (m_concurrency == 1) {
-        static MatchSimilarity match;
+        MatchSimilarity match;
         auto* scoresPtr = scores.data();
 
         for (const auto& t1 : templates) {
@@ -104,7 +105,7 @@ template <class T> void MatchMany<T>::manyMany(std::vector<uint8_t>& scores, con
     size_t i {};
     for (const auto& t1 : templates) {
         futures.emplace_back(std::async(std::launch::async, [=, &t1t = t1.fingerprints()[0], &scores, &templates]() {
-            thread_local static MatchSimilarity match;
+            MatchSimilarity match;
             auto* scoresPtr = &scores[i];
             for (const auto& t2 : templates) {
                 match.compute(*scoresPtr++, t1t, t2.fingerprints()[0]);
