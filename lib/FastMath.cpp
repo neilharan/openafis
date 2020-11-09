@@ -138,13 +138,13 @@ Field::AngleSize FastMath::degreesToRadians(const uint16_t theta)
 //
 Field::AngleType FastMath::minimumAngle(const Field::AngleType a, const Field::AngleType b)
 {
-    const auto d = std::abs(a - b);
+    const auto d = diff(a, b);
 
     if constexpr (std::is_same_v<Field::AngleType, float>) {
         return std::min(static_cast<float>(d), FastMath::TwoPI - d);
     }
     if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
-        return std::min(d, FastMath::TwoPI8 - d);
+        return std::min(d, static_cast<Field::AngleType>(FastMath::TwoPI8 - d));
     }
 }
 

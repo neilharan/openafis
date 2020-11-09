@@ -26,17 +26,17 @@ bool TripletScalar::skipPair(const TripletScalar& probe) const
     // Theorems 1, 2 & 3...
     auto cd = m_distances;
     auto pd = probe.m_distances;
-    if (std::abs(static_cast<Field::MinutiaDistanceType>(cd) - static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
+    if (FastMath::diff(static_cast<Field::MinutiaDistanceType>(cd), static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
         return true;
     }
     cd >>= 8;
     pd >>= 8;
-    if (std::abs(static_cast<Field::MinutiaDistanceType>(cd) - static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
+    if (FastMath::diff(static_cast<Field::MinutiaDistanceType>(cd), static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
         return true;
     }
     cd >>= 8;
     pd >>= 8;
-    if (std::abs(static_cast<Field::MinutiaDistanceType>(cd) - static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
+    if (FastMath::diff(static_cast<Field::MinutiaDistanceType>(cd), static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
         return true;
     }
     return false;
@@ -80,11 +80,11 @@ void TripletScalar::emplacePair(Pair::Pairs& pairs, const TripletScalar& probe) 
             auto max = 0;
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                const auto d = std::abs(m_minutiae[i].distance() - probe.minutiae()[shift[i]].distance());
+                const auto d = FastMath::diff(m_minutiae[i].distance(), probe.minutiae()[shift[i]].distance());
                 if (d > Param::MaximumLocalDistance) {
                     return Pair::SimilarityMultiplier;
                 }
-                max = std::max(max, d);
+                max = std::max(max, static_cast<int>(d));
             }
             return (max * Pair::SimilarityMultiplier) / Param::MaximumLocalDistance;
         }();
