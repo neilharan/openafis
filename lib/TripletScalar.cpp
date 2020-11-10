@@ -50,7 +50,7 @@ bool TripletScalar::skipPair(const TripletScalar& probe) const
 void TripletScalar::emplacePair(Pair::Pairs& pairs, const TripletScalar& probe) const
 {
     using Shift = std::array<int, 3>;
-    static const std::array<Shift, 3> Shifting = { 0, 1, 2, 1, 2, 0, 2, 0, 1 }; // rotate triplets when comparing
+    static const std::array<Shift, 3> Shifting = { { 0, 1, 2, 1, 2, 0, 2, 0, 1 } }; // rotate triplets when comparing
     static constexpr auto BestS = Pair::SimilarityMultiplier * Pair::SimilarityMultiplier * Pair::SimilarityMultiplier;
     auto bestS = BestS;
     auto rotations = Param::MaximumRotations;
@@ -195,7 +195,7 @@ bool TripletScalar::operator<(const TripletScalar& other) const
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void TripletScalar::sortDistances()
 {
-    std::array<Field::MinutiaDistanceType, 3>d { m_minutiae[0].distance(), m_minutiae[1].distance(), m_minutiae[2].distance() };
+    std::array<Field::MinutiaDistanceType, 3> d { m_minutiae[0].distance(), m_minutiae[1].distance(), m_minutiae[2].distance() };
     std::sort(d.begin(), d.end(), [](const Field::MinutiaCoordType& d1, const Field::MinutiaCoordType& d2) { return d1 > d2; });
     m_distances = static_cast<uint32_t>(d[2]) << 16 | static_cast<uint32_t>(d[1]) << 8 | d[0];
 }

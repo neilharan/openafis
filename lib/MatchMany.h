@@ -3,13 +3,12 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#include "Match.h"
+#include "ThreadPool.h"
+
+#include <vector>
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Instantiate on the heap.
-// This class reserves a wide array to improve duplicate checking efficiency...
-//
 namespace OpenAFIS
 {
 
@@ -24,10 +23,10 @@ public:
     OneManyResult oneMany(const TemplateType& probe, const Templates& candidates) const;
     void manyMany(std::vector<uint8_t>& scores, const Templates& templates) const;
 
-    [[nodiscard]] unsigned int concurrency() const { return m_concurrency; }
+    [[nodiscard]] size_t concurrency() const { return m_pool.size(); }
 
 private:
-    const unsigned int m_concurrency;
+    mutable ThreadPool m_pool;
 };
 }
 

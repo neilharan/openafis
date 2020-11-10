@@ -71,7 +71,7 @@ FastMath::Cosines::Cosines()
     : m_values([]() {
         static Values v;
         for (auto i = Min; i <= Max; ++i) {
-            v.at(i - Min) = std::cosf(i / FastMath::Radians8);
+            v.at(i - Min) = std::cosf(static_cast<float>(i) / FastMath::Radians8);
         }
         return &v;
     }())
@@ -97,7 +97,7 @@ FastMath::Sines::Sines()
     : m_values([]() {
         static Values v;
         for (auto i = Min; i <= Max; ++i) {
-            v.at(i - Min) = std::sinf(i / FastMath::Radians8);
+            v.at(i - Min) = std::sinf(static_cast<float>(i) / FastMath::Radians8);
         }
         return &v;
     }())
@@ -123,11 +123,11 @@ Field::AngleSize FastMath::degreesToRadians(const uint16_t theta)
 {
     if constexpr (std::is_same_v<Field::AngleType, float>) {
         static constexpr float Factor = PI / 180.0f;
-        return theta * Factor;
+        return static_cast<float>(theta) * Factor;
     }
     if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
         static constexpr float Factor = PI / 180.0f * Radians8;
-        return static_cast<Field::AngleSize>(std::lround(theta * Factor));
+        return static_cast<Field::AngleSize>(std::lround(static_cast<float>(theta) * Factor));
     }
 }
 

@@ -1,7 +1,6 @@
 
 #include "TripletSIMD.h"
 #include "FastMath.h"
-#include "Log.h"
 #include "Param.h"
 
 #define MIPP_ALIGNED_LOADS

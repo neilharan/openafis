@@ -1,6 +1,6 @@
 
-#include "Log.h"
 #include "MatchMany.h"
+#include "Match.h"
 #include "Param.h"
 #include "TemplateISO19794_2_2005.h"
 
@@ -15,7 +15,7 @@ namespace OpenAFIS
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 template <class T>
 MatchMany<T>::MatchMany()
-    : m_concurrency(std::min(Param::MaximumConcurrency, std::thread::hardware_concurrency()))
+    : m_pool(std::min(Param::MaximumConcurrency, std::thread::hardware_concurrency()), ThreadPool::Priority::Critical)
 {
 }
 
@@ -26,7 +26,7 @@ template <class T> typename MatchMany<T>::OneManyResult MatchMany<T>::oneMany(co
     if (candidates.empty()) {
         return std::make_pair(0, nullptr);
     }
-    if (m_concurrency == 1) {
+    if (m_pool.size() == 1) {
         MatchSimilarity match;
 
         uint8_t maxSimilarity {};
@@ -44,12 +44,12 @@ template <class T> typename MatchMany<T>::OneManyResult MatchMany<T>::oneMany(co
         return std::make_pair(maxSimilarity, maxCandidate);
     }
     std::vector<std::future<OneManyResult>> futures;
-    futures.reserve(static_cast<size_t>(std::ceil(static_cast<float>(candidates.size()) / m_concurrency)));
+    futures.reserve(m_pool.size());
 
     for (auto fromIt = candidates.begin();;) {
-        auto endIt = fromIt + std::min(static_cast<size_t>(candidates.end() - fromIt), futures.capacity());
+        auto endIt = fromIt + std::min(static_cast<size_t>(candidates.end() - fromIt), static_cast<size_t>(std::ceil(static_cast<float>(candidates.size()) / m_pool.size())));
 
-        futures.emplace_back(std::async(std::launch::async, [=, &probeT = probe.fingerprints()[0]]() {
+        futures.emplace_back(m_pool.enqueue([=, &probeT = probe.fingerprints()[0]]() {
             MatchSimilarity match;
 
             uint8_t maxSimilarity {};
@@ -71,6 +71,7 @@ template <class T> typename MatchMany<T>::OneManyResult MatchMany<T>::oneMany(co
         }
         fromIt = endIt;
     }
+
     OneManyResult bestR;
     for (auto& f : futures) {
         const auto& r = f.get();
@@ -88,7 +89,7 @@ template <class T> void MatchMany<T>::manyMany(std::vector<uint8_t>& scores, con
     if (scores.size() != templates.size() * templates.size()) {
         return;
     }
-    if (m_concurrency == 1) {
+    if (m_pool.size() == 1) {
         MatchSimilarity match;
         auto* scoresPtr = scores.data();
 

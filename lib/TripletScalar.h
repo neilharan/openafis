@@ -27,7 +27,10 @@ public:
     [[nodiscard]] size_t bytes() const { return sizeof(*this); };
 
     bool operator<(const TripletScalar& other) const;
-    friend bool operator<(const TripletScalar& lhs, const Field::MinutiaDistanceType rhs) { return static_cast<Field::MinutiaDistanceType>(lhs.m_distances) < rhs; } // lower_bound/upper_bound (the binary search)
+    friend bool operator<(const TripletScalar& lhs, const Field::MinutiaDistanceType rhs)
+    {
+        return static_cast<Field::MinutiaDistanceType>(lhs.m_distances) < rhs;
+    } // lower_bound/upper_bound (the binary search)
     friend bool operator<(const Field::MinutiaDistanceType lhs, const TripletScalar& rhs) { return lhs < static_cast<Field::MinutiaDistanceType>(rhs.m_distances); } // "
 
 private:

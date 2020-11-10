@@ -30,11 +30,10 @@ public:
     static Field::AngleType minimumAngle(Field::AngleType a, Field::AngleType b);
     static Field::AngleType rotateAngle(Field::AngleType a, Field::AngleType b);
 
-    template <class T>
-    static T diff(const T a, const T b)
+    template <class T> static T diff(const T a, const T b)
     {
-        //return std::abs(a - b);
-        //return std::max(a, b) - std::min(a, b);
+        // return std::abs(a - b);
+        // return std::max(a, b) - std::min(a, b);
         return b > a ? b - a : a - b;
     }
 

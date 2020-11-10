@@ -22,7 +22,7 @@ public:
 
     static constexpr std::string_view LF = "\n";
 
-    template <typename... A> static void test(A&&... args) { (std::cout << ... << std::forward<A>(args)) << std::endl; }
+    template <typename... A> static void test(A&&... args) { (std::cout << ... << std::forward<A>(args)) << std::endl << std::flush; }
 
     template <typename... A> static void info(A&&... args)
     {

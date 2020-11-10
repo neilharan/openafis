@@ -25,6 +25,7 @@ HEADERS = \
     $$PWD/../lib/Template.h \
     $$PWD/../lib/TemplateCSV.h \
     $$PWD/../lib/TemplateISO19794_2_2005.h \
+    $$PWD/../lib/ThreadPool.h \
     $$PWD/../lib/Triplet.h \
     $$PWD/../lib/TripletScalar.h \
     $$PWD/../lib/TripletSIMD.h \
@@ -45,14 +46,16 @@ SOURCES = \
 
 contains(CONFIG, debug) {
     *-msvc*: {
-        DEFINES += _HAS_EXCEPTIONS=0
+        DEFINES += \
+            _HAS_EXCEPTIONS=0 \
+            _ITERATOR_DEBUG_LEVEL=0
         QMAKE_CXXFLAGS += /std:c++17
         QMAKE_CXXFLAGS_EXCEPTIONS_ON -= -EHsc
     }
 }
 contains(CONFIG, release) {
     *-msvc*: {
-        # /arch:SSE2 /fp:fast
+        # /arch:AVX2 /fp:fast
         DEFINES += _HAS_EXCEPTIONS=0
         QMAKE_CXXFLAGS += /GS- /GT /Oy /Oi /std:c++17
         QMAKE_CXXFLAGS_EXCEPTIONS_ON -= -EHsc

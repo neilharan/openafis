@@ -52,7 +52,7 @@ protected:
     Minutiae m_minutiae; // three points making up the triplet
 
 private:
-    Minutiae shiftClockwise(Minutiae minutiae) const;
+    [[nodiscard]] Minutiae shiftClockwise(Minutiae minutiae) const;
 };
 }
 

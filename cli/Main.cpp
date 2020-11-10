@@ -11,6 +11,7 @@
 #include <map>
 #include <numeric>
 #include <sstream>
+#include <thread>
 #include <vector>
 
 
@@ -210,8 +211,9 @@ static void oneMany(const std::string& path, const std::string& f1, const int lo
 
     Log::test(Log::LF, "Matching 1:", candidates.size());
 
-    for(auto i = 1; i <= 3; ++i) {
+    for (auto i = 1; i <= 3; ++i) {
         Log::test(Log::LF, "Pass ", i, "...");
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
         const auto start = std::chrono::steady_clock::now();
         const auto result = match.oneMany(probe, candidates);
@@ -219,7 +221,8 @@ static void oneMany(const std::string& path, const std::string& f1, const int lo
         const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 
         if (result.second) {
-            Log::test("    Matched", Log::LF, "    probe [", probe.id(), "]", Log::LF, "    and candidate [", result.second->id(), "]", Log::LF, "    with ", static_cast<int>(result.first), "% similarity");
+            Log::test(
+                "    Matched", Log::LF, "    probe [", probe.id(), "]", Log::LF, "    and candidate [", result.second->id(), "]", Log::LF, "    with ", static_cast<int>(result.first), "% similarity");
         } else {
             Log::test("    No matches");
         }
