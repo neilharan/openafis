@@ -123,5 +123,6 @@ template <class T> void MatchMany<T>::manyMany(std::vector<uint8_t>& scores, con
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Explicit instantiations...
 //
+template class MatchMany<TemplateISO19794_2_2005<uint32_t, Fingerprint>>;
 template class MatchMany<TemplateISO19794_2_2005<std::string, Fingerprint>>;
 }

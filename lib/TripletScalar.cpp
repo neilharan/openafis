@@ -21,25 +21,98 @@ TripletScalar::TripletScalar(const Minutiae& minutiae)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Theorems 1, 2 & 3...
+//
 bool TripletScalar::skipPair(const TripletScalar& probe) const
 {
-    // Theorems 1, 2 & 3...
-    auto cd = m_distances;
-    auto pd = probe.m_distances;
-    if (FastMath::diff(static_cast<Field::MinutiaDistanceType>(cd), static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
-        return true;
+    constexpr auto SkipMethod = 2;
+
+    if constexpr (SkipMethod == 1) {
+        // SWAR (ideas from https://programming.sirrida.de/swar.html)...
+        constexpr uint32_t SignMask = 0x80808080u;
+        constexpr uint8_t Shift = (1 << 3) - 1;
+
+        const uint32_t t0 = ~(m_distances ^ probe.m_distances) & SignMask;
+
+        const uint32_t x1 = (m_distances | SignMask) - probe.m_distances & ~SignMask;
+        uint32_t t1 = (probe.m_distances & ~m_distances) & SignMask;
+        t1 = t1 | (t0 & ~x1);
+        t1 = (t1 << 1) - (t1 >> Shift);
+
+        const uint32_t y2 = (probe.m_distances | SignMask) - m_distances & ~SignMask;
+        uint32_t t2 = (m_distances & ~probe.m_distances) & SignMask;
+        t2 = t2 | (t0 & ~y2);
+        t2 = (t2 << 1) - (t2 >> Shift);
+
+        auto d = ((x1 ^ t0) & ~t1) + ((y2 ^ t0) & ~t2);
+
+        if (static_cast<int8_t>(d) >= Param::MaximumLocalDistance) {
+            return true;
+        }
+        if (static_cast<int8_t>(d >> 8) >= Param::MaximumLocalDistance) {
+            return true;
+        }
+        if (static_cast<int8_t>(d >> 16) >= Param::MaximumLocalDistance) {
+            return true;
+        }
+        return false;
     }
-    cd >>= 8;
-    pd >>= 8;
-    if (FastMath::diff(static_cast<Field::MinutiaDistanceType>(cd), static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
-        return true;
+
+    if constexpr (SkipMethod == 2) {
+        // SWAR (ideas from https://www.chessprogramming.org/SIMD_and_SWAR_Techniques)...
+        constexpr uint32_t SignMask = 0x80808080u;
+        auto d = ((m_distances | SignMask) - probe.m_distances) ^ ((m_distances ^ SignMask) & SignMask);
+
+        if (static_cast<int8_t>(d) >= Param::MaximumLocalDistance || static_cast<int8_t>(d) <= -Param::MaximumLocalDistance) {
+            return true;
+        }
+        d >>= 8;
+        if (static_cast<int8_t>(d) >= Param::MaximumLocalDistance || static_cast<int8_t>(d) <= -Param::MaximumLocalDistance) {
+            return true;
+        }
+        d >>= 8;
+        if (static_cast<int8_t>(d) >= Param::MaximumLocalDistance || static_cast<int8_t>(d) <= -Param::MaximumLocalDistance) {
+            return true;
+        }
+        return false;
     }
-    cd >>= 8;
-    pd >>= 8;
-    if (FastMath::diff(static_cast<Field::MinutiaDistanceType>(cd), static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
-        return true;
+
+    if constexpr (SkipMethod == 3) {
+        // SWAR (ideas from https://www.chessprogramming.org/SIMD_and_SWAR_Techniques)...
+        constexpr uint32_t MSBON = 0x80808080u;
+        auto d = ((m_distances | MSBON) - probe.m_distances) ^ ((m_distances ^ MSBON) & MSBON);
+
+        if (std::abs(static_cast<Field::MinutiaDistanceType>(d)) >= Param::MaximumLocalDistance) {
+            return true;
+        }
+        if (std::abs(static_cast<Field::MinutiaDistanceType>(d >> 8)) >= Param::MaximumLocalDistance) {
+            return true;
+        }
+        if (std::abs(static_cast<Field::MinutiaDistanceType>(d >> 16)) >= Param::MaximumLocalDistance) {
+            return true;
+        }
+        return false;
     }
-    return false;
+
+    if constexpr (SkipMethod == 4) {
+        // Default (abs(x-y) b0, b1 and b2)...
+        auto cd = m_distances;
+        auto pd = probe.m_distances;
+        if (FastMath::diff(static_cast<Field::MinutiaDistanceType>(cd), static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
+            return true;
+        }
+        cd >>= 8;
+        pd >>= 8;
+        if (FastMath::diff(static_cast<Field::MinutiaDistanceType>(cd), static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
+            return true;
+        }
+        cd >>= 8;
+        pd >>= 8;
+        if (FastMath::diff(static_cast<Field::MinutiaDistanceType>(cd), static_cast<Field::MinutiaDistanceType>(pd)) >= Param::MaximumLocalDistance) {
+            return true;
+        }
+        return false;
+    }
 }
 
 
@@ -65,7 +138,7 @@ void TripletScalar::emplacePair(Pair::Pairs& pairs, const TripletScalar& probe) 
         // Equation 7 (3 iterations)...
         const auto directions = [&]() {
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                if (FastMath::minimumAngle(m_minutiae[i].angle(), probe.minutiae()[shift[i]].angle()) > Param::maximumDirectionDifference()) {
+                if (FastMath::minimumAngle(m_minutiae[i].angle(), probe.minutiae()[shift[i]].angle()) >= Param::maximumDirectionDifference()) {
                     return false;
                 }
             }
@@ -81,7 +154,7 @@ void TripletScalar::emplacePair(Pair::Pairs& pairs, const TripletScalar& probe) 
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
                 const auto d = FastMath::diff(m_minutiae[i].distance(), probe.minutiae()[shift[i]].distance());
-                if (d > Param::MaximumLocalDistance) {
+                if (d >= Param::MaximumLocalDistance) {
                     return Pair::SimilarityMultiplier;
                 }
                 max = std::max(max, static_cast<int>(d));

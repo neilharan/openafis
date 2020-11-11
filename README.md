@@ -8,6 +8,8 @@ Note: this library is focused on the matching problem. It does not currently ext
 
 The goal is to accurately identify one minutiae-set from 250K candidate sets within one second using modest laptop equipment. A secondary goal is to identify one minutiae-set from 1M candidate sets within one second, at a lower level of accuracy.
 
+Update 2020-11-11: goals have been exceeded (875K fp/s and 1.3M fp/s respectively). More optimizations, full vectorization and test tools to come.
+
 ## Progress
 
   | TASK | COMPLETE | NOTES |

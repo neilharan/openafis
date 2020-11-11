@@ -25,9 +25,11 @@ constexpr auto LineWidth = 100;
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Helper loads and parses templated from the supplied path, optionally duplicating by a supplied factor...
+//
 template <class T> static bool helperLoadPath(T& templates, const std::string& path, const int loadFactor)
 {
-    templates.reserve(loadFactor * 1000);
+    templates.reserve(loadFactor * 640ll);
 
     for (const auto& entry : std::filesystem::recursive_directory_iterator(path.c_str())) {
         if (!entry.is_regular_file()) {
@@ -37,7 +39,19 @@ template <class T> static bool helperLoadPath(T& templates, const std::string& p
         if (StringUtil::lower(p.extension().string()) != ".iso") {
             continue;
         }
-        auto& t = templates.emplace_back(p.relative_path().make_preferred().string());
+        auto& t = [&templates, &p]() -> T::value_type& {
+            if constexpr (std::is_same_v<T::value_type::IdType, std::string>) {
+                return templates.emplace_back(p.relative_path().make_preferred().string());
+            }
+
+            if constexpr (std::is_integral_v<T::value_type::IdType>) {
+                static T::value_type::IdType id{};
+                return templates.emplace_back(++id);
+            }
+
+            throw("unsupported T");
+        }();
+
         if (!t.load(p.string())) {
             Log::error("failed to load ", p.string());
             return false;
@@ -47,7 +61,7 @@ template <class T> static bool helperLoadPath(T& templates, const std::string& p
             return false;
         }
     }
-    // Duplicate templates if requested...
+    // Duplicate templates if requested (extend size of test dataset)...
     if (loadFactor > 1) {
         const T copy = templates;
         for (auto i = 0; i < loadFactor; ++i) {
@@ -56,6 +70,7 @@ template <class T> static bool helperLoadPath(T& templates, const std::string& p
             }
         }
     }
+    templates.shrink_to_fit();
     return true;
 }
 
@@ -119,7 +134,7 @@ static void bulkLoad(const std::string& path)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Crude matching efficiency & efficacy test...
+// 1:1 matching test...
 //
 static void one(const std::string& path, const std::string& f1, const std::string& f2, const std::string& f3)
 {
@@ -156,22 +171,15 @@ static void one(const std::string& path, const std::string& f1, const std::strin
     }
 
     const auto test = [](const auto& a, const auto& b) {
-        static const int Passes = 5;
-        static const int Iterations = 50000;
-        static MatchSimilarity match;
+        MatchSimilarity match;
+        uint8_t s {};
 
-        for (auto i = 0; i < Passes; ++i) {
-            uint8_t s {};
+        const auto start = std::chrono::steady_clock::now();
+        match.compute(s, a.fingerprints()[0], b.fingerprints()[0]);
+        const auto finish = std::chrono::steady_clock::now();
+        const auto us = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
 
-            const auto start = std::chrono::steady_clock::now();
-            for (auto i = 0; i < Iterations; ++i) {
-                match.compute(s, a.fingerprints()[0], b.fingerprints()[0]);
-            }
-            const auto finish = std::chrono::steady_clock::now();
-            const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-
-            Log::test("Pass ", i + 1, ", similarity of ", a.id(), " and ", b.id(), ": ", static_cast<int>(s), "% [", Iterations, " iterations in ", ms.count(), "ms]");
-        }
+        Log::test("Similarity of ", a.id(), " and ", b.id(), ": ", static_cast<int>(s), "% [in ", us.count(), "us]");
     };
 
     Log::test(Log::LF, "Matching...");
@@ -183,6 +191,8 @@ static void one(const std::string& path, const std::string& f1, const std::strin
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// 1:N matching test...
+//
 static void oneMany(const std::string& path, const std::string& f1, const int loadFactor)
 {
     using TemplateType = TemplateISO19794_2_2005<std::string, Fingerprint>;
@@ -192,6 +202,7 @@ static void oneMany(const std::string& path, const std::string& f1, const int lo
     Log::test("1:N match", Log::LF);
     Log::test("Path: ", path);
     Log::test("Template 1: ", f1);
+    Log::test("Load factor: ", loadFactor);
     Log::test("Concurrency: ", match.concurrency());
     Log::test(std::string(LineWidth, '='), Log::LF);
 
@@ -233,14 +244,17 @@ static void oneMany(const std::string& path, const std::string& f1, const int lo
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// N:N matching test. Matches every template against every other template; hashing this output is a quick way to check optimisations haven't affected efficacy...
+//
 static void manyMany(const std::string& path, const int loadFactor)
 {
     using TemplateType = TemplateISO19794_2_2005<std::string, Fingerprint>;
     MatchMany<TemplateType> match;
 
     Log::test(std::string(LineWidth, '='));
-    Log::test("Exponential N:N match", Log::LF);
+    Log::test("N:N match", Log::LF);
     Log::test("Path: ", path);
+    Log::test("Load factor: ", loadFactor);
     Log::test("Concurrency: ", match.concurrency());
     Log::test(std::string(LineWidth, '='), Log::LF);
 
@@ -294,6 +308,48 @@ static void manyMany(const std::string& path, const int loadFactor)
         f << std::endl;
     }
     Log::test("Written ", fn);
+    Log::test(std::string(LineWidth, '='), Log::LF);
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+static void bench(const std::string& path, const std::string& f1, const int loadFactor)
+{
+    using TemplateType = TemplateISO19794_2_2005<uint32_t, Fingerprint>;
+    MatchMany<TemplateType> match;
+
+    Log::test(std::string(LineWidth, '='));
+    Log::test("Benchmark", Log::LF);
+    Log::test("Path: ", path);
+    Log::test("Template 1: ", f1);
+    Log::test("Load factor: ", loadFactor);
+    Log::test("Concurrency: ", match.concurrency());
+    Log::test(std::string(LineWidth, '='), Log::LF);
+
+    Log::test("Loading...");
+
+    std::vector<TemplateType> candidates;
+    if (!helperLoadPath(candidates, path, loadFactor)) {
+        return;
+    }
+    const auto pathF1 = std::filesystem::path(StringUtil::format(R"(%s/%s)", path.c_str(), f1.c_str()));
+    TemplateType probe(0);
+    if (!probe.load(pathF1.string())) {
+        return;
+    }
+    const auto size = std::accumulate(candidates.begin(), candidates.end(), size_t {}, [](size_t sum, const auto& t) { return sum + t.bytes(); });
+    Log::test("Loaded ", candidates.size() + 1, " templates (requiring ", size, " bytes)");
+
+    Log::test(Log::LF, "Matching 1:", candidates.size());
+
+    const auto result = match.oneMany(probe, candidates);
+
+    if (result.second) {
+        Log::test(
+            "    Matched", Log::LF, "    probe [", probe.id(), "]", Log::LF, "    and candidate [", result.second->id(), "]", Log::LF, "    with ", static_cast<int>(result.first), "% similarity");
+    } else {
+        Log::test("    No matches");
+    }
     Log::test(std::string(LineWidth, '='), Log::LF);
 }
 

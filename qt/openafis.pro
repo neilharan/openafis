@@ -57,7 +57,7 @@ contains(CONFIG, release) {
     *-msvc*: {
         # /arch:AVX2 /fp:fast
         DEFINES += _HAS_EXCEPTIONS=0
-        QMAKE_CXXFLAGS += /GS- /GT /Oy /Oi /std:c++17
+        QMAKE_CXXFLAGS += /GS- /Ob2 /Oi /Ot /Oy /GT /GL /QIntel-jcc-erratum /std:c++17
         QMAKE_CXXFLAGS_EXCEPTIONS_ON -= -EHsc
     }
 }

@@ -80,7 +80,7 @@ public:
         auto r = task->get_future();
 
         {
-            std::unique_lock<std::mutex> lock(m_mutex);
+            std::lock_guard lock(m_mutex);
             m_tasks.emplace([task]() { (*task)(); });
         }
         m_condition.notify_one();

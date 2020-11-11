@@ -13,9 +13,11 @@ namespace OpenAFIS
 {
 
 // Any identifier you like - maybe a std::string for research, or uint16_t when memory is a constraint...
-template <class IdType, class FingerprintType> class Template
+template <class I, class F> class Template
 {
 public:
+    using IdType = I;
+    using FingerprintType = F;
     using Minutiae = std::vector<Minutia>;
     using Fingerprints = std::vector<FingerprintType>;
 
