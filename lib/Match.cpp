@@ -23,11 +23,11 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
 
     // Local matching 5.1.1-2...
     for (const auto& p : probeT) {
-        auto it = std::lower_bound(candidateT.begin(), candidateT.end(), p.maxDistance() - Param::MaximumLocalDistance);
+        auto it = std::lower_bound(candidateT.begin(), candidateT.end(), static_cast<Field::MinutiaDistanceType>(p.maxDistance() - Param::MaximumLocalDistance));
         if (it == candidateT.end()) {
             continue;
         }
-        const auto end = std::upper_bound(it, candidateT.end(), p.maxDistance() + Param::MaximumLocalDistance);
+        const auto end = std::upper_bound(it, candidateT.end(), static_cast<Field::MinutiaDistanceType>(p.maxDistance() + Param::MaximumLocalDistance));
 
         for (; it < end; ++it) {
             if (!it->skipPair(p)) {
@@ -65,7 +65,7 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
     // Global matching 5.2...
     auto maxMatched = 0;
     for (const auto& p1 : m_pairs) {
-        const auto theta = p1.candidate()->angle() - p1.probe()->angle();
+        const auto theta = static_cast<Field::AngleType>(p1.candidate()->angle() - p1.probe()->angle());
         const auto cosTheta = FastMath::cos(theta);
         const auto sinTheta = FastMath::sin(theta);
 

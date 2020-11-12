@@ -39,17 +39,18 @@ template <class T> static bool helperLoadPath(T& templates, const std::string& p
         if (StringUtil::lower(p.extension().string()) != ".iso") {
             continue;
         }
-        auto& t = [&templates, &p]() -> T::value_type& {
-            if constexpr (std::is_same_v<T::value_type::IdType, std::string>) {
+        auto& t = [=, &templates]() -> typename T::value_type& {
+            if constexpr (std::is_same<typename T::value_type::IdType, std::string>::value) {
                 return templates.emplace_back(p.relative_path().make_preferred().string());
             }
 
-            if constexpr (std::is_integral_v<T::value_type::IdType>) {
-                static T::value_type::IdType id{};
+            if constexpr (std::is_integral_v<typename T::value_type::IdType>) {
+                static typename T::value_type::IdType id{};
                 return templates.emplace_back(++id);
             }
 
-            throw("unsupported T");
+            Log::error("unsupported T (this should not be possible!)");
+            std::exit(0); // no exceptions
         }();
 
         if (!t.load(p.string())) {
@@ -279,10 +280,10 @@ static void manyMany(const std::string& path, const int loadFactor)
     Log::test(Log::LF, "Reporting...");
 
     const auto now = []() {
-        std::time_t t = std::time(nullptr);
-        std::tm tm = *std::localtime(&t);
+        auto t = std::time(nullptr);
+        auto tm = std::localtime(&t);
         std::stringstream ss;
-        ss << std::put_time(&tm, "%Y-%m-%d-%H-%M-%S");
+        ss << std::put_time(tm, "%Y-%m-%d-%H-%M-%S");
         return ss.str();
     };
 
@@ -313,6 +314,9 @@ static void manyMany(const std::string& path, const int loadFactor)
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#if 0
+
+//NJH-TODO
 static void bench(const std::string& path, const std::string& f1, const int loadFactor)
 {
     using TemplateType = TemplateISO19794_2_2005<uint32_t, Fingerprint>;
@@ -352,6 +356,7 @@ static void bench(const std::string& path, const std::string& f1, const int load
     }
     Log::test(std::string(LineWidth, '='), Log::LF);
 }
+#endif
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

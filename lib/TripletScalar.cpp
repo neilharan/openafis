@@ -123,7 +123,7 @@ bool TripletScalar::skipPair(const TripletScalar& probe) const
 void TripletScalar::emplacePair(Pair::Pairs& pairs, const TripletScalar& probe) const
 {
     using Shift = std::array<int, 3>;
-    static const std::array<Shift, 3> Shifting = { { 0, 1, 2, 1, 2, 0, 2, 0, 1 } }; // rotate triplets when comparing
+    static const std::array<Shift, 3> Shifting = { { { 0, 1, 2 }, { 1, 2, 0 }, { 2, 0, 1 } } }; // rotate triplets when comparing
     static constexpr auto BestS = Pair::SimilarityMultiplier * Pair::SimilarityMultiplier * Pair::SimilarityMultiplier;
     auto bestS = BestS;
     auto rotations = Param::MaximumRotations;
@@ -195,12 +195,12 @@ void TripletScalar::emplacePair(Pair::Pairs& pairs, const TripletScalar& probe) 
                     if (i == j) {
                         continue;
                     }
-                    const auto y = m_minutiae[i].y() - m_minutiae[j].y();
-                    const auto x = m_minutiae[i].x() - m_minutiae[j].x();
+                    const auto y = static_cast<Field::MinutiaCoordType>(m_minutiae[i].y() - m_minutiae[j].y());
+                    const auto x = static_cast<Field::MinutiaCoordType>(m_minutiae[i].x() - m_minutiae[j].x());
                     const auto d = FastMath::rotateAngle(m_minutiae[i].angle(), FastMath::atan2(y, x));
 
-                    const auto oy = probe.minutiae()[shift[i]].y() - probe.minutiae()[shift[j]].y();
-                    const auto ox = probe.minutiae()[shift[i]].x() - probe.minutiae()[shift[j]].x();
+                    const auto oy = static_cast<Field::MinutiaCoordType>(probe.minutiae()[shift[i]].y() - probe.minutiae()[shift[j]].y());
+                    const auto ox = static_cast<Field::MinutiaCoordType>(probe.minutiae()[shift[i]].x() - probe.minutiae()[shift[j]].x());
                     const auto od = FastMath::rotateAngle(probe.minutiae()[shift[i]].angle(), FastMath::atan2(oy, ox));
 
                     const auto ad = FastMath::minimumAngle(d, od);

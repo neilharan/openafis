@@ -8,7 +8,7 @@ Note: this library is focused on the matching problem. It does not currently ext
 
 The goal is to accurately identify one minutiae-set from 250K candidate sets within one second using modest laptop equipment. A secondary goal is to identify one minutiae-set from 1M candidate sets within one second, at a lower level of accuracy.
 
-Update 2020-11-11: goals have been exceeded (875K fp/s and 1.3M fp/s respectively). More optimizations, full vectorization and test tools to come.
+Update 2020-11-12: goals have been exceeded @ 900K fp/s and 1.5M fp/s respectively (Linux x86_64 + clang 10). More optimizations, cache friendly tweaks, full vectorization and test tools to come.
 
 ## Progress
 
@@ -17,11 +17,11 @@ Update 2020-11-11: goals have been exceeded (875K fp/s and 1.3M fp/s respectivel
   | Template loading | 100% | |
   | Local matching | 100% | |
   | Global matching | 100% | |
-  | CMake support | | |
+  | CMake support | 90% | flto not working on Windows clang yet |
   | Test suite | 30% | EER, FMR100, FMR1000, ZeroFMR |
   | Benchmarks | 25% | |
   | Parallelization | 100% | |
-  | Optimization | 50% | |
+  | Optimization | 50% | Cache friendly, false sharing, better triplet elimination |
   | Vectorizaton (SIMD) | 5% | AVX2, NEON |
   | Minutiae/pair rendering | 100% | SVG output |
   | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction feature) |

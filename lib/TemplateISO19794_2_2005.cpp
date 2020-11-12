@@ -2,6 +2,7 @@
 #include "TemplateISO19794_2_2005.h"
 #include "Log.h"
 
+#include <cstring>
 #include <fstream>
 
 
@@ -17,13 +18,13 @@ template <class I, class F> const unsigned char TemplateISO19794_2_2005<I, F>::M
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const std::string& path)
 {
-    std::basic_ifstream<uint8_t> f(path, std::ifstream::in | std::ifstream::binary);
+    std::ifstream f(path, std::ifstream::in | std::ifstream::binary);
     if (!f) {
         Log::error("unable to open ", path);
         return false;
     }
     thread_local static std::vector<uint8_t> data(MaximumLength);
-    f.read(data.data(), data.size());
+    f.read(reinterpret_cast<char*>(data.data()), data.size());
     if ((f.rdstate() & std::ifstream::eofbit) == 0) {
         Log::error("filesize > MaximumLength ", path);
         return false;
@@ -108,12 +109,12 @@ template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const uint8
             if (!mp) {
                 return false;
             }
-            const auto adjustedAngle = [mp]() {
+            const auto adjustedAngle = [mp]() -> uint16_t {
                 const auto a = static_cast<unsigned short>(360.0f - static_cast<float>(mp->angle) * (360.0f / 256.0f));
                 return a > 360 ? a - 360 : a;
             };
-            minutiae.emplace_back(
-                Minutia::Type((mp->type_X & 0xc000) >> 14), (mp->type_X & 0x3f) << 8 | (mp->type_X & 0xff00) >> 8, (mp->rfu_Y & 0x3f) << 8 | (mp->rfu_Y & 0xff00) >> 8, adjustedAngle());
+            minutiae.emplace_back(Minutia::Type((mp->type_X & 0xc000) >> 14), static_cast<uint16_t>((mp->type_X & 0x3f) << 8 | (mp->type_X & 0xff00) >> 8),
+                static_cast<uint16_t>((mp->rfu_Y & 0x3f) << 8 | (mp->rfu_Y & 0xff00) >> 8), adjustedAngle());
         }
         // skip extension data at the end...
         const auto* ex = safeRead(reinterpret_cast<const uint16_t**>(&p));

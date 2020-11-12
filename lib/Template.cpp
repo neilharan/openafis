@@ -2,7 +2,7 @@
 #include "Template.h"
 #include "Log.h"
 
-#include "delaunator.hpp"
+#include "delaunator-cpp/include/delaunator.hpp"
 
 #include <cassert>
 

@@ -7,6 +7,7 @@
 #include "FastMath.h"
 #include "Minutia.h"
 
+#include <cmath>
 #include <unordered_set>
 
 

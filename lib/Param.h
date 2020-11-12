@@ -14,12 +14,12 @@ namespace OpenAFIS
 class Param
 {
 public:
-    static constexpr Field::MinutiaCoordType MaximumLocalDistance = 12; // NJH-TODO require scaling
-    static constexpr Field::MinutiaCoordType MaximumGlobalDistance = 12; // "
+    static constexpr Field::MinutiaDistanceType MaximumLocalDistance = 12; // NJH-TODO require scaling
+    static constexpr Field::MinutiaDistanceType MaximumGlobalDistance = 12; // "
     static constexpr int MinimumMinutiae = 4;
     static constexpr int MaximumRotations = 3; // 3 = best accuracy, [1,2] faster match times
     static constexpr unsigned int MaximumConcurrency = 256; // 1 = single-threaded
-    static constexpr bool EnableSIMD = false;
+    static constexpr bool EnableSIMD = false; // NJH-TODO: not supported yet
 
     static constexpr Field::AngleType maximumAngleDifference()
     {

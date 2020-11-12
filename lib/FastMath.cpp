@@ -43,7 +43,7 @@ FastMath::ArcTangents::ArcTangents()
         static Values v;
         for (auto x = Min; x < Max; ++x) {
             for (auto y = Min; y < Max; ++y) {
-                const auto t = std::atan2f(x, y);
+                const auto t = ::atan2f(x, y);
                 if constexpr (std::is_same_v<Field::AngleType, float>) {
                     v.at(x - Min).at(y - Min) = static_cast<Field::AngleType>(t);
                 }
@@ -71,7 +71,7 @@ FastMath::Cosines::Cosines()
     : m_values([]() {
         static Values v;
         for (auto i = Min; i <= Max; ++i) {
-            v.at(i - Min) = std::cosf(static_cast<float>(i) / FastMath::Radians8);
+            v.at(i - Min) = ::cosf(static_cast<float>(i) / FastMath::Radians8);
         }
         return &v;
     }())
@@ -81,7 +81,7 @@ FastMath::Cosines::Cosines()
 float FastMath::cos(const Field::AngleType theta)
 {
     if constexpr (std::is_same_v<Field::AngleType, float>) {
-        return std::cosf(theta);
+        return ::cosf(theta);
     }
     if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
         static const Cosines Table;
@@ -97,7 +97,7 @@ FastMath::Sines::Sines()
     : m_values([]() {
         static Values v;
         for (auto i = Min; i <= Max; ++i) {
-            v.at(i - Min) = std::sinf(static_cast<float>(i) / FastMath::Radians8);
+            v.at(i - Min) = ::sinf(static_cast<float>(i) / FastMath::Radians8);
         }
         return &v;
     }())
@@ -107,7 +107,7 @@ FastMath::Sines::Sines()
 float FastMath::sin(const Field::AngleType theta)
 {
     if constexpr (std::is_same_v<Field::AngleType, float>) {
-        return std::sinf(theta);
+        return ::sinf(theta);
     }
     if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
         static const Sines Table;

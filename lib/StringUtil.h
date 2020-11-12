@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #include <algorithm>
 #include <iostream>
+#include <memory>
 #include <string>
 
 
@@ -18,7 +19,7 @@ public:
     static std::string lower(const std::string& s)
     {
         auto _s = s;
-        std::transform(_s.begin(), _s.end(), _s.begin(), [](const unsigned char c) { return std::tolower(c); });
+        std::transform(_s.begin(), _s.end(), _s.begin(), [](const unsigned char c) { return static_cast<char>(std::tolower(c)); });
         return _s;
     }
 

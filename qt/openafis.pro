@@ -4,9 +4,7 @@ QT -= core
 QT -= gui
 
 INCLUDEPATH += \
-    ../3rdparty/delaunator-cpp/include \
-    ../3rdparty/MIPP/src \
-    ../3rdparty/xsimd\include \s
+    ../3rdparty \
     ../lib
 
 HEADERS = \
@@ -60,5 +58,7 @@ contains(CONFIG, release) {
         QMAKE_CXXFLAGS += /GS- /Ob2 /Oi /Ot /Oy /GT /GL /QIntel-jcc-erratum /std:c++17
         QMAKE_CXXFLAGS_EXCEPTIONS_ON -= -EHsc
     }
+    *linux*: {
+        QMAKE_CXXFLAGS += -O3 -std=c++27 -stdlib=libc++
+    }
 }
-OBJECTS_DIR = $$BUILD_TYPE/openafis

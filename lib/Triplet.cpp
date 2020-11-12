@@ -18,8 +18,8 @@ Triplet::Triplet(const Minutiae& minutiae)
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Triplet::Minutiae Triplet::shiftClockwise(Minutiae minutiae) const
 {
-    const auto cx = ((minutiae[0].x() + minutiae[1].x()) / 2 + minutiae[2].x()) / 2;
-    const auto cy = ((minutiae[0].y() + minutiae[1].y()) / 2 + minutiae[2].y()) / 2;
+    const auto cx = static_cast<Field::MinutiaCoordType>(((minutiae[0].x() + minutiae[1].x()) / 2 + minutiae[2].x()) / 2);
+    const auto cy = static_cast<Field::MinutiaCoordType>(((minutiae[0].y() + minutiae[1].y()) / 2 + minutiae[2].y()) / 2);
 
     auto a0 = FastMath::atan2(minutiae[0].y() - cy, minutiae[0].x() - cx);
     auto a1 = FastMath::atan2(minutiae[1].y() - cy, minutiae[1].x() - cx);

@@ -24,7 +24,7 @@ MatchMany<T>::MatchMany()
 template <class T> typename MatchMany<T>::OneManyResult MatchMany<T>::oneMany(const T& probe, const Templates& candidates) const
 {
     if (candidates.empty()) {
-        return std::make_pair(0, nullptr);
+        return std::make_pair(uint8_t {}, nullptr);
     }
     if (m_pool.size() == 1) {
         MatchSimilarity match;

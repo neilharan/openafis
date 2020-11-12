@@ -17,8 +17,6 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
-#else
-#include <pthread.h>
 #endif
 
 
@@ -114,35 +112,8 @@ private:
         if (!SetThreadPriority(GetCurrentThread(), p())) {
             std::cerr << __FUNCTION__ << ": failed [SetThreadPriority(): failed; GetLastError() = " << GetLastError() << "]" << std::endl;
         }
-#endif
-
-#ifdef _PTHREAD_H
-        const auto p = [=]() {
-            switch (priority) {
-                case Priority::Low: {
-                    return -19;
-                }
-                default:
-                case Priority::Normal: {
-                    return 0;
-                }
-                case Priority::High: {
-                    return -10;
-                }
-                case Priority::Critical: {
-                    return -20;
-                }
-            }
-        };
-
-        const auto self = pthread_self();
-        int policy;
-        sched_param sp;
-        pthread_getschedparam(self, &policy, &sp);
-        sp.sched_priority = p();
-        if (pthread_setschedparam(self, SCHED_OTHER, &sp)) {
-            std::cerr << __FUNCTION__ << ": failed [pthread_setschedparam(): failed; errno = " << std::strerror(errno) << "]" << std::endl;
-        }
+#else
+        std::ignore = priority;
 #endif
     }
 
