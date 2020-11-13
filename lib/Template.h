@@ -49,7 +49,7 @@ private:
         }
 
         Fingerprints fps;
-        const IdType id;
+        IdType id;
     } m_data;
 };
 }

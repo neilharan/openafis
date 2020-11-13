@@ -1,5 +1,5 @@
 [![](logo/logo.png)]()
-
+# 
 A high-performance one-to-many (1:N) fingerprint matching library for commodity hardware, written in modern platform-independent C++.
 
 [![License: BSD-2-Clause](https://img.shields.io/github/license/neilharan/openafis.svg)](./LICENSE)
@@ -8,7 +8,7 @@ Note: this library is focused on the matching problem. It does not currently ext
 
 The goal is to accurately identify one minutiae-set from 250K candidate sets within one second using modest laptop equipment. A secondary goal is to identify one minutiae-set from 1M candidate sets within one second, at a lower level of accuracy.
 
-Update 2020-11-12: goals have been exceeded @ 900K fp/s and 1.5M fp/s respectively (Linux x86_64 + clang 10). More optimizations, cache friendly tweaks, full vectorization and test tools to come.
+**Update 2020-11-12: goals have been exceeded @ 900K fp/s and 1.5M fp/s respectively (Linux x86_64 + clang 10). More optimizations, cache friendly tweaks, full vectorization and test tools to come.**
 
 ## Progress
 
@@ -17,7 +17,7 @@ Update 2020-11-12: goals have been exceeded @ 900K fp/s and 1.5M fp/s respective
   | Template loading | 100% | |
   | Local matching | 100% | |
   | Global matching | 100% | |
-  | CMake support | 90% | flto not working on Windows clang yet |
+  | CMake support | 90% | flto not yet working on MSVC + clang |
   | Test suite | 30% | EER, FMR100, FMR1000, ZeroFMR |
   | Benchmarks | 25% | |
   | Parallelization | 100% | |
@@ -25,14 +25,6 @@ Update 2020-11-12: goals have been exceeded @ 900K fp/s and 1.5M fp/s respective
   | Vectorizaton (SIMD) | 5% | AVX2, NEON |
   | Minutiae/pair rendering | 100% | SVG output |
   | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction feature) |
-
-## Roadmap
-
-- Minutiae extraction feature
-- Research quaternion descriptors
-- CUDA implementation
-- Additional template readers (ANSI INCITS 378-2004/2009 and proprietary formats)
-- Benchmark other libraries
 
 ## Supported operating systems
 
@@ -44,6 +36,35 @@ Update 2020-11-12: goals have been exceeded @ 900K fp/s and 1.5M fp/s respective
 - And anywhere else you can find a C++17 toolchain
 
 There is also a wrapper and qmake project file for incorporating with Qt projects.
+
+## Roadmap
+
+- Minutiae extraction feature
+- Research quaternion descriptors
+- CUDA implementation
+- Additional template readers (ANSI INCITS 378-2004/2009 and proprietary formats)
+- Benchmark other libraries
+
+## Getting started
+
+#### Install dependencies
+
+```sh
+sudo apt install clang cmake llvm libpthread-stubs0-dev
+```
+
+#### Build & run
+
+```sh
+git clone https://github.com/neilharan/openafis.git
+cd openafis
+cmake . && make
+cli/openafis-cli one-many --f1 fvc2002/DB1_B/101_2.iso --load-factor 4000 --path data/valid
+```
+
+This example loads the entire FVC2002 and FVC2004 datasets into memory 4000 times, randomly shuffles them in memory (to minimize any unfair advantages from caching/prefetching) then searches for the best match for the template fvc2002/DB1_B/101_2.iso.
+
+As both probe and candidate templates exist in the same dataset you can expect a 100% match and a reference to the same disk file. If you now rename the template indicated by --f1 and execute the test a second time you can expect a 78% match to a different impression from the same individual.
 
 ## Algorithm
 

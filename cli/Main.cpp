@@ -10,6 +10,7 @@
 #include <iostream>
 #include <map>
 #include <numeric>
+#include <random>
 #include <sstream>
 #include <thread>
 #include <vector>
@@ -70,6 +71,10 @@ template <class T> static bool helperLoadPath(T& templates, const std::string& p
                 templates.emplace_back(t);
             }
         }
+        // Shuffle to minimize any unfair advantages from caching/prefetching gained by duplicating templates (this is for test purposes only)...
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(templates.begin(), templates.end(), g);
     }
     templates.shrink_to_fit();
     return true;
@@ -474,9 +479,9 @@ int main(const int argc, const char** argv)
         OpenAFIS::Log::test("Options:");
         OpenAFIS::Log::test("    --load-factor : load *.iso below --path multiple times (default 1)", OpenAFIS::Log::LF);
         OpenAFIS::Log::test("Examples:");
-        OpenAFIS::Log::test("    openafis-cli many-many --path ~/openafis/data/fvc");
-        OpenAFIS::Log::test("    openafis-cli one --f1 db1_b/101_1.iso --f2 db1_b/101_2.iso --f3 db1_b/102_1.iso --path ~/openafis/data/fvc2002");
-        OpenAFIS::Log::test("    openafis-cli render --f1 db1_b/101_1.iso --f2 db1_b/101_7.iso --path ~/openafis/data/fvc2002");
+        OpenAFIS::Log::test("    openafis-cli many-many --path data/valid");
+        OpenAFIS::Log::test("    openafis-cli one-many --f1 fvc2002/DB1_B/101_2.iso --load-factor 4000 --path data/valid");
+        OpenAFIS::Log::test("    openafis-cli render --f1 DB1_B/101_1.iso --f2 DB1_B/101_7.iso --path data/valid/fvc2002");
     }
     return 0;
 }
