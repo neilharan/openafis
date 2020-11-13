@@ -1,4 +1,4 @@
-[![](logo/logo.png)]()
+![logo](logo/logo.png)
 # 
 A high-performance one-to-many (1:N) fingerprint matching library for commodity hardware, written in modern platform-independent C++.
 
