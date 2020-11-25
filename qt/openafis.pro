@@ -26,7 +26,6 @@ HEADERS = \
     $$PWD/../lib/ThreadPool.h \
     $$PWD/../lib/Triplet.h \
     $$PWD/../lib/TripletScalar.h \
-    $$PWD/../lib/TripletSIMD.h \
     $$PWD/../lib/StringUtil.h
 
 SOURCES = \
@@ -39,8 +38,7 @@ SOURCES = \
     ../lib/TemplateCSV.cpp \
     ../lib/TemplateISO19794_2_2005.cpp \
     ../lib/Triplet.cpp \
-    ../lib/TripletScalar.cpp \
-    ../lib/TripletSIMD.cpp
+    ../lib/TripletScalar.cpp
 
 contains(CONFIG, debug) {
     *-msvc*: {

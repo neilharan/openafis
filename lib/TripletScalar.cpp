@@ -16,7 +16,16 @@ namespace OpenAFIS
 TripletScalar::TripletScalar(const Minutiae& minutiae)
     : Triplet(minutiae)
 {
-    sortDistances();
+    // distance between two vectors: a^2 + b^2 = c^2
+    const auto distance = [](const MinutiaPoint& mpa, const MinutiaPoint& mpb) {
+        const auto a = mpa.x() - mpb.x();
+        const auto b = mpa.y() - mpb.y();
+        return FastMath::isqrt(a * a + b * b);
+    };
+
+    std::array<Field::MinutiaDistanceType, 3> d { distance(m_minutiae[0], m_minutiae[1]), distance(m_minutiae[1], m_minutiae[2]), distance(m_minutiae[2], m_minutiae[0]) };
+    std::sort(d.begin(), d.end(), [](const Field::MinutiaCoordType& d1, const Field::MinutiaCoordType& d2) { return d1 > d2; });
+    m_distances = static_cast<uint32_t>(d[2]) << 16 | static_cast<uint32_t>(d[1]) << 8 | d[0];
 }
 
 
@@ -122,8 +131,8 @@ bool TripletScalar::skipPair(const TripletScalar& probe) const
 //
 void TripletScalar::emplacePair(Pair::Pairs& pairs, const TripletScalar& probe) const
 {
-    using Shift = std::array<int, 3>;
-    static const std::array<Shift, 3> Shifting = { { { 0, 1, 2 }, { 1, 2, 0 }, { 2, 0, 1 } } }; // rotate triplets when comparing
+    using Shift = std::array<uint8_t, 3>;
+    static constexpr std::array<Shift, 3> Shifting = { { { 0, 1, 2 }, { 1, 2, 0 }, { 2, 0, 1 } } }; // rotate triplets when comparing
     static constexpr auto BestS = Pair::SimilarityMultiplier * Pair::SimilarityMultiplier * Pair::SimilarityMultiplier;
     auto bestS = BestS;
     auto rotations = Param::MaximumRotations;
@@ -151,12 +160,17 @@ void TripletScalar::emplacePair(Pair::Pairs& pairs, const TripletScalar& probe) 
         // Equation 8 (3 iterations)...
         const auto lengths = [&]() {
             auto max = 0;
+            auto cd = m_distances;
+            auto pd = probe.m_distances;
 
             for (decltype(shift.size()) i = 0; i < shift.size(); ++i) {
-                const auto d = FastMath::diff(m_minutiae[i].distance(), probe.minutiae()[shift[i]].distance());
+                // NJH-TODO const auto d = FastMath::diff(m_minutiae[i].distance(), probe.minutiae()[shift[i]].distance());
+                const auto d = FastMath::diff(static_cast<Field::MinutiaDistanceType>(cd), static_cast<Field::MinutiaDistanceType>(pd >> (shift[i] * 8)));
+                // NJH-TODO const auto d = FastMath::diff(static_cast<Field::MinutiaDistanceType>(cd), probe.minutiae()[shift[i]].distance());
                 if (d >= Param::MaximumLocalDistance) {
                     return Pair::SimilarityMultiplier;
                 }
+                cd >>= 8;
                 max = std::max(max, static_cast<int>(d));
             }
             return (max * Pair::SimilarityMultiplier) / Param::MaximumLocalDistance;
@@ -262,15 +276,6 @@ bool TripletScalar::operator<(const TripletScalar& other) const
         return true;
     }
     return false;
-}
-
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-void TripletScalar::sortDistances()
-{
-    std::array<Field::MinutiaDistanceType, 3> d { m_minutiae[0].distance(), m_minutiae[1].distance(), m_minutiae[2].distance() };
-    std::sort(d.begin(), d.end(), [](const Field::MinutiaCoordType& d1, const Field::MinutiaCoordType& d2) { return d1 > d2; });
-    m_distances = static_cast<uint32_t>(d[2]) << 16 | static_cast<uint32_t>(d[1]) << 8 | d[0];
 }
 
 }

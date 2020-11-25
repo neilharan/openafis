@@ -42,9 +42,6 @@ Triplet::Minutiae Triplet::shiftClockwise(Minutiae minutiae) const
         swap(a1, a2);
         swap(minutiae[1], minutiae[2]);
     }
-    minutiae[0].setDistanceFrom(minutiae[1]);
-    minutiae[1].setDistanceFrom(minutiae[2]);
-    minutiae[2].setDistanceFrom(minutiae[0]);
     return minutiae;
 }
 }

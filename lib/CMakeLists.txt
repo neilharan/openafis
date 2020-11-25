@@ -7,7 +7,5 @@ file(GLOB
     *.cpp
     *.h)
 
-list(FILTER LIB_FILES EXCLUDE REGEX "TripletSIMD*")
-
 include_directories(${PROJECT_SOURCE_DIR}/3rdparty)
 add_library(openafis STATIC ${LIB_FILES})

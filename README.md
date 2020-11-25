@@ -22,7 +22,7 @@ The goal is to accurately identify one minutiae-set from 250K candidate sets wit
   | Benchmarks | 25% | |
   | Parallelization | 100% | |
   | Optimization | 50% | Cache friendly, false sharing, better triplet elimination |
-  | Vectorizaton (SIMD) | 5% | AVX2, NEON |
+  | Vectorizaton (SIMD) | 0% | AVX2, NEON |
   | Minutiae/pair rendering | 100% | SVG output |
   | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction feature) |
 
@@ -73,7 +73,6 @@ Improving Fingerprint Verification Using Minutiae Triplets (https://doi.org/10.3
 ## Dependencies
 
 - Delaunay 2D Triangulation (https://github.com/delfrrr/delaunator-cpp) [MIT License]
-- MyIntrinsics++ (MIPP) (https://github.com/aff3ct/MIPP) [MIT License]
 
 ## Supported minutiae template formats
 

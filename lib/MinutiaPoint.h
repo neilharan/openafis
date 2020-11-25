@@ -68,24 +68,13 @@ public:
     [[nodiscard]] inline Field::MinutiaCoordType x() const { return m_x; }
     [[nodiscard]] inline Field::MinutiaCoordType y() const { return m_y; }
     [[nodiscard]] inline Field::AngleType angle() const { return m_angle; }
-    [[nodiscard]] inline Field::MinutiaDistanceType distance() const { return m_distance; }
     [[nodiscard]] inline Field::MinutiaKeyType key() const { return static_cast<Field::MinutiaKeyType>(m_x) << 8 | m_y; }
     [[nodiscard]] size_t bytes() const { return sizeof(*this); }
-
-    // distance between two vectors: a^2 + b^2 = c^2
-    void setDistanceFrom(const MinutiaPoint& other)
-    {
-        const auto a = m_x - other.x();
-        const auto b = m_y - other.y();
-        m_distance = FastMath::isqrt(a * a + b * b);
-    }
 
 private:
     Field::MinutiaCoordSize m_x {}; // scaled for dimensions
     Field::MinutiaCoordSize m_y {}; // "
     Field::AngleSize m_angle {}; // radians [0,2PI] mapped over [0,255] (uint8_t)
-
-    Field::MinutiaDistanceType m_distance {}; // distance from adjacent side, also scaled
 };
 }
 

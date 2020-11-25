@@ -50,6 +50,7 @@ template <class R, class F, class P> void Match<R, F, P>::compute(R& result, con
             const auto dp = m_probeDupes.emplace(p.probe()->minutiae()[i].key());
             const auto dc = m_candidateDupes.emplace(p.candidate()->minutiae()[i].key());
             if (!dp.second && !dc.second) {
+                // duplicate point...
                 continue;
             }
             if constexpr (std::is_same_v<R, MinutiaPoint::PairRenderable::Set>) {
