@@ -17,12 +17,9 @@
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-namespace OpenAFIS
-{
-
-
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 constexpr auto LineWidth = 100;
+
+using namespace OpenAFIS;
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -415,7 +412,6 @@ static void render(const std::string& path, const std::string& f1, const std::st
     test(t1, t2);
     Log::test(std::string(LineWidth, '='), Log::LF);
 }
-}
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -431,14 +427,14 @@ int main(const int argc, const char** argv)
 
     const auto option = [](const char** begin, const char** end, const std::string& option) { return std::find(begin, end, option) != end; };
 
-    OpenAFIS::Log::init();
-    OpenAFIS::Log::test("OpenAFIS: an efficient 1:N fingerprint matching library (", OpenAFIS::Param::EnableSIMD ? OpenAFIS::InstructionSet : "SCALAR", ")");
-    OpenAFIS::Log::test("Build options:");
-    OpenAFIS::Log::test("    MaximumLocalDistance: ", static_cast<int>(OpenAFIS::Param::MaximumLocalDistance));
-    OpenAFIS::Log::test("    MaximumGlobalDistance: ", static_cast<int>(OpenAFIS::Param::MaximumGlobalDistance));
-    OpenAFIS::Log::test("    MinimumMinutiae: ", static_cast<int>(OpenAFIS::Param::MinimumMinutiae));
-    OpenAFIS::Log::test("    MaximumConcurrency: ", static_cast<int>(OpenAFIS::Param::MaximumConcurrency));
-    OpenAFIS::Log::test("    MaximumRotations: ", static_cast<int>(OpenAFIS::Param::MaximumRotations), OpenAFIS::Log::LF);
+    Log::init();
+    Log::test("OpenAFIS: an efficient 1:N fingerprint matching library (", Param::EnableSIMD ? InstructionSet : "SCALAR", ")");
+    Log::test("Build options:");
+    Log::test("    MaximumLocalDistance: ", static_cast<int>(Param::MaximumLocalDistance));
+    Log::test("    MaximumGlobalDistance: ", static_cast<int>(Param::MaximumGlobalDistance));
+    Log::test("    MinimumMinutiae: ", static_cast<int>(Param::MinimumMinutiae));
+    Log::test("    MaximumConcurrency: ", static_cast<int>(Param::MaximumConcurrency));
+    Log::test("    MaximumRotations: ", static_cast<int>(Param::MaximumRotations), Log::LF);
 
     const auto f1 = param(argv, argv + argc, "--f1");
     const auto f2 = param(argv, argv + argc, "--f2");
@@ -448,40 +444,40 @@ int main(const int argc, const char** argv)
 
     bool command {};
     if (option(argv, argv + argc, "bulk-load")) {
-        OpenAFIS::bulkLoad(path);
+        bulkLoad(path);
         command |= true;
     }
     if (option(argv, argv + argc, "one")) {
-        OpenAFIS::one(path, f1, f2, f3);
+        one(path, f1, f2, f3);
         command |= true;
     }
     if (option(argv, argv + argc, "one-many")) {
-        OpenAFIS::oneMany(path, f1, std::max(1, loadFactor));
+        oneMany(path, f1, std::max(1, loadFactor));
         command |= true;
     }
     if (option(argv, argv + argc, "many-many")) {
-        OpenAFIS::manyMany(path, std::max(1, loadFactor));
+        manyMany(path, std::max(1, loadFactor));
         command |= true;
     }
     if (option(argv, argv + argc, "render")) {
-        OpenAFIS::render(path, f1, f2);
+        render(path, f1, f2);
         command |= true;
     }
     if (option(argv, argv + argc, "--help") || !command) {
-        OpenAFIS::Log::test("Usage: openafis-cli [COMMAND]... [OPTIONS]... [--f1 ISO_FILE] [--f2 ISO_FILE] [--f3 ISO_FILE] [--path PATH]", OpenAFIS::Log::LF);
-        OpenAFIS::Log::test("Commands:");
-        OpenAFIS::Log::test("    bulk-load : load and parse every *.iso below --path");
-        OpenAFIS::Log::test("    one       : match --f1,--f2 and --f1,--f3");
-        OpenAFIS::Log::test("    one-many  : match --f1 against every *.iso below --path");
-        OpenAFIS::Log::test("    many-many : match every *.iso below --path");
-        OpenAFIS::Log::test("    render    : generate two SVG's showing minutiae and matched pairs between --f1,--f2");
-        OpenAFIS::Log::test("    help      : this screen", OpenAFIS::Log::LF);
-        OpenAFIS::Log::test("Options:");
-        OpenAFIS::Log::test("    --load-factor : load *.iso below --path multiple times (default 1)", OpenAFIS::Log::LF);
-        OpenAFIS::Log::test("Examples:");
-        OpenAFIS::Log::test("    openafis-cli many-many --path data/valid");
-        OpenAFIS::Log::test("    openafis-cli one-many --f1 fvc2002/DB1_B/101_2.iso --load-factor 4000 --path data/valid");
-        OpenAFIS::Log::test("    openafis-cli render --f1 DB1_B/101_1.iso --f2 DB1_B/101_7.iso --path data/valid/fvc2002");
+        Log::test("Usage: openafis-cli [COMMAND]... [OPTIONS]... [--f1 ISO_FILE] [--f2 ISO_FILE] [--f3 ISO_FILE] [--path PATH]", Log::LF);
+        Log::test("Commands:");
+        Log::test("    bulk-load : load and parse every *.iso below --path");
+        Log::test("    one       : match --f1,--f2 and --f1,--f3");
+        Log::test("    one-many  : match --f1 against every *.iso below --path");
+        Log::test("    many-many : match every *.iso below --path");
+        Log::test("    render    : generate two SVG's showing minutiae and matched pairs between --f1,--f2");
+        Log::test("    help      : this screen", Log::LF);
+        Log::test("Options:");
+        Log::test("    --load-factor : load *.iso below --path multiple times (default 1)", Log::LF);
+        Log::test("Examples:");
+        Log::test("    openafis-cli many-many --path data/valid");
+        Log::test("    openafis-cli one-many --f1 fvc2002/DB1_B/101_2.iso --load-factor 4000 --path data/valid");
+        Log::test("    openafis-cli render --f1 DB1_B/101_1.iso --f2 DB1_B/101_7.iso --path data/valid/fvc2002");
     }
     return 0;
 }
