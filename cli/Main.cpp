@@ -418,7 +418,7 @@ static void render(const std::string& path, const std::string& f1, const std::st
 int main(const int argc, const char** argv)
 {
     const auto param = [](const char** begin, const char** end, const std::string& option) {
-        auto it = std::find(begin, end, option);
+        auto *it = std::find(begin, end, option);
         if (it != end && ++it != end) {
             return std::string(*it);
         }

@@ -9,7 +9,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(CheckCXXCompilerFlag)
 include(AddCXXCompilerFlag)
-include(CXXFeatureCheck)
 
 if (MSVC)
     string(REGEX REPLACE "[-/]W[1-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -73,10 +72,8 @@ else()
     endif()
 endif()
 
-cxx_feature_check(STEADY_CLOCK)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 add_subdirectory(lib)
 add_subdirectory(cli)
-#NJH-TODO add_subdirectory(examples)
