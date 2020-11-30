@@ -1,0 +1,65 @@
+name: linux
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # gcc 10
+          - cxx: g++-10
+            os: ubuntu-20.04
+            std: 17
+          # gcc 9
+          - cxx: g++-9
+            os: ubuntu-20.04
+            std: 17
+          # gcc 8
+          - cxx: g++-8
+            os: ubuntu-20.04
+            std: 17
+          # gcc 7
+          - cxx: g++-7
+            os: ubuntu-20.04
+            std: 17
+          # clang 10
+          - cxx: clang++-10
+            os: ubuntu-20.04
+            std: 17
+          # clang 9
+          - cxx: clang++-9
+            os: ubuntu-20.04
+            std: 17
+            
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        working-directory: ${{ runner.workspace }}/build
+        env:
+          CXX: ${{ matrix.cxx }}
+          MAX_STD: ${{ matrix.std }}
+        shell: bash
+        run: |
+          run_cmake() {
+            cmake "$@" \
+                  $GITHUB_WORKSPACE
+          }
+          run_build() {
+            run_cmake "$@"
+            make -k -j
+            make clean
+          }
+          standards="11 14 17 20"
+          for std in $standards; do
+            run_build -DCMAKE_CXX_STANDARD=$std
+            if [[ "${std}" == "${MAX_STD}" ]]; then
+              break
+            fi
+          done
