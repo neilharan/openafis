@@ -141,7 +141,7 @@ Field::AngleType FastMath::minimumAngle(const Field::AngleType a, const Field::A
     const auto d = diff(a, b);
 
     if constexpr (std::is_same_v<Field::AngleType, float>) {
-        return std::min(static_cast<float>(d), FastMath::TwoPI - d);
+        return std::min(static_cast<float>(d), FastMath::TwoPI - static_cast<float>(d));
     }
     if constexpr (std::is_same_v<Field::AngleType, int16_t>) {
         return std::min(d, static_cast<Field::AngleType>(FastMath::TwoPI8 - d));

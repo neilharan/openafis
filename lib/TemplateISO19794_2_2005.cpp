@@ -59,13 +59,13 @@ template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const uint8
             const void* np { nullptr };
             return reinterpret_cast<T>(np);
         }
-        const auto* p = *readFrom;
+        const auto* _p = *readFrom;
         *reinterpret_cast<const uint8_t**>(readFrom) += sz;
 
         // check alignment - platforms that support unaligned access (like x86) _could_ just return p
         // realigning here does improve performance though & is a requirement for some platforms (like arm) where unaligned access is UB...
-        if (reinterpret_cast<uintptr_t>(p) % sizeof(void*) == 0) {
-            return p;
+        if (reinterpret_cast<uintptr_t>(_p) % sizeof(void*) == 0) {
+            return _p;
         }
         thread_local static std::vector<uint8_t> buff(LargestStruct);
         if (sz > buff.size()) {
@@ -73,7 +73,7 @@ template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const uint8
             *readFrom = nullptr;
             return *readFrom;
         }
-        memcpy(buff.data(), p, sz);
+        memcpy(buff.data(), _p, sz);
         const void* bp { buff.data() };
         return reinterpret_cast<T>(bp);
     };

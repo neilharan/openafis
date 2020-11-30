@@ -22,16 +22,16 @@ public:
     using Fingerprints = std::vector<FingerprintType>;
 
     explicit Template(const IdType& id)
-        : m_data(id)
+        : m_id(id)
     {
     }
 
-    [[nodiscard]] const IdType& id() const { return m_data.id; }
-    [[nodiscard]] const Fingerprints& fingerprints() const { return m_data.fps; }
-    void clear() { m_data.fps.clear(); }
+    [[nodiscard]] const IdType& id() const { return m_id; }
+    [[nodiscard]] const Fingerprints& fingerprints() const { return m_fps; }
+    void clear() { m_fps.clear(); }
     [[nodiscard]] size_t bytes() const
     {
-        return sizeof(*this) + std::accumulate(m_data.fps.begin(), m_data.fps.end(), size_t {}, [](size_t sum, const auto& fp) { return sum + fp.bytes(); });
+        return sizeof(*this) + std::accumulate(m_fps.begin(), m_fps.end(), size_t {}, [](size_t sum, const auto& fp) { return sum + fp.bytes(); });
     }
 
 protected:
@@ -42,15 +42,8 @@ protected:
     bool load(const Dimensions& dimensions, const std::vector<Minutiae>& fps);
 
 private:
-    struct Data {
-        explicit Data(const IdType& id)
-            : id(id)
-        {
-        }
-
-        Fingerprints fps;
-        IdType id;
-    } m_data;
+    IdType m_id;
+    Fingerprints m_fps;
 };
 }
 

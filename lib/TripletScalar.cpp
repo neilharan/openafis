@@ -43,12 +43,12 @@ bool TripletScalar::skipPair(const TripletScalar& probe) const
 
         const uint32_t t0 = ~(m_distances ^ probe.m_distances) & SignMask;
 
-        const uint32_t x1 = (m_distances | SignMask) - probe.m_distances & ~SignMask;
+        const uint32_t x1 = ((m_distances | SignMask) - probe.m_distances) & ~SignMask;
         uint32_t t1 = (probe.m_distances & ~m_distances) & SignMask;
         t1 = t1 | (t0 & ~x1);
         t1 = (t1 << 1) - (t1 >> Shift);
 
-        const uint32_t y2 = (probe.m_distances | SignMask) - m_distances & ~SignMask;
+        const uint32_t y2 = ((probe.m_distances | SignMask) - m_distances) & ~SignMask;
         uint32_t t2 = (m_distances & ~probe.m_distances) & SignMask;
         t2 = t2 | (t0 & ~y2);
         t2 = (t2 << 1) - (t2 >> Shift);

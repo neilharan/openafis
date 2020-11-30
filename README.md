@@ -3,14 +3,15 @@
 A high-performance one-to-many (1:N) fingerprint matching library for commodity hardware, written in modern platform-independent C++.
 
 [![License: BSD-2-Clause](https://img.shields.io/github/license/neilharan/openafis.svg)](./LICENSE)
+[![C++ Standard](https://img.shields.io/badge/C%2B%2B-17%2F20-blue.svg)](https://img.shields.io/badge/C%2B%2B-17%2F20-blue.svg)
 
 Note: this library is focused on the matching problem. It does not currently extract minutiae from images.
 
 The goal is to accurately identify one minutiae-set from 250K candidate sets within one second using modest laptop equipment. A secondary goal is to identify one minutiae-set from 1M candidate sets within one second, at a lower level of accuracy.
 
-**Update 2020-11-12: goals have been exceeded @ 900K fp/s and 1.5M fp/s respectively (Linux x86_64 + clang 10). More optimizations, cache friendly tweaks, full vectorization and test tools to come.**
+## Status
 
-## Progress
+**Update 2020-11-12: goals have been exceeded @ 900K fp/s and 1.5M fp/s respectively (Linux x86_64 + clang 10). More optimizations, cache friendly tweaks, full vectorization and test tools to come.**
 
   | TASK | COMPLETE | NOTES |
   | ---- | -------- | ----- |
@@ -24,26 +25,17 @@ The goal is to accurately identify one minutiae-set from 250K candidate sets wit
   | Optimization | 50% | Cache friendly, false sharing, better triplet elimination |
   | Vectorizaton (SIMD) | 0% | AVX2, NEON |
   | Minutiae/pair rendering | 100% | SVG output |
-  | Certification/evaluation | | FVC-onGoing, MINEX III (requires minutiae extraction feature) |
+  | Continuous integration setup | 0% | |
+  | Certification/evaluation | 0% | FVC-onGoing, MINEX III (requires minutiae extraction feature) |
 
-## Supported operating systems
+## Compiler support
 
-- Windows
-- Linux
-- Android
-- iOS
-- MacOS X
-- And anywhere else you can find a C++17 toolchain
+Tested with:
 
-There is also a wrapper and qmake project file for incorporating with Qt projects.
-
-## Roadmap
-
-- Minutiae extraction feature
-- Research quaternion descriptors
-- CUDA implementation
-- Additional template readers (ANSI INCITS 378-2004/2009 and proprietary formats)
-- Benchmark other libraries
+- gcc 9.3.0 (Linux x86_64)
+- clang 10.0.0 (Linux x86_64)
+- clang-cl 11.0.0 (Windows x86_64)
+- msvc 16.7.7 (Windows x86_64)
 
 ## Getting started
 
@@ -110,16 +102,21 @@ TODO
 ## Example
 
 ```C++
-TemplateISO19794_2_2005 t1(101);
-assert(t1.load("./fvc2002/DB1_B/101_1.iso"));
-std::cout << "template " << t1.id() << ": size " << t1.size() << " bytes, #fingerprints " << t1.lmts().size() << std::endl;
+#include "OpenAFIS.h"
+...
 
-TemplateISO19794_2_2005 t2(102);
-assert(t2.load("./fvc2002/DB1_B/101_2.iso"));
-std::cout << "template " << t2.id() << ": size " << t2.size() << " bytes, #fingerprints " << t2.lmts().size()) << std::endl;
-
-static Match<unsigned int> match;
-std::cout << "similarity = " << match.compute(s, t1, t2);
+TemplateISO19794_2_2005<uint32_t, Fingerprint> t1(1);
+if (!t1.load("./fvc2002/DB1_B/101_1.iso")) {
+    // Load error;
+}
+TemplateISO19794_2_2005<uint32_t, Fingerprint> t2(2);
+if (!t2.load("./fvc2002/DB1_B/101_2.iso")) {
+    // Load error;
+}
+MatchSimilarity match;
+uint8_t s {};
+match.compute(s, t1.fingerprints()[0], t2.fingerprints()[0]);
+std::cout << "similarity = " << s;
 ```
 
 ## Benchmarking
@@ -151,6 +148,14 @@ TODO
   | 1:N match time | | Memory | Production | |
 
 ¹ 19794-2:2005 templates pre-loaded in memory. The time taken to produce indexed in-memory structures is recorded (we're not measuring disk I/O here).
+
+## Roadmap
+
+- Minutiae extraction feature
+- Research quaternion descriptors
+- CUDA implementation
+- Additional template readers (ANSI INCITS 378-2004/2009 and proprietary formats)
+- Benchmark other libraries
 
 ## Licensing
 

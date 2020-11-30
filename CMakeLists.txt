@@ -21,6 +21,8 @@ if (MSVC)
     add_cxx_compiler_flag(/Oy)
     add_cxx_compiler_flag(/GT)
     add_cxx_compiler_flag(/GL)
+    add_cxx_compiler_flag(/Zc:__cplusplus)
+    
     if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
         add_cxx_compiler_flag(/QIntel-jcc-erratum)
         add_cxx_compiler_flag(/fp:fast)

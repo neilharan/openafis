@@ -35,10 +35,10 @@ template <class I, class F> bool Template<I, F>::load(const Dimensions& dimensio
 
         F* fp {};
         if constexpr (std::is_same_v<F, Fingerprint>) {
-            fp = &m_data.fps.emplace_back(Fingerprint(minutiae.size(), d.triangles.size() / 3));
+            fp = &m_fps.emplace_back(Fingerprint(minutiae.size(), d.triangles.size() / 3));
         }
         if constexpr (std::is_same_v<F, FingerprintRenderable>) {
-            fp = &m_data.fps.emplace_back(FingerprintRenderable(minutiae.size(), d.triangles.size() / 3, dimensions, minutiae));
+            fp = &m_fps.emplace_back(FingerprintRenderable(minutiae.size(), d.triangles.size() / 3, dimensions, minutiae));
         }
         auto& t = fp->triplets();
 

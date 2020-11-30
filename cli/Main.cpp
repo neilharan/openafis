@@ -1,5 +1,7 @@
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#if __cplusplus == 201703L
+
 #include "OpenAFIS.h"
 #include "Param.h"
 #include "StringUtil.h"
@@ -425,7 +427,7 @@ int main(const int argc, const char** argv)
         return std::string();
     };
 
-    const auto option = [](const char** begin, const char** end, const std::string& option) { return std::find(begin, end, option) != end; };
+    const auto hasOption = [](const char** begin, const char** end, const std::string& option) { return std::find(begin, end, option) != end; };
 
     Log::init();
     Log::test("OpenAFIS: an efficient 1:N fingerprint matching library (", Param::EnableSIMD ? InstructionSet : "SCALAR", ")");
@@ -443,27 +445,27 @@ int main(const int argc, const char** argv)
     const auto loadFactor = std::atoi(param(argv, argv + argc, "--load-factor").c_str());
 
     bool command {};
-    if (option(argv, argv + argc, "bulk-load")) {
+    if (hasOption(argv, argv + argc, "bulk-load")) {
         bulkLoad(path);
         command |= true;
     }
-    if (option(argv, argv + argc, "one")) {
+    if (hasOption(argv, argv + argc, "one")) {
         one(path, f1, f2, f3);
         command |= true;
     }
-    if (option(argv, argv + argc, "one-many")) {
+    if (hasOption(argv, argv + argc, "one-many")) {
         oneMany(path, f1, std::max(1, loadFactor));
         command |= true;
     }
-    if (option(argv, argv + argc, "many-many")) {
+    if (hasOption(argv, argv + argc, "many-many")) {
         manyMany(path, std::max(1, loadFactor));
         command |= true;
     }
-    if (option(argv, argv + argc, "render")) {
+    if (hasOption(argv, argv + argc, "render")) {
         render(path, f1, f2);
         command |= true;
     }
-    if (option(argv, argv + argc, "--help") || !command) {
+    if (hasOption(argv, argv + argc, "--help") || !command) {
         Log::test("Usage: openafis-cli [COMMAND]... [OPTIONS]... [--f1 ISO_FILE] [--f2 ISO_FILE] [--f3 ISO_FILE] [--path PATH]", Log::LF);
         Log::test("Commands:");
         Log::test("    bulk-load : load and parse every *.iso below --path");
@@ -481,3 +483,14 @@ int main(const int argc, const char** argv)
     }
     return 0;
 }
+
+#else
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+int main(const int, const char**)
+{
+    // C++17 required
+    return 0;
+}
+
+#endif

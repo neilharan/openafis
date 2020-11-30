@@ -45,7 +45,7 @@ private:
 
         [[nodiscard]] constexpr Field::MinutiaDistanceType get(const unsigned int x) const
         {
-            assert(x >= 0 && x < Max);
+            assert(x < Max);
             return (*m_values)[x];
         }
 
