@@ -1,0 +1,24 @@
+name: windows
+
+on: push
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2016, windows-2019]
+        platform: [Win32, x64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure
+        shell: bash
+        run: |
+          cmake -A ${{ matrix.platform }} .
+      
+      - name: Build
+        run: cmake --build .
