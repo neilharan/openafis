@@ -27,10 +27,10 @@ jobs:
             
     steps:
       - name: Checkout
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
         
       - name: Install dependencies
-      - run: sudo apt-get install -y clang-10 llvm libpthread-stubs0-dev
+        run: sudo apt-get install -y clang-10 llvm libpthread-stubs0-dev
 
       - name: Build
         env:
