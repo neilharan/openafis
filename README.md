@@ -2,6 +2,8 @@
 # 
 A high-performance one-to-many (1:N) fingerprint matching library for commodity hardware, written in modern platform-independent C++.
 
+![Linux](https://github.com/neilharan/openafis/workflows/linux/badge.svg?branch=master)
+![Windows](https://github.com/neilharan/openafis/workflows/windows/badge.svg?branch=master)
 [![License: BSD-2-Clause](https://img.shields.io/github/license/neilharan/openafis.svg)](./LICENSE)
 ![C++ Standard](https://img.shields.io/badge/C%2B%2B-17%2F20-blue.svg)
 
@@ -30,12 +32,17 @@ The goal is to accurately identify one minutiae-set from 250K candidate sets wit
 
 ## Compiler support
 
-Tested with:
+All commits are automatically built with:
 
-- gcc 9.3.0 (Linux x86_64)
-- clang 10.0.0 (Linux x86_64)
-- clang-cl 11.0.0 (Windows x86_64)
-- msvc 16.7.7 (Windows x86_64)
+- gcc 10 (Linux)
+- gcc 9 (Linux)
+- gcc 8 (Linux)
+- clang 10 (Linux)
+- clang 11 (Linux)
+- msvc 2016 (Windows win32 & x64)
+- msvc 2019 (Windows win32 & x64)
+
+clang-cl 11 (Windows x64) is also used during development.
 
 ## Getting started
 
