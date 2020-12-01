@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.8.0)
+cmake_minimum_required (VERSION 3.9)
 project(openafis CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -7,6 +7,13 @@ set(CMAKE_CXX_EXTENSIONS NO)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT result)
+if (result)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
+
 include(CheckCXXCompilerFlag)
 include(AddCXXCompilerFlag)
 
@@ -20,7 +27,6 @@ if (MSVC)
     add_cxx_compiler_flag(/Ot)
     add_cxx_compiler_flag(/Oy)
     add_cxx_compiler_flag(/GT)
-    add_cxx_compiler_flag(/GL)
     add_cxx_compiler_flag(/Zc:__cplusplus)
     
     if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
@@ -38,11 +44,6 @@ if (MSVC)
     add_definitions(-D_HAS_EXCEPTIONS=0)
     add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-
-    if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-        set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
-        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
-    endif()
 else()
     add_cxx_compiler_flag(-O3)
     add_cxx_compiler_flag(-march=native)
@@ -58,8 +59,7 @@ else()
     add_cxx_compiler_flag(-Wno-deprecated)
     add_cxx_compiler_flag(-fno-exceptions)
     add_cxx_compiler_flag(-Wthread-safety)
-    add_cxx_compiler_flag(-flto)
-    
+
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
       find_program(GCC_AR gcc-ar)
       if (GCC_AR)

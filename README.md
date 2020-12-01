@@ -3,7 +3,7 @@
 A high-performance one-to-many (1:N) fingerprint matching library for commodity hardware, written in modern platform-independent C++.
 
 [![License: BSD-2-Clause](https://img.shields.io/github/license/neilharan/openafis.svg)](./LICENSE)
-[![C++ Standard](https://img.shields.io/badge/C%2B%2B-17%2F20-blue.svg)](https://img.shields.io/badge/C%2B%2B-17%2F20-blue.svg)
+![C++ Standard](https://img.shields.io/badge/C%2B%2B-17%2F20-blue.svg)
 
 Note: this library is focused on the matching problem. It does not currently extract minutiae from images.
 
