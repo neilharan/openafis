@@ -45,7 +45,7 @@ template <class T> static bool helperLoadPath(T& templates, const std::string& p
                 return templates.emplace_back(p.relative_path().make_preferred().string());
             }
 
-            if constexpr (std::is_integral_v<typename T::value_type::IdType>) {
+            if constexpr (std::is_integral<typename T::value_type::IdType>::value) {
                 static typename T::value_type::IdType id{};
                 return templates.emplace_back(++id);
             }
