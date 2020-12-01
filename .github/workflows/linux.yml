@@ -18,9 +18,6 @@ jobs:
           # gcc 8
           - cxx: g++-8
             std: 17
-          # gcc 7
-          - cxx: g++-7
-            std: 17
           # clang 10
           - cxx: clang++-10
             std: 17
@@ -29,7 +26,12 @@ jobs:
             std: 17
             
     steps:
+      - name: Checkout
       - uses: actions/checkout@v2
+        
+      - name: Install dependencies
+      - run: sudo apt-get install -y clang-10 llvm libpthread-stubs0-dev
+
       - name: Build
         env:
           CXX: ${{ matrix.cxx }}
