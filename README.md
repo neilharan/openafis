@@ -39,7 +39,7 @@ All commits are automatically built with:
 - gcc 8 (Linux)
 - clang 10 (Linux)
 - clang 11 (Linux)
-- msvc 2016 (Windows win32 & x64)
+- msvc 2017 (Windows win32 & x64)
 - msvc 2019 (Windows win32 & x64)
 
 clang-cl 11 (Windows x64) is also used during development.

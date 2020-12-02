@@ -1,9 +1,10 @@
+#!/usr/bin/env python
 # This program is part of OpenAFIS (https://github.com/neilharan/openafis).
 # Extracts minutiae from supplied tif raster files (for example the FVC example data).
 #
 # Install numpy, cffi and pillow.
 # Copy sgfpamx, sgfplib & sgwsqlib dll's from SecuGen FDx Pro SDK into current directory (should be possible to get this to work with Linux, but not managed it yet).
-
+#
 import argparse
 import numpy
 from cffi import FFI

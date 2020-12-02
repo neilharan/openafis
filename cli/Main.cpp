@@ -44,12 +44,15 @@ template <class T> static bool helperLoadPath(T& templates, const std::string& p
             if constexpr (std::is_same<typename T::value_type::IdType, std::string>::value) {
                 return templates.emplace_back(p.relative_path().make_preferred().string());
             }
-
-            if constexpr (!std::is_same<typename T::value_type::IdType, std::string>::value) {
+#if defined(_MSC_VER) && _MSC_VER <= 1916
+            // https://developercommunity.visualstudio.com/content/problem/295561/discarded-if-constexpr-branch-incorrectly-causes-t.html
+            Log::error("unsupported toolchain");
+#else
+            if constexpr (std::is_integral_v<typename T::value_type::IdType>) {
                 static typename T::value_type::IdType id{};
                 return templates.emplace_back(++id);
             }
-
+#endif
             Log::error("unsupported T (this should not be possible!)");
             std::exit(0); // no exceptions
         }();
