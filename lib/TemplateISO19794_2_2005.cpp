@@ -104,7 +104,8 @@ template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const uint8
         auto& minutiae = fps.emplace_back();
         minutiae.reserve(std::min(fp->minutiaCount, static_cast<uint8_t>(Template<I, F>::MaximumMinutiae)));
 
-        for (auto m = 0u; m < minutiae.capacity(); ++m) {
+        auto m = 0u;
+        for (; m < minutiae.capacity(); ++m) {
             const auto* mp = safeRead(reinterpret_cast<const _Minutia**>(&p));
             if (!mp) {
                 return false;
@@ -115,6 +116,12 @@ template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const uint8
             };
             minutiae.emplace_back(Minutia::Type((mp->type_X & 0xc000) >> 14), static_cast<uint16_t>((mp->type_X & 0x3f) << 8 | (mp->type_X & 0xff00) >> 8),
                 static_cast<uint16_t>((mp->rfu_Y & 0x3f) << 8 | (mp->rfu_Y & 0xff00) >> 8), adjustedAngle());
+        }
+        for (; m < fp->minutiaCount; ++m) {
+            const auto* mp = safeRead(reinterpret_cast<const _Minutia**>(&p));
+            if (!mp) {
+                return false;
+            }
         }
         // skip extension data at the end...
         const auto* ex = safeRead(reinterpret_cast<const uint16_t**>(&p));
