@@ -113,7 +113,7 @@ template <class I, class F> bool TemplateISO19794_2_2005<I, F>::load(const uint8
                 const auto a = static_cast<unsigned short>(360.0f - static_cast<float>(mp->angle) * (360.0f / 256.0f));
                 return a > 360 ? a - 360 : a;
             };
-            minutiae.emplace_back(Minutia::Type((mp->type_X & 0xc000) >> 14), static_cast<uint16_t>((mp->type_X & 0x3f) << 8 | (mp->type_X & 0xff00) >> 8),
+            minutiae.emplace_back(Minutia::Type((mp->type_X & 0x00c0) >> 6), static_cast<uint16_t>((mp->type_X & 0x3f) << 8 | (mp->type_X & 0xff00) >> 8),
                 static_cast<uint16_t>((mp->rfu_Y & 0x3f) << 8 | (mp->rfu_Y & 0xff00) >> 8), adjustedAngle());
         }
         // skip extension data at the end...
