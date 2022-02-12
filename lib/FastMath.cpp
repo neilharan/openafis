@@ -43,7 +43,7 @@ FastMath::ArcTangents::ArcTangents()
         static Values v;
         for (auto x = Min; x < Max; ++x) {
             for (auto y = Min; y < Max; ++y) {
-                const auto t = ::atan2f(x, y);
+                auto t = ::atan2f(x, y);
                 if (t < 0) {
                     t += TwoPI;
                 }
